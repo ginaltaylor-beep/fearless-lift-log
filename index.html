@@ -56,58 +56,83 @@ const INCREMENTS=[1.25,2.5,5,10,20,25];
 const BANDS=['Red','Blue','Green','Yellow','Black','Purple'];
 const DIFFICULTIES=[['','Effort'],['E','Easy'],['M','Medium'],['H','Hard']];
 
+const EXERCISE_ALIASES={
+ bandedThoracic:'banded_wall_thoracic_rotation',bbOverheadPress:'barbell_overhead_press',altDbBench:'alternating_dumbbell_bench_press',bicepCurls:'dumbbell_bicep_curls',frontRackStepOut:'front_rack_step_out_squats',battleRopes:'alternating_battle_ropes',treadmill:'treadmill',
+ closeGripLat:'close_grip_lat_pulldown',cableDeadbug:'cable_overhead_deadbug',slRdl:'single_leg_romanian_deadlift',reverseFly:'reverse_fly',dropSetRow:'drop_set_three_point_row',overheadSlam:'overhead_slam',
+ backSquat:'barbell_back_squat',seatedVerticalJump:'seated_vertical_jump',seatedAltShoulder:'seated_alternating_shoulder_press',lateralRaise:'lateral_raise',forwardStepUp:'forward_step_up',calfRaise:'front_foot_elevated_calf_raise',pogoJump:'front_foot_elevated_pogo_jump',
+ bbRdl:'barbell_romanian_deadlift',seatedCableRow:'seated_single_arm_cable_row',slHipThrust:'single_leg_hip_thrust',kbSwing:'kettlebell_swing',strictCurl:'strict_bicep_curl',skullCrushers:'skull_crushers',plankRockets:'plank_rockets',
+ bench:'barbell_bench_press',bandrow:'bent_over_banded_row',lunges:'walking_lunges',tricep:'overhead_tricep_extension',frontraise:'alternating_supinated_cross_body_dumbbell_front_raise',dbsitup:'dumbbell_sit_up'
+};
+
 const exercises={
-  bandedThoracic:{name:'Banded Wall Thoracic Rotation',kind:'band',label:'Band color',increment:null,multiplier:0},
-  bbOverheadPress:{name:'BB Overhead Press',kind:'weight',label:'Total weight',increment:2.5,multiplier:1},
-  altDbBench:{name:'Alternating DB Bench Press',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2},
-  bicepCurls:{name:'Bicep Curls',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2},
-  frontRackStepOut:{name:'Front Rack Step-Out Squats',kind:'weight',label:'Total weight',increment:5,multiplier:1},
-  battleRopes:{name:'Alternating Battle Ropes',kind:'time',label:'Seconds',increment:null,multiplier:0},
-  treadmill:{name:'Treadmill',kind:'cardio',label:'Speed',increment:null,multiplier:0},
-
-  closeGripLat:{name:'Close-Grip Lat Pulldown',kind:'weight',label:'Cable weight',increment:5,multiplier:1},
-  cableDeadbug:{name:'Cable Overhead Deadbug',kind:'weight',label:'Cable weight',increment:5,multiplier:1},
-  slRdl:{name:'SL RDL',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,note:'Single-Leg Romanian Deadlift.'},
-  reverseFly:{name:'Reverse Fly',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2},
-  dropSetRow:{name:'Drop Set 3-Point Row',kind:'drop',label:'Cable weight',increment:5,multiplier:1},
-  overheadSlam:{name:'Overhead Slam',kind:'weight',label:'Ball weight',increment:5,multiplier:1},
-
-  backSquat:{name:'BB Back Squat',kind:'weight',label:'Total weight',increment:5,multiplier:1},
-  seatedVerticalJump:{name:'Seated Vertical Jump',kind:'weight',label:'External weight',increment:5,multiplier:1},
-  seatedAltShoulder:{name:'Seated Alternating Shoulder Press',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2},
-  lateralRaise:{name:'Lateral Raise',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2},
-  forwardStepUp:{name:'Forward Step-Up',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2},
-  calfRaise:{name:'Front-Foot-Elevated Calf Raise',kind:'weight',label:'External weight',increment:2.5,multiplier:1},
-  pogoJump:{name:'Front-Foot-Elevated Pogo Jump',kind:'reps',label:'Reps',increment:null,multiplier:0},
-
-  bbRdl:{name:'BB RDL',kind:'weight',label:'Total weight',increment:10,multiplier:1},
-  seatedCableRow:{name:'Seated SA Cable Row',kind:'weight',label:'Cable weight',increment:5,multiplier:1},
-  slHipThrust:{name:'SL Hip Thrust',kind:'weight',label:'External weight',increment:2.5,multiplier:1},
-  kbSwing:{name:'KB Swing',kind:'weight',label:'Kettlebell weight',increment:5,multiplier:1},
-  strictCurl:{name:'Strict Bicep Curl',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2},
-  skullCrushers:{name:'Skull Crushers',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2},
-  plankRockets:{name:'Plank Rockets',kind:'reps',label:'Reps',increment:null,multiplier:0},
-
-  bench:{name:'Bench Press',kind:'weight',label:'Total weight',increment:2.5,multiplier:1},
-  bandrow:{name:'Bent Over Banded Row',kind:'band',label:'Band color',increment:null,multiplier:0},
-  lunges:{name:'Walking Lunges',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2},
-  tricep:{name:'Overhead Tricep Extensions',kind:'weight',label:'One dumbbell total',increment:2.5,multiplier:1},
-  frontraise:{name:'Alternating Supinated Cross-Body DB Front Raise',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2},
-  dbsitup:{name:'DB Sit-Up',kind:'weight',label:'One dumbbell total',increment:2.5,multiplier:1}
+ banded_wall_thoracic_rotation:{name:'Banded Wall Thoracic Rotation',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Mobility',equipment:'Resistance band'},
+ barbell_overhead_press:{name:'BB Overhead Press',kind:'weight',label:'Total weight',increment:2.5,multiplier:1,category:'Upper Body Push',equipment:'Barbell'},
+ alternating_dumbbell_bench_press:{name:'Alternating DB Bench Press',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells'},
+ dumbbell_bicep_curls:{name:'Bicep Curls',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Pull',equipment:'Dumbbells'},
+ front_rack_step_out_squats:{name:'Front Rack Step-Out Squats',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Lower Body Push',equipment:'Barbell'},
+ alternating_battle_ropes:{name:'Alternating Battle Ropes',kind:'time',label:'Seconds',increment:null,multiplier:0,category:'Conditioning',equipment:'Battle ropes'},
+ treadmill:{name:'Treadmill',kind:'cardio',label:'Speed',increment:null,multiplier:0,category:'Conditioning',equipment:'Treadmill'},
+ close_grip_lat_pulldown:{name:'Close-Grip Lat Pulldown',kind:'weight',label:'Cable weight',increment:5,multiplier:1,category:'Upper Body Pull',equipment:'Cable'},
+ cable_overhead_deadbug:{name:'Cable Overhead Deadbug',kind:'weight',label:'Cable weight',increment:5,multiplier:1,category:'Core',equipment:'Cable'},
+ single_leg_romanian_deadlift:{name:'SL RDL',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Hinge',equipment:'Dumbbells',note:'Single-Leg Romanian Deadlift.'},
+ reverse_fly:{name:'Reverse Fly',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Pull',equipment:'Dumbbells'},
+ drop_set_three_point_row:{name:'Drop Set 3-Point Row',kind:'drop',label:'Cable weight',increment:5,multiplier:1,category:'Upper Body Pull',equipment:'Cable'},
+ overhead_slam:{name:'Overhead Slam',kind:'weight',label:'Ball weight',increment:5,multiplier:1,category:'Power',equipment:'Medicine ball'},
+ barbell_back_squat:{name:'BB Back Squat',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Lower Body Push',equipment:'Barbell'},
+ seated_vertical_jump:{name:'Seated Vertical Jump',kind:'weight',label:'External weight',increment:5,multiplier:1,category:'Power',equipment:'Bodyweight / external load'},
+ seated_alternating_shoulder_press:{name:'Seated Alternating Shoulder Press',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells'},
+ lateral_raise:{name:'Lateral Raise',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells'},
+ forward_step_up:{name:'Forward Step-Up',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Lower Body Push',equipment:'Dumbbells / box'},
+ front_foot_elevated_calf_raise:{name:'Front-Foot-Elevated Calf Raise',kind:'weight',label:'External weight',increment:2.5,multiplier:1,category:'Lower Body',equipment:'External load'},
+ front_foot_elevated_pogo_jump:{name:'Front-Foot-Elevated Pogo Jump',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Power',equipment:'Bodyweight'},
+ barbell_romanian_deadlift:{name:'BB RDL',kind:'weight',label:'Total weight',increment:10,multiplier:1,category:'Hinge',equipment:'Barbell'},
+ seated_single_arm_cable_row:{name:'Seated SA Cable Row',kind:'weight',label:'Cable weight',increment:5,multiplier:1,category:'Upper Body Pull',equipment:'Cable'},
+ single_leg_hip_thrust:{name:'SL Hip Thrust',kind:'weight',label:'External weight',increment:2.5,multiplier:1,category:'Hinge',equipment:'External load'},
+ kettlebell_swing:{name:'KB Swing',kind:'weight',label:'Kettlebell weight',increment:5,multiplier:1,category:'Hinge',equipment:'Kettlebell'},
+ strict_bicep_curl:{name:'Strict Bicep Curl',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Pull',equipment:'Dumbbells'},
+ skull_crushers:{name:'Skull Crushers',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells'},
+ plank_rockets:{name:'Plank Rockets',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Core',equipment:'Bodyweight'},
+ barbell_bench_press:{name:'Bench Press',kind:'weight',label:'Total weight',increment:2.5,multiplier:1,category:'Upper Body Push',equipment:'Barbell'},
+ bent_over_banded_row:{name:'Bent Over Banded Row',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Upper Body Pull',equipment:'Resistance band'},
+ walking_lunges:{name:'Walking Lunges',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Lower Body',equipment:'Dumbbells',note:'Enter total reps across both legs (8 right + 8 left = 16).'},
+ overhead_tricep_extension:{name:'Overhead Tricep Extensions',kind:'weight',label:'One dumbbell total',increment:2.5,multiplier:1,category:'Upper Body Push',equipment:'Dumbbell'},
+ alternating_supinated_cross_body_dumbbell_front_raise:{name:'Alternating Supinated Cross-Body DB Front Raise',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells'},
+ dumbbell_sit_up:{name:'DB Sit-Up',kind:'weight',label:'One dumbbell total',increment:2.5,multiplier:1,category:'Core',equipment:'Dumbbell'}
 };
 
 const programs={
- Monday:{title:'Accessory',stations:{1:['bandedThoracic','bbOverheadPress'],2:['treadmill'],3:['altDbBench','bicepCurls'],4:['frontRackStepOut','battleRopes']}},
- Tuesday:{title:'Upper Body Pull',stations:{1:['closeGripLat','cableDeadbug'],2:['treadmill'],3:['slRdl','reverseFly'],4:['dropSetRow','overheadSlam']}},
- Wednesday:{title:'Lower Body Push',stations:{1:['backSquat','seatedVerticalJump'],2:['treadmill'],3:['seatedAltShoulder','lateralRaise'],4:['forwardStepUp','calfRaise','pogoJump']}},
- Thursday:{title:'Hinge',stations:{1:['bbRdl','seatedCableRow'],2:['treadmill'],3:['slHipThrust','kbSwing'],4:['strictCurl','skullCrushers','plankRockets']}},
- Friday:{title:'Upper Body Push',stations:{1:['bench','bandrow'],2:['treadmill'],3:['lunges','tricep'],4:['frontraise','dbsitup']}}
+ Monday:{title:'Accessory',stations:{1:['banded_wall_thoracic_rotation','barbell_overhead_press'],2:['treadmill'],3:['alternating_dumbbell_bench_press','dumbbell_bicep_curls'],4:['front_rack_step_out_squats','alternating_battle_ropes']}},
+ Tuesday:{title:'Upper Body Pull',stations:{1:['close_grip_lat_pulldown','cable_overhead_deadbug'],2:['treadmill'],3:['single_leg_romanian_deadlift','reverse_fly'],4:['drop_set_three_point_row','overhead_slam']}},
+ Wednesday:{title:'Lower Body Push',stations:{1:['barbell_back_squat','seated_vertical_jump'],2:['treadmill'],3:['seated_alternating_shoulder_press','lateral_raise'],4:['forward_step_up','front_foot_elevated_calf_raise','front_foot_elevated_pogo_jump']}},
+ Thursday:{title:'Hinge',stations:{1:['barbell_romanian_deadlift','seated_single_arm_cable_row'],2:['treadmill'],3:['single_leg_hip_thrust','kettlebell_swing'],4:['strict_bicep_curl','skull_crushers','plank_rockets']}},
+ Friday:{title:'Upper Body Push',stations:{1:['barbell_bench_press','bent_over_banded_row'],2:['treadmill'],3:['walking_lunges','overhead_tricep_extension'],4:['alternating_supinated_cross_body_dumbbell_front_raise','dumbbell_sit_up']}}
 };
 
 let db=loadDb();
 let view={screen:'home',day:null,workout:null,summary:null};
 
-function blankDb(){return {version:'0.4',program:'July 2026',history:[],drafts:{},increments:{},lastBackupAt:null,lastBackupWorkoutId:null}}
+const EXERCISE_NAME_TO_ID=Object.fromEntries(Object.entries(exercises).flatMap(([id,ex])=>[[ex.name.toLowerCase(),id],[id.toLowerCase(),id]]));
+function canonicalExerciseId(value){
+ const raw=String(value||'').trim();
+ return EXERCISE_ALIASES[raw]||EXERCISE_NAME_TO_ID[raw.toLowerCase()]||raw;
+}
+function remapExerciseData(data){
+ const out={};
+ for(const [rawId,value] of Object.entries(data||{})){
+  const id=canonicalExerciseId(rawId);
+  if(exercises[id])out[id]=value;
+ }
+ return out;
+}
+function migrateDatabaseToV05(){
+ if(db.version==='0.5')return;
+ db.history=(db.history||[]).map(w=>({...w,version:'0.5',data:remapExerciseData(w.data)}));
+ db.drafts=Object.fromEntries(Object.entries(db.drafts||{}).map(([day,w])=>[day,{...w,version:'0.5',data:remapExerciseData(w.data)}]));
+ db.increments=Object.fromEntries(Object.entries(db.increments||{}).map(([id,v])=>[canonicalExerciseId(id),v]).filter(([id])=>exercises[id]));
+ db.version='0.5';saveDb();
+}
+
+function blankDb(){return {version:'0.5',program:'July 2026',history:[],drafts:{},increments:{},lastBackupAt:null,lastBackupWorkoutId:null}}
 function loadDb(){try{return {...blankDb(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch{return blankDb()}}
 function saveDb(){localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
@@ -124,7 +149,7 @@ function migrateOldFriday(){
    if(!already){
     const w=newWorkout('Friday',old.date||'2026-07-24');
     w.startStation=old.startStation||1;w.stationOrder=old.stationOrder||[1,2,3,4];w.completed=old.completed||{};w.notes=old.notes||'';
-    for(const id of ['bench','bandrow','lunges','tricep','frontraise','dbsitup']) if(old.data[id]) w.data[id]=old.data[id];
+    for(const oldId of ['bench','bandrow','lunges','tricep','frontraise','dbsitup']){const id=canonicalExerciseId(oldId);if(old.data[oldId])w.data[id]=old.data[oldId]}
     if(old.data.treadmill) w.data.treadmill=old.data.treadmill;
     w.finishedAt=(old.date||'2026-07-24')+'T12:00:00';
     db.history.push(w);saveDb();
@@ -135,7 +160,7 @@ function migrateOldFriday(){
 }
 
 function newWorkout(day,date=today()){
- const w={id:uid(),version:'0.4',program:'July 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
+ const w={id:uid(),version:'0.5',program:'July 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
  Object.values(programs[day].stations).flat().forEach(id=>w.data[id]=defaultData(exercises[id]));
  return w;
 }
@@ -208,10 +233,10 @@ function workoutHighlights(w){
  if(countExercises(w)===expected&&highlights.length<4)highlights.push('✅ Logged every exercise');
  const workoutNumber=db.history.filter(h=>h.id!==w.id).length+1;
  if([10,25,50,100,250,500].includes(workoutNumber))highlights.unshift(`💪 Workout #${workoutNumber}`);
- const deadlift=Math.max(exerciseMax('bbRdl',w),exerciseMax('slRdl',w));
- const priorDeadlift=Math.max(0,...db.history.filter(h=>h.id!==w.id).map(h=>Math.max(exerciseMax('bbRdl',h),exerciseMax('slRdl',h))));
+ const deadlift=Math.max(exerciseMax('barbell_romanian_deadlift',w),exerciseMax('single_leg_romanian_deadlift',w));
+ const priorDeadlift=Math.max(0,...db.history.filter(h=>h.id!==w.id).map(h=>Math.max(exerciseMax('barbell_romanian_deadlift',h),exerciseMax('single_leg_romanian_deadlift',h))));
  if(deadlift>=200&&priorDeadlift<200)highlights.unshift('🔥 First 200 lb deadlift!');
- const bench=exerciseMax('bench',w),priorBench=Math.max(0,...db.history.filter(h=>h.id!==w.id).map(h=>exerciseMax('bench',h)));
+ const bench=exerciseMax('barbell_bench_press',w),priorBench=Math.max(0,...db.history.filter(h=>h.id!==w.id).map(h=>exerciseMax('barbell_bench_press',h)));
  if(bench>=100&&priorBench<100)highlights.unshift('🔥 First 100 lb bench press!');
  if(!highlights.length)highlights.push('⭐ Another workout added to your strength journey');
  return highlights.slice(0,5);
@@ -223,9 +248,9 @@ function finishWorkout(){
 }
 function backupFilename(workout){const d=new Date(workout.finishedAt||Date.now()),hh=String(d.getHours()).padStart(2,'0'),mm=String(d.getMinutes()).padStart(2,'0'),title=workout.title.replace(/[^a-z0-9]+/gi,'');return `${workout.date}-${hh}${mm}-${workout.day}-${title}.json`}
 function downloadBackup(workout=view.workout,automatic=false){
- if(!workout)return;const payload={app:'Fearless Lift Log',version:'0.4',exportedAt:new Date().toISOString(),workout};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=backupFilename(workout);a.click();db.lastBackupAt=new Date().toISOString();db.lastBackupWorkoutId=workout.id;saveDb();if(view.screen==='summary'&&!automatic)render();setTimeout(()=>URL.revokeObjectURL(a.href),500)
+ if(!workout)return;const payload={app:'Fearless Lift Log',version:'0.5',exportedAt:new Date().toISOString(),workout};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=backupFilename(workout);a.click();db.lastBackupAt=new Date().toISOString();db.lastBackupWorkoutId=workout.id;saveDb();if(view.screen==='summary'&&!automatic)render();setTimeout(()=>URL.revokeObjectURL(a.href),500)
 }
-function downloadAll(){const blob=new Blob([JSON.stringify({app:'Fearless Lift Log',version:'0.4',exportedAt:new Date().toISOString(),...db},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`fearless-lift-log-all-data-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function downloadAll(){const blob=new Blob([JSON.stringify({app:'Fearless Lift Log',version:'0.5',exportedAt:new Date().toISOString(),...db},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`fearless-lift-log-all-data-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 
 function workoutIdentity(w){
  return [w.date||'',w.day||'',w.title||''].join('|').toLowerCase();
@@ -235,7 +260,7 @@ function normalizedImportedWorkout(raw){
  if(!w||typeof w!=='object'||!w.date||!w.day||!w.data)return null;
  const copy=JSON.parse(JSON.stringify(w));
  copy.id=copy.id||uid();
- copy.version=copy.version||'0.4';
+ copy.version='0.5';
  copy.program=copy.program||'Historical Import';
  copy.title=copy.title||programs[copy.day]?.title||'Workout';
  copy.completed=copy.completed||{1:true,2:true,3:true,4:true};
@@ -243,6 +268,8 @@ function normalizedImportedWorkout(raw){
  copy.finishedAt=copy.finishedAt||`${copy.date}T12:00:00`;
  copy.startedAt=copy.startedAt||copy.finishedAt;
  copy.notes=copy.notes||'';
+ copy.data=remapExerciseData(copy.data);
+ if(!Object.keys(copy.data).length)return null;
  return copy;
 }
 function collectImportedWorkouts(payload){
@@ -305,7 +332,7 @@ function renderHome(){
  const backupCurrent=!!last&&db.lastBackupWorkoutId===last.id;
  return `<section class="card hero"><h2>Ready to lift? 🏋️</h2><p>Choose today's workout. Your entries save automatically on this device.</p><div class="day-grid">${days.map(d=>`<button class="${d===weekday?'primary':''}" onclick="openDay('${d}')">${d}<span class="sub" style="display:block;color:${d===weekday?'#d0d5dd':'var(--muted)'}">${programs[d].title}</span></button>`).join('')}</div></section>
  <section class="card pad"><strong>Your Strength Journey</strong><div class="journey-grid"><div class="journey-box"><strong>${db.history.length}</strong><span>workouts logged</span></div><div class="journey-box"><strong>${last?last.day:'—'}</strong><span>last workout</span></div></div>${last?`<div class="previous"><strong>Last highlight</strong><br>${esc(last.primaryHighlight||last.highlights?.[0]||'⭐ Workout complete')}</div>`:'<p class="sub">Your first completed workout will begin your story.</p>'}<div class="previous"><strong>Backup status</strong><br>${backupCurrent?'✓ Current':'Backup recommended after your next completed workout'}</div><div class="actions"><button onclick="openHistory()">View History</button><button onclick="openImport()">Import Workouts</button><button onclick="downloadAll()">Back Up All Data</button></div></section>
- <section class="card pad"><strong>Built for the gym</strong><div class="sub" style="line-height:1.65;margin-top:8px">Fearless Lift Log displays workout information only—nothing beyond your lifting history and progress.</div></section>`;
+ <section class="card pad"><strong>Built for the gym</strong><div class="sub" style="line-height:1.65;margin-top:8px">Fearless Lift Log displays workout information only—nothing beyond your lifting history and progress.<br><span style="font-size:11px">Data model v0.5 · Stable exercise IDs</span></div></section>`;
 }
 function renderWorkout(){
  const w=view.workout,p=programs[view.day];
@@ -321,7 +348,7 @@ function renderHistory(){
  return `<section class="card pad"><strong>Workout History</strong><div class="sub">Your strength story, workout by workout.</div>${rows.length?rows.map(w=>`<div class="history-item"><div class="history-top"><div><div class="history-title">${w.day} · ${w.title}</div><div class="history-meta">${w.date} · ${totalVolume(w).toLocaleString()} lb volume</div></div><button class="small-btn" onclick="downloadBackup(db.history.find(x=>x.id==='${w.id}'))">Backup</button></div>${(w.highlights||[]).slice(0,3).map(h=>`<div class="sub" style="margin-top:6px">${esc(h)}</div>`).join('')}${w.notes?`<div class="sub" style="margin-top:6px">${esc(w.notes)}</div>`:''}</div>`).join(''):'<p class="sub">No completed workouts yet.</p>'}</section>`;
 }
 function render(){
- migrateOldFriday();const app=document.getElementById('app'),footer=document.getElementById('footer'),back=document.getElementById('backBtn'),sub=document.getElementById('headerSub');
+ migrateDatabaseToV05();migrateOldFriday();const app=document.getElementById('app'),footer=document.getElementById('footer'),back=document.getElementById('backBtn'),sub=document.getElementById('headerSub');
  back.classList.toggle('hidden',view.screen==='home');back.onclick=goHome;
  if(view.screen==='home'){sub.textContent='Know your history. Challenge yourself appropriately.';app.innerHTML=renderHome();footer.classList.add('hidden')}
  if(view.screen==='workout'){sub.textContent=`${view.day} · ${programs[view.day].title} · July 2026`;app.innerHTML=renderWorkout();footer.classList.remove('hidden');footer.innerHTML=`<button onclick="resetWorkout()">Reset</button><button class="primary" ${allStationsDone(view.workout)?'':'disabled'} onclick="finishWorkout()">Finish Workout</button>`}
