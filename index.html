@@ -38,7 +38,7 @@ input,select,textarea{width:100%;border:1px solid #c7cbd1;border-radius:10px;pad
 .actions{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}.actions button{flex:1}.delete{background:#fee2e2;color:var(--danger);min-height:36px;padding:6px 10px}
 .complete{width:100%;margin-top:14px;background:var(--goodbg);color:var(--good);min-height:49px}.complete.done{background:var(--good);color:#fff}
 .footer{position:fixed;left:0;right:0;bottom:0;z-index:15;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:center}.footer button{max-width:390px;flex:1}
-.summary{text-align:center;padding:22px 18px}.summary h2{font-size:25px;margin:0 0 6px}.big-number{font-size:42px;font-weight:900;letter-spacing:-1px;margin:14px 0 2px}.summary-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.stat{background:#f8fafc;border-radius:12px;padding:11px 6px}.stat strong{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}
+.summary{text-align:center;padding:22px 18px}.highlights{text-align:left;background:#fffaf0;border:1px solid #f3dfad;border-radius:14px;padding:13px 14px;margin:16px 0}.highlight{font-weight:760;line-height:1.4;padding:5px 0}.remember{background:var(--accent);color:#fff;border-radius:14px;padding:14px;margin:16px 0;text-align:left}.remember .sub{color:#d0d5dd}.journey-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.journey-box{background:#f8fafc;border-radius:12px;padding:12px}.journey-box strong{display:block;font-size:19px}.journey-box span{font-size:11px;color:var(--muted)}.summary h2{font-size:25px;margin:0 0 6px}.big-number{font-size:42px;font-weight:900;letter-spacing:-1px;margin:14px 0 2px}.summary-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.stat{background:#f8fafc;border-radius:12px;padding:11px 6px}.stat strong{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}
 .history-item{padding:13px 0;border-bottom:1px solid #e5e7eb}.history-item:last-child{border-bottom:0}.history-top{display:flex;gap:10px;align-items:flex-start}.history-title{font-weight:800;flex:1}.history-meta{font-size:12px;color:var(--muted);margin-top:3px}
 .notice{background:var(--warnbg);color:var(--warn);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.4;margin-top:12px}.hidden{display:none!important}
 @media(max-width:520px){.field-grid.three{grid-template-columns:1fr 1fr}.summary-stats{grid-template-columns:1fr 1fr 1fr}.day-grid{grid-template-columns:1fr 1fr}}
@@ -106,7 +106,7 @@ const programs={
 let db=loadDb();
 let view={screen:'home',day:null,workout:null,summary:null};
 
-function blankDb(){return {version:'0.2',program:'July 2026',history:[],drafts:{},increments:{}}}
+function blankDb(){return {version:'0.3',program:'July 2026',history:[],drafts:{},increments:{},lastBackupAt:null,lastBackupWorkoutId:null}}
 function loadDb(){try{return {...blankDb(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch{return blankDb()}}
 function saveDb(){localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
@@ -134,7 +134,7 @@ function migrateOldFriday(){
 }
 
 function newWorkout(day,date=today()){
- const w={id:uid(),version:'0.2',program:'July 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
+ const w={id:uid(),version:'0.3',program:'July 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
  Object.values(programs[day].stations).flat().forEach(id=>w.data[id]=defaultData(exercises[id]));
  return w;
 }
@@ -184,15 +184,47 @@ function totalVolume(w){
 }
 function countSets(w){let n=0;for(const [id,d] of Object.entries(w.data)){const ex=exercises[id];if(Array.isArray(d))n+=d.filter(s=>Object.values(s).some(v=>String(v).trim()!=='')).length;else if(ex?.kind==='cardio'&&Object.values(d).some(v=>String(v).trim()!==''))n++}return n}
 function countExercises(w){let n=0;for(const d of Object.values(w.data)){if(Array.isArray(d)){if(d.some(s=>Object.values(s).some(v=>String(v).trim()!=='')))n++}else if(Object.values(d).some(v=>String(v).trim()!==''))n++}return n}
+function durationMinutes(w){if(!w.startedAt||!w.finishedAt)return null;return Math.max(1,Math.round((new Date(w.finishedAt)-new Date(w.startedAt))/60000))}
+function exerciseMax(id,w){const ex=exercises[id],d=w?.data?.[id];if(!ex||!Array.isArray(d))return 0;if(ex.kind==='drop')return Math.max(0,...d.flatMap(s=>[Number(s.weight1)||0,Number(s.weight2)||0]));if(!['weight'].includes(ex.kind))return 0;return Math.max(0,...d.map(s=>Number(s.weight)||0))}
+function repsAtMax(id,w,max){const d=w?.data?.[id];if(!Array.isArray(d)||!max)return 0;return d.reduce((n,s)=>n+((Number(s.weight)||0)===max?(Number(s.reps)||0):0),0)}
+function comparablePrevious(w){return [...db.history].filter(h=>h.day===w.day&&h.id!==w.id&&(h.finishedAt||h.date)<(w.finishedAt||w.date)).sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date))[0]}
+function workoutHighlights(w){
+ const previous=comparablePrevious(w),highlights=[],improvements=[];
+ for(const id of Object.keys(w.data)){
+  const ex=exercises[id],now=exerciseMax(id,w);if(!ex||!now)continue;
+  const priorBest=Math.max(0,...db.history.filter(h=>h.id!==w.id).map(h=>exerciseMax(id,h)));
+  const previousMax=exerciseMax(id,previous);
+  if(priorBest&&now>priorBest){improvements.push({rank:100+now,text:`⭐ New ${ex.name} personal best — ${now} lb`});continue}
+  if(priorBest&&now===priorBest){improvements.push({rank:70,text:`⭐ Matched your best ${ex.name} — ${now} lb`});continue}
+  if(previousMax&&now>previousMax){improvements.push({rank:80,text:`⭐ Increased ${ex.name} from ${previousMax} to ${now} lb`});continue}
+  if(previousMax&&now===previousMax&&repsAtMax(id,w,now)>repsAtMax(id,previous,previousMax)) improvements.push({rank:60,text:`⭐ More reps at your top ${ex.name} weight`});
+ }
+ improvements.sort((a,b)=>b.rank-a.rank);highlights.push(...improvements.slice(0,3).map(x=>x.text));
+ const priorVolume=previous?totalVolume(previous):0,volume=totalVolume(w);
+ if(previous&&volume>priorVolume&&highlights.length<3)highlights.push(`📈 Higher ${w.title} volume than last time`);
+ if(allStationsDone(w)&&highlights.length<4)highlights.push('⭐ Completed every station');
+ const expected=Object.values(programs[w.day].stations).flat().length;
+ if(countExercises(w)===expected&&highlights.length<4)highlights.push('✅ Logged every exercise');
+ const workoutNumber=db.history.filter(h=>h.id!==w.id).length+1;
+ if([10,25,50,100,250,500].includes(workoutNumber))highlights.unshift(`💪 Workout #${workoutNumber}`);
+ const deadlift=Math.max(exerciseMax('bbRdl',w),exerciseMax('slRdl',w));
+ const priorDeadlift=Math.max(0,...db.history.filter(h=>h.id!==w.id).map(h=>Math.max(exerciseMax('bbRdl',h),exerciseMax('slRdl',h))));
+ if(deadlift>=200&&priorDeadlift<200)highlights.unshift('🔥 First 200 lb deadlift!');
+ const bench=exerciseMax('bench',w),priorBench=Math.max(0,...db.history.filter(h=>h.id!==w.id).map(h=>exerciseMax('bench',h)));
+ if(bench>=100&&priorBench<100)highlights.unshift('🔥 First 100 lb bench press!');
+ if(!highlights.length)highlights.push('⭐ Another workout added to your strength journey');
+ return highlights.slice(0,5);
+}
 function finishWorkout(){
  const w=view.workout;if(!allStationsDone(w)){alert('Mark all four stations complete before finishing the workout.');return}
- w.notes=document.getElementById('workoutNotes')?.value||w.notes||'';w.finishedAt=new Date().toISOString();
- db.history.push(JSON.parse(JSON.stringify(w)));delete db.drafts[view.day];saveDb();view.summary={volume:totalVolume(w),sets:countSets(w),exercises:countExercises(w)};view.screen='summary';render();
+ w.notes=document.getElementById('workoutNotes')?.value||w.notes||'';w.finishedAt=new Date().toISOString();w.highlights=workoutHighlights(w);w.primaryHighlight=w.highlights[0];
+ db.history.push(JSON.parse(JSON.stringify(w)));delete db.drafts[view.day];saveDb();downloadBackup(w,true);view.summary={volume:totalVolume(w),sets:countSets(w),exercises:countExercises(w),duration:durationMinutes(w),highlights:w.highlights};view.screen='summary';render();
 }
-function downloadBackup(workout=view.workout){
- if(!workout)return;const payload={app:'Fearless Lift Log',version:'0.2',exportedAt:new Date().toISOString(),workout};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`fearless-lift-log-${workout.date}-${workout.day.toLowerCase()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)
+function backupFilename(workout){const d=new Date(workout.finishedAt||Date.now()),hh=String(d.getHours()).padStart(2,'0'),mm=String(d.getMinutes()).padStart(2,'0'),title=workout.title.replace(/[^a-z0-9]+/gi,'');return `${workout.date}-${hh}${mm}-${workout.day}-${title}.json`}
+function downloadBackup(workout=view.workout,automatic=false){
+ if(!workout)return;const payload={app:'Fearless Lift Log',version:'0.3',exportedAt:new Date().toISOString(),workout};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=backupFilename(workout);a.click();db.lastBackupAt=new Date().toISOString();db.lastBackupWorkoutId=workout.id;saveDb();if(view.screen==='summary'&&!automatic)render();setTimeout(()=>URL.revokeObjectURL(a.href),500)
 }
-function downloadAll(){const blob=new Blob([JSON.stringify({app:'Fearless Lift Log',version:'0.2',exportedAt:new Date().toISOString(),...db},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`fearless-lift-log-all-data-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+function downloadAll(){const blob=new Blob([JSON.stringify({app:'Fearless Lift Log',version:'0.3',exportedAt:new Date().toISOString(),...db},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`fearless-lift-log-all-data-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 function difficulty(value,id,index){return `<select onchange="updateValue('${id}',${index},'difficulty',this.value)">${DIFFICULTIES.map(([v,l])=>`<option value="${v}" ${value===v?'selected':''}>${l}</option>`).join('')}</select>`}
 function stepper(id,index,field,value,placeholder){return `<div class="stepper"><button type="button" onclick="step('${id}',${index},'${field}',-1)">−</button><input type="number" inputmode="decimal" value="${esc(value)}" placeholder="${placeholder}" onchange="updateValue('${id}',${index},'${field}',this.value)"><button type="button" onclick="step('${id}',${index},'${field}',1)">+</button></div>`}
 
@@ -215,10 +247,11 @@ function setHtml(id,ex,s,i){
 }
 
 function renderHome(){
- const weekday=dayForDate();const days=Object.keys(programs);
- return `<section class="card hero"><h2>Ready to lift?</h2><p>Choose today's workout. Your entries save automatically on this device.</p><div class="day-grid">${days.map(d=>`<button class="${d===weekday?'primary':''}" onclick="openDay('${d}')">${d}<span class="sub" style="display:block;color:${d===weekday?'#d0d5dd':'var(--muted)'}">${programs[d].title}</span></button>`).join('')}</div></section>
- <section class="card pad"><strong>Your strength journey</strong><p class="sub">${db.history.length} completed workout${db.history.length===1?'':'s'} saved. Meaningful progression headlines will grow as comparable workouts accumulate.</p><div class="actions"><button onclick="openHistory()">View History</button><button onclick="downloadAll()">Back Up All Data</button></div></section>
- <section class="card pad"><strong>Fearless Lift Log Manifesto</strong><div class="sub" style="line-height:1.65;margin-top:8px">Record reality. Eliminate friction. Never make the lifter do math. Respect the training program. Provide context, not commands. Make meaningful progress visible.</div></section>`;
+ const weekday=dayForDate(),days=Object.keys(programs),rows=[...db.history].sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date)),last=rows[0];
+ const backupCurrent=!!last&&db.lastBackupWorkoutId===last.id;
+ return `<section class="card hero"><h2>Ready to lift? 🏋️</h2><p>Choose today's workout. Your entries save automatically on this device.</p><div class="day-grid">${days.map(d=>`<button class="${d===weekday?'primary':''}" onclick="openDay('${d}')">${d}<span class="sub" style="display:block;color:${d===weekday?'#d0d5dd':'var(--muted)'}">${programs[d].title}</span></button>`).join('')}</div></section>
+ <section class="card pad"><strong>Your Strength Journey</strong><div class="journey-grid"><div class="journey-box"><strong>${db.history.length}</strong><span>workouts logged</span></div><div class="journey-box"><strong>${last?last.day:'—'}</strong><span>last workout</span></div></div>${last?`<div class="previous"><strong>Last highlight</strong><br>${esc(last.primaryHighlight||last.highlights?.[0]||'⭐ Workout complete')}</div>`:'<p class="sub">Your first completed workout will begin your story.</p>'}<div class="previous"><strong>Backup status</strong><br>${backupCurrent?'✓ Current':'Backup recommended after your next completed workout'}</div><div class="actions"><button onclick="openHistory()">View History</button><button onclick="downloadAll()">Back Up All Data</button></div></section>
+ <section class="card pad"><strong>Built for the gym</strong><div class="sub" style="line-height:1.65;margin-top:8px">Fearless Lift Log displays workout information only—nothing beyond your lifting history and progress.</div></section>`;
 }
 function renderWorkout(){
  const w=view.workout,p=programs[view.day];
@@ -228,10 +261,10 @@ function renderWorkout(){
  const stations=stationOrder.map((n,pos)=>{const done=!!w.completed[n],ids=p.stations[n];return `<section class="card"><div class="station-head" onclick="this.nextElementSibling.classList.toggle('hidden')"><div><div class="station-title">Station ${n}</div><div class="station-meta">${w.startStation?['1st','2nd','3rd','4th'][pos]+' in workout':'Choose a starting station'}</div></div><span class="badge ${done?'done':''}">${done?'Complete':'Open'}</span></div><div class="station-body ${done?'hidden':''}">${ids.map(exerciseHtml).join('')}<button class="complete ${done?'done':''}" onclick="event.stopPropagation();toggleStation(${n})">${done?'✓ Station Complete':'Mark Station Complete'}</button></div></section>`}).join('');
  return `${startCard}${order}${stations}<section class="card pad"><strong>Workout notes</strong><textarea id="workoutNotes" placeholder="Anything worth remembering…" onchange="view.workout.notes=this.value;saveDraft()">${esc(w.notes)}</textarea></section>`;
 }
-function renderSummary(){const w=view.workout,s=view.summary;return `<section class="card summary"><h2>Workout Saved</h2><div class="sub">${w.day} · ${w.title}</div><div class="big-number">${s.volume.toLocaleString()} lb</div><div>Congratulations—you lifted this much today!</div><div class="summary-stats"><div class="stat"><strong>${s.sets}</strong><span>sets logged</span></div><div class="stat"><strong>${s.exercises}</strong><span>exercises</span></div><div class="stat"><strong>4</strong><span>stations</span></div></div><div class="notice">The fun total is included. The deeper progression story will become more useful after you have multiple comparable workouts.</div><div class="actions" style="margin-top:16px"><button onclick="downloadBackup(view.workout)">Download Backup</button><button class="primary" onclick="goHome()">Return Home</button></div></section>`}
+function renderSummary(){const w=view.workout,s=view.summary,highlights=s.highlights||w.highlights||['⭐ Workout complete'],backupCurrent=db.lastBackupWorkoutId===w.id;return `<section class="card summary"><h2>🏋️ Workout Complete!</h2><div class="sub">${w.day} · ${w.title}</div><div class="highlights">${highlights.map(h=>`<div class="highlight">${esc(h)}</div>`).join('')}</div><div class="remember"><div class="sub">Today you'll remember:</div><strong>${esc(w.primaryHighlight||highlights[0])}</strong></div><div class="summary-stats"><div class="stat"><strong>${s.exercises}</strong><span>exercises</span></div><div class="stat"><strong>${s.sets}</strong><span>sets logged</span></div><div class="stat"><strong>${s.duration||'—'}</strong><span>${s.duration?'minutes':'duration'}</span></div></div><div class="big-number">${s.volume.toLocaleString()} lb</div><div class="sub">total training volume</div><div class="notice">✓ Saved on this device<br>${backupCurrent?'✓ Backup created':'Backup ready to save'}</div><div class="actions" style="margin-top:16px"><button onclick="downloadBackup(view.workout)">Save Backup Again</button><button class="primary" onclick="goHome()">Return Home</button></div><p class="sub" style="margin-top:18px">See you next workout. 💪</p></section>`}
 function renderHistory(){
  const rows=[...db.history].sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date));
- return `<section class="card pad"><strong>Workout History</strong><div class="sub">Saved on this device.</div>${rows.length?rows.map(w=>`<div class="history-item"><div class="history-top"><div><div class="history-title">${w.day} · ${w.title}</div><div class="history-meta">${w.date} · Started Station ${w.startStation||'—'} · ${totalVolume(w).toLocaleString()} lb volume</div></div><button class="small-btn" onclick="downloadBackup(db.history.find(x=>x.id==='${w.id}'))">Backup</button></div>${w.notes?`<div class="sub" style="margin-top:6px">${esc(w.notes)}</div>`:''}</div>`).join(''):'<p class="sub">No completed workouts yet.</p>'}</section>`;
+ return `<section class="card pad"><strong>Workout History</strong><div class="sub">Your strength story, workout by workout.</div>${rows.length?rows.map(w=>`<div class="history-item"><div class="history-top"><div><div class="history-title">${w.day} · ${w.title}</div><div class="history-meta">${w.date} · ${totalVolume(w).toLocaleString()} lb volume</div></div><button class="small-btn" onclick="downloadBackup(db.history.find(x=>x.id==='${w.id}'))">Backup</button></div>${(w.highlights||[]).slice(0,3).map(h=>`<div class="sub" style="margin-top:6px">${esc(h)}</div>`).join('')}${w.notes?`<div class="sub" style="margin-top:6px">${esc(w.notes)}</div>`:''}</div>`).join(''):'<p class="sub">No completed workouts yet.</p>'}</section>`;
 }
 function render(){
  migrateOldFriday();const app=document.getElementById('app'),footer=document.getElementById('footer'),back=document.getElementById('backBtn'),sub=document.getElementById('headerSub');
