@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<title>Fearless Lift Log — Friday</title>
+<style>
+:root{
+  --bg:#f4f5f7;--card:#fff;--ink:#111827;--muted:#6b7280;--line:#d1d5db;
+  --accent:#111827;--good:#166534;--goodbg:#dcfce7;--soft:#eef2ff;--danger:#991b1b;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{position:sticky;top:0;z-index:10;background:rgba(244,245,247,.96);backdrop-filter:blur(10px);padding:calc(12px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid var(--line)}
+h1{font-size:21px;margin:0}.sub{font-size:13px;color:var(--muted);margin-top:3px}
+main{max-width:760px;margin:auto;padding:14px 12px calc(90px + env(safe-area-inset-bottom))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;margin:0 0 12px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.station-head{padding:14px 14px 12px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.station-title{font-weight:800;font-size:18px;flex:1}
+.station-meta{font-size:12px;color:var(--muted)}
+.badge{font-size:12px;font-weight:700;border-radius:999px;padding:5px 9px;background:#e5e7eb}
+.badge.done{background:var(--goodbg);color:var(--good)}
+.station-body{padding:0 12px 14px}
+.exercise{border-top:1px solid #e5e7eb;padding:14px 0 4px}
+.exercise h3{font-size:16px;margin:0 0 3px}
+.hint{font-size:12px;color:var(--muted);margin-bottom:8px}
+.previous{font-size:12px;background:var(--soft);border-radius:10px;padding:8px 10px;margin:7px 0 10px}
+.set-row{display:grid;grid-template-columns:34px 1fr 1fr 94px 38px;gap:6px;align-items:center;margin:7px 0}
+.set-row.band{grid-template-columns:34px 1.25fr .8fr 94px 38px}
+.set-row.cardio{grid-template-columns:1fr 1fr 94px}
+label.small{font-size:11px;color:var(--muted)}
+input,select,textarea,button{font:inherit}
+input,select{width:100%;min-height:44px;border:1px solid #c7cbd1;border-radius:10px;padding:8px;background:#fff;font-size:16px}
+input[type=number]{text-align:center}
+.setno{text-align:center;font-weight:800;color:var(--muted)}
+.iconbtn{border:0;background:#f3f4f6;border-radius:10px;min-height:40px;font-size:20px;color:var(--danger)}
+.actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+button{border:0;border-radius:11px;padding:11px 13px;font-weight:750;background:#e5e7eb;color:var(--ink)}
+button.primary{background:var(--accent);color:white}
+button.complete{width:100%;margin-top:14px;background:var(--goodbg);color:var(--good);min-height:48px}
+button.complete.done{background:var(--good);color:#fff}
+.start-panel{padding:14px}.start-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.start-grid button{padding:14px 6px}
+.order{font-weight:800;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin:0 0 12px}
+.notes{width:100%;min-height:70px;border:1px solid #c7cbd1;border-radius:10px;padding:10px;font-size:16px}
+.footer-actions{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:center}
+.footer-actions button{max-width:360px;flex:1}
+.hidden{display:none}
+@media(max-width:480px){
+ .set-row{grid-template-columns:28px 1fr 1fr 84px 36px;gap:5px}
+ .set-row.band{grid-template-columns:28px 1.2fr .75fr 84px 36px}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Fearless Lift Log</h1>
+  <div class="sub">Friday · Upper Body Push · July 2026</div>
+</header>
+
+<main>
+  <section id="startCard" class="card">
+    <div class="start-panel">
+      <strong>Which station are you starting at?</strong>
+      <div class="sub">Tap once. The app records the circular order automatically.</div>
+      <div class="start-grid">
+        <button onclick="startWorkout(1)">1</button>
+        <button onclick="startWorkout(2)">2</button>
+        <button onclick="startWorkout(3)">3</button>
+        <button onclick="startWorkout(4)">4</button>
+      </div>
+    </div>
+  </section>
+
+  <div id="orderBox" class="order hidden"></div>
+  <div id="stations"></div>
+
+  <section class="card">
+    <div class="start-panel">
+      <strong>Workout notes</strong>
+      <textarea id="workoutNotes" class="notes" placeholder="Anything worth remembering…"></textarea>
+    </div>
+  </section>
+</main>
+
+<div class="footer-actions">
+  <button onclick="resetToday()">Reset</button>
+  <button class="primary" onclick="downloadBackup()">Download Backup</button>
+</div>
+
+<script>
+const KEY = "fearlessLiftLogFriday_v01";
+
+const workoutTemplate = [
+  {
+    station:1,
+    title:"Station 1",
+    exercises:[
+      {id:"bench",name:"Bench Press",type:"weight",unit:"Total weight",previous:"Last week: 70 lb × 7"},
+      {id:"bandrow",name:"Bent Over Banded Row",type:"band",unit:"Band color",previous:"Last week: gray band × 10"}
+    ]
+  },
+  {
+    station:2,
+    title:"Station 2",
+    exercises:[
+      {id:"treadmill",name:"Treadmill",type:"cardio",previous:"Last week: 3.5 speed · most/all"}
+    ]
+  },
+  {
+    station:3,
+    title:"Station 3",
+    exercises:[
+      {id:"lunges",name:"Walking Lunges",type:"weightEach",unit:"DB weight each",previous:"Last week: 25 lb each × 8"},
+      {id:"tricep",name:"Overhead Tricep Extensions",type:"weight",unit:"One dumbbell total",previous:"Last week: 30 lb × 8"}
+    ]
+  },
+  {
+    station:4,
+    title:"Station 4",
+    exercises:[
+      {id:"frontraise",name:"Alternating Supinated Cross-Body DB Front Raise",type:"weightEach",unit:"DB weight each",previous:"Last week: 10 lb each × 10"},
+      {id:"dbsitup",name:"DB Sit-up",type:"weight",unit:"One dumbbell total",previous:"Last week: 15 lb × 10"}
+    ]
+  }
+];
+
+let state = load() || {
+  date:new Date().toISOString().slice(0,10),
+  startStation:null,
+  stationOrder:[],
+  completed:{},
+  data:{},
+  notes:""
+};
+
+function save(){
+  state.notes = document.getElementById("workoutNotes")?.value || state.notes || "";
+  localStorage.setItem(KEY, JSON.stringify(state));
+}
+
+function load(){
+  try{return JSON.parse(localStorage.getItem(KEY));}catch(e){return null}
+}
+
+function startWorkout(n){
+  if(!state.startStation){
+    state.startStation=n;
+    state.stationOrder=[n, n%4+1, (n+1)%4+1, (n+2)%4+1];
+  }
+  save(); render();
+}
+
+function defaultSets(ex){
+  if(ex.type==="cardio") return {speed:"",distance:"",difficulty:"",notes:""};
+  return [{weight:"",reps:"",difficulty:""}];
+}
+
+function ensureExercise(ex){
+  if(!state.data[ex.id]) state.data[ex.id]=defaultSets(ex);
+}
+
+function addSet(id,repeat=false){
+  const ex = workoutTemplate.flatMap(s=>s.exercises).find(x=>x.id===id);
+  ensureExercise(ex);
+  const arr=state.data[id];
+  const prev=arr[arr.length-1] || {weight:"",reps:"",difficulty:""};
+  arr.push(repeat ? {...prev} : {weight:"",reps:"",difficulty:""});
+  save(); render();
+}
+
+function deleteSet(id,index){
+  const arr=state.data[id];
+  if(arr.length===1){arr[0]={weight:"",reps:"",difficulty:""};}
+  else arr.splice(index,1);
+  save(); render();
+}
+
+function updateSet(id,index,field,value){
+  state.data[id][index][field]=value; save();
+}
+
+function updateCardio(id,field,value){
+  state.data[id][field]=value; save();
+}
+
+function toggleComplete(station){
+  state.completed[station]=!state.completed[station]; save(); render();
+}
+
+function difficultySelect(value, onchange){
+  return `<select onchange="${onchange}">
+    <option value="" ${value===""?"selected":""}>Effort</option>
+    <option value="E" ${value==="E"?"selected":""}>Easy</option>
+    <option value="M" ${value==="M"?"selected":""}>Medium</option>
+    <option value="H" ${value==="H"?"selected":""}>Hard</option>
+  </select>`;
+}
+
+function exerciseHTML(ex){
+  ensureExercise(ex);
+  if(ex.type==="cardio"){
+    const d=state.data[ex.id];
+    return `<div class="exercise">
+      <h3>${ex.name}</h3>
+      <div class="previous">${ex.previous}</div>
+      <div class="set-row cardio">
+        <div><label class="small">Speed</label><input inputmode="decimal" value="${d.speed||""}" onchange="updateCardio('${ex.id}','speed',this.value)"></div>
+        <div><label class="small">Distance</label><input inputmode="decimal" value="${d.distance||""}" onchange="updateCardio('${ex.id}','distance',this.value)"></div>
+        <div><label class="small">Difficulty</label>${difficultySelect(d.difficulty||"",`updateCardio('${ex.id}','difficulty',this.value)`)}</div>
+      </div>
+      <label class="small">Notes</label>
+      <input value="${d.notes||""}" placeholder="Incline, intervals, most/all…" onchange="updateCardio('${ex.id}','notes',this.value)">
+    </div>`;
+  }
+
+  const isBand=ex.type==="band";
+  const rows=state.data[ex.id].map((s,i)=>`
+    <div class="set-row ${isBand?"band":""}">
+      <div class="setno">${i+1}</div>
+      <input ${isBand?'type="text"':'type="number" inputmode="decimal"'} placeholder="${isBand?'Color':'lb'}" value="${s.weight||""}" onchange="updateSet('${ex.id}',${i},'weight',this.value)">
+      <input type="number" inputmode="numeric" placeholder="Reps" value="${s.reps||""}" onchange="updateSet('${ex.id}',${i},'reps',this.value)">
+      ${difficultySelect(s.difficulty||"",`updateSet('${ex.id}',${i},'difficulty',this.value)`)}
+      <button class="iconbtn" aria-label="Delete set" onclick="deleteSet('${ex.id}',${i})">×</button>
+    </div>`).join("");
+
+  return `<div class="exercise">
+    <h3>${ex.name}</h3>
+    <div class="hint">${ex.unit}</div>
+    <div class="previous">${ex.previous}</div>
+    ${rows}
+    <div class="actions">
+      <button onclick="addSet('${ex.id}',true)">Repeat Previous Set</button>
+      <button onclick="addSet('${ex.id}',false)">Add Empty Set</button>
+    </div>
+  </div>`;
+}
+
+function render(){
+  document.getElementById("workoutNotes").value=state.notes||"";
+  const start=document.getElementById("startCard");
+  const order=document.getElementById("orderBox");
+  if(state.startStation){
+    start.classList.add("hidden");
+    order.classList.remove("hidden");
+    order.textContent=`Started at Station ${state.startStation} · Order: ${state.stationOrder.join(" → ")}`;
+  }else{
+    start.classList.remove("hidden");
+    order.classList.add("hidden");
+  }
+
+  const ordered = state.startStation
+    ? state.stationOrder.map(n=>workoutTemplate.find(s=>s.station===n))
+    : workoutTemplate;
+
+  document.getElementById("stations").innerHTML=ordered.map((st,pos)=>{
+    const done=!!state.completed[st.station];
+    const position=state.startStation ? `${["1st","2nd","3rd","4th"][pos]} in workout` : "Not started";
+    return `<section class="card">
+      <div class="station-head" onclick="this.nextElementSibling.classList.toggle('hidden')">
+        <div>
+          <div class="station-title">${st.title}</div>
+          <div class="station-meta">${position}</div>
+        </div>
+        <div class="badge ${done?"done":""}">${done?"Complete":"Open"}</div>
+      </div>
+      <div class="station-body ${done?"hidden":""}">
+        ${st.exercises.map(exerciseHTML).join("")}
+        <button class="complete ${done?"done":""}" onclick="event.stopPropagation();toggleComplete(${st.station})">
+          ${done?"✓ Station Complete":"Mark Station Complete"}
+        </button>
+      </div>
+    </section>`;
+  }).join("");
+  save();
+}
+
+function resetToday(){
+  if(confirm("Clear this Friday workout and start over?")){
+    localStorage.removeItem(KEY);
+    state={date:new Date().toISOString().slice(0,10),startStation:null,stationOrder:[],completed:{},data:{},notes:""};
+    render();
+  }
+}
+
+function downloadBackup(){
+  save();
+  const payload={
+    app:"Fearless Lift Log",
+    version:"0.1",
+    workout:"Friday — Upper Body Push",
+    program:"July 2026",
+    ...state
+  };
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=`fearless-lift-log-${state.date}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+window.addEventListener("beforeunload",save);
+document.addEventListener("change",save);
+render();
+</script>
+</body>
+</html>
