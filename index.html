@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#172033">
-<title>Fearless Lift Log v0.9</title>
+<title>Fearless Lift Log v10</title>
 <style>
 :root{
   --bg:#f3f4f6;--card:#fff;--ink:#172033;--muted:#667085;--line:#d0d5dd;
@@ -171,15 +171,15 @@ function remapExerciseData(data,sourceLibrary={}){
  return out;
 }
 
-function migrateDatabaseToV09(){
+function migrateDatabaseToV10(){
  if(db.version==='0.9')return;
- db.history=(db.history||[]).map(w=>({...w,version:'0.9',data:remapExerciseData(w.data)}));
- db.drafts=Object.fromEntries(Object.entries(db.drafts||{}).map(([day,w])=>[day,{...w,version:'0.9',data:remapExerciseData(w.data)}]));
+ db.history=(db.history||[]).map(w=>({...w,version:'10',data:remapExerciseData(w.data)}));
+ db.drafts=Object.fromEntries(Object.entries(db.drafts||{}).map(([day,w])=>[day,{...w,version:'10',data:remapExerciseData(w.data)}]));
  db.increments=Object.fromEntries(Object.entries(db.increments||{}).map(([id,v])=>[canonicalExerciseId(id),Number(v)]).filter(([id,v])=>exerciseDefinition(id)&&Number.isFinite(v)&&v>0));
  db.exerciseLibrary=db.exerciseLibrary||{};db.version='0.9';saveDb();
 }
 
-function blankDb(){return {version:'0.9' ,program:'July 2026',history:[],drafts:{},increments:{},exerciseLibrary:{},lastBackupAt:null,lastBackupWorkoutId:null}}
+function blankDb(){return {version:'10' ,program:'July 2026',history:[],drafts:{},increments:{},exerciseLibrary:{},lastBackupAt:null,lastBackupWorkoutId:null}}
 function loadDb(){try{return {...blankDb(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch{return blankDb()}}
 function saveDb(){localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
@@ -207,7 +207,7 @@ function migrateOldFriday(){
 }
 
 function newWorkout(day,date=today()){
- const w={id:uid(),version:'0.9',program:'July 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
+ const w={id:uid(),version:'10',program:'July 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
  Object.values(programs[day].stations).flat().forEach(id=>w.data[id]=defaultData(exerciseDefinition(id)));
  return w;
 }
@@ -294,16 +294,47 @@ function finishWorkout(){
  const w=view.workout,editing=!!view.editingId;if(!editing&&!allStationsDone(w)){alert('Mark all four stations complete before finishing the workout.');return}
  w.notes=document.getElementById('workoutNotes')?.value||w.notes||'';
  if(!editing)w.finishedAt=new Date().toISOString();
- w.version='0.9';w.highlights=workoutHighlights(w);w.primaryHighlight=w.highlights[0];
+ w.version='10';w.highlights=workoutHighlights(w);w.primaryHighlight=w.highlights[0];
  if(editing){const index=db.history.findIndex(x=>x.id===view.editingId);if(index<0){alert('This workout could not be found.');return}db.history[index]=JSON.parse(JSON.stringify(w));}
  else{db.history.push(JSON.parse(JSON.stringify(w)));delete db.drafts[view.day];}
- saveDb();downloadBackup(w,true);releaseWakeLock();view.summary={volume:totalVolume(w),sets:countSets(w),exercises:countExercises(w),duration:durationMinutes(w),highlights:w.highlights,edited:editing};view.screen='summary';view.editingId=null;render();
+ saveDb();releaseWakeLock();view.summary={volume:totalVolume(w),sets:countSets(w),exercises:countExercises(w),duration:durationMinutes(w),highlights:w.highlights,edited:editing};view.screen='summary';view.editingId=null;render();
 }
 function backupFilename(workout){const d=new Date(workout.finishedAt||Date.now()),hh=String(d.getHours()).padStart(2,'0'),mm=String(d.getMinutes()).padStart(2,'0'),title=workout.title.replace(/[^a-z0-9]+/gi,'');return `${workout.date}-${hh}${mm}-${workout.day}-${title}.json`}
-function downloadBackup(workout=view.workout,automatic=false){
- if(!workout)return;const payload={app:'Fearless Lift Log',version:'0.9',exportedAt:new Date().toISOString(),workout};const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=backupFilename(workout);a.click();db.lastBackupAt=new Date().toISOString();db.lastBackupWorkoutId=workout.id;saveDb();if(view.screen==='summary'&&!automatic)render();setTimeout(()=>URL.revokeObjectURL(a.href),500)
+function makeJsonFile(payload,filename){
+ return new File([JSON.stringify(payload,null,2)],filename,{type:'application/json'});
 }
-function downloadAll(){const blob=new Blob([JSON.stringify({app:'Fearless Lift Log',version:'0.9',exportedAt:new Date().toISOString(),exerciseLibrary:allExerciseDefinitions(),...db},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`fearless-lift-log-all-data-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+async function saveFileToICloud(file,workoutId=null){
+ const message='On the next screen, choose Save to Files, then iCloud Drive → Fearless Lift Log → Backups.';
+ if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+  alert(message);
+  try{
+   await navigator.share({title:'Fearless Lift Log Backup',text:'Fearless Lift Log backup file',files:[file]});
+   db.lastBackupAt=new Date().toISOString();
+   if(workoutId)db.lastBackupWorkoutId=workoutId;
+   saveDb();render();
+   return true;
+  }catch(err){
+   if(err?.name!=='AbortError')alert('The iCloud save sheet could not open. A normal download will be used instead.');
+   else return false;
+  }
+ }
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(file);a.download=file.name;a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ alert('The backup was downloaded. In Files, move it to iCloud Drive → Fearless Lift Log → Backups.');
+ return false;
+}
+async function downloadBackup(workout=view.workout){
+ if(!workout)return;
+ const payload={app:'Fearless Lift Log',version:'10',exportedAt:new Date().toISOString(),workout};
+ const file=makeJsonFile(payload,backupFilename(workout));
+ await saveFileToICloud(file,workout.id);
+}
+async function downloadAll(){
+ const payload={app:'Fearless Lift Log',version:'10',exportedAt:new Date().toISOString(),exerciseLibrary:allExerciseDefinitions(),...db};
+ const file=makeJsonFile(payload,`fearless-lift-log-all-data-${today()}.json`);
+ await saveFileToICloud(file,db.history.at(-1)?.id||null);
+}
 
 function workoutIdentity(w){
  return [w.date||'',w.day||'',w.title||''].join('|').toLowerCase();
@@ -407,8 +438,8 @@ function renderHome(){
  const weekday=dayForDate(),days=Object.keys(programs),rows=[...db.history].sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date)),last=rows[0];
  const backupCurrent=!!last&&db.lastBackupWorkoutId===last.id;
  return `<section class="card hero"><h2>Ready to lift? 🏋️</h2><p>Choose today's workout. Your entries save automatically on this device.</p><div class="day-grid">${days.map(d=>`<button class="${d===weekday?'primary':''}" onclick="openDay('${d}')">${d}<span class="sub" style="display:block;color:${d===weekday?'#d0d5dd':'var(--muted)'}">${programs[d].title}</span></button>`).join('')}</div></section>
- <section class="card pad"><strong>Your Strength Journey</strong><div class="journey-grid"><div class="journey-box"><strong>${db.history.length}</strong><span>workouts logged</span></div><div class="journey-box"><strong>${last?last.day:'—'}</strong><span>last workout</span></div></div>${last?`<div class="previous"><strong>Last highlight</strong><br>${esc(last.primaryHighlight||last.highlights?.[0]||'⭐ Workout complete')}</div>`:'<p class="sub">Your first completed workout will begin your story.</p>'}<div class="previous"><strong>Backup status</strong><br>${backupCurrent?'✓ Current':'Backup recommended after your next completed workout'}</div><div class="actions"><button onclick="openHistory()">View History</button><button onclick="openExerciseIndex()">Exercise Index</button><button onclick="openImport()">Import Workouts</button><button onclick="downloadAll()">Back Up All Data</button></div></section>
- <section class="card pad"><strong>Built for the gym</strong><div class="sub" style="line-height:1.65;margin-top:8px">Fearless Lift Log displays workout information only—nothing beyond your lifting history and progress.<br><span style="font-size:11px">Data model v0.9 · Screen Awake · Editable Workout History</span></div></section>`;
+ <section class="card pad"><strong>Your Strength Journey</strong><div class="journey-grid"><div class="journey-box"><strong>${db.history.length}</strong><span>workouts logged</span></div><div class="journey-box"><strong>${last?last.day:'—'}</strong><span>last workout</span></div></div>${last?`<div class="previous"><strong>Last highlight</strong><br>${esc(last.primaryHighlight||last.highlights?.[0]||'⭐ Workout complete')}</div>`:'<p class="sub">Your first completed workout will begin your story.</p>'}<div class="previous"><strong>Backup status</strong><br>${backupCurrent?'✓ Latest workout backed up':'Latest workout has not been saved to iCloud yet'}<div class="sub" style="margin-top:5px">iPhone requires you to approve each file save. Choose Save to Files → iCloud Drive → Fearless Lift Log → Backups.</div></div><div class="actions"><button onclick="openHistory()">View History</button><button onclick="openExerciseIndex()">Exercise Index</button><button onclick="openImport()">Import Workouts</button><button onclick="downloadAll()">Back Up All Data to iCloud</button></div></section>
+ <section class="card pad"><strong>Built for the gym</strong><div class="sub" style="line-height:1.65;margin-top:8px">Fearless Lift Log displays workout information only—nothing beyond your lifting history and progress.<br><span style="font-size:11px">Data model v10 · Screen Awake · Editable Workout History · iCloud Backup Workflow</span></div></section>`;
 }
 function renderWorkout(){
  const w=view.workout,p=programs[view.day];
@@ -419,13 +450,13 @@ function renderWorkout(){
  const notice=view.editingId?'✏️ Editing a completed workout. Make your corrections, then tap Save Changes.':'☀️ Screen stays awake while this workout is open. It returns to your normal Auto-Lock after you finish or leave the workout.';
  return `<div class="awake-note">${notice}</div>${startCard}${order}${stations}<section class="card pad"><strong>Workout notes</strong><textarea id="workoutNotes" placeholder="Anything worth remembering…" onchange="view.workout.notes=this.value;saveDraft()">${esc(w.notes)}</textarea></section>`;
 }
-function renderSummary(){const w=view.workout,s=view.summary,highlights=s.highlights||w.highlights||['⭐ Workout complete'],backupCurrent=db.lastBackupWorkoutId===w.id,title=s.edited?'✏️ Workout Updated':'🏋️ Workout Complete!',message=s.edited?'Your corrected workout now totals':'Congratulations — you lifted';return `<section class="card summary"><h2>${title}</h2><div class="sub">${w.day} · ${w.title}</div><div class="congrats-volume">${message} ${s.volume.toLocaleString()} pounds${s.edited?'.':' today!'}</div><div class="highlights">${highlights.map(h=>`<div class="highlight">${esc(h)}</div>`).join('')}</div><div class="remember"><div class="sub">Today you'll remember:</div><strong>${esc(w.primaryHighlight||highlights[0])}</strong></div><div class="summary-stats"><div class="stat"><strong>${s.exercises}</strong><span>exercises</span></div><div class="stat"><strong>${s.sets}</strong><span>sets logged</span></div><div class="stat"><strong>${s.duration||'—'}</strong><span>${s.duration?'minutes':'duration'}</span></div></div><div class="sub" style="margin-top:8px">Training volume = weight × reps, including both dumbbells when applicable.</div><div class="notice">✓ Saved on this device<br>${backupCurrent?'✓ Updated backup created':'Backup ready to save'}</div><div class="actions" style="margin-top:16px"><button onclick="editWorkout('${w.id}')">Edit Workout</button><button onclick="downloadBackup(view.workout)">Save Backup Again</button><button class="primary" onclick="goHome()">Return Home</button></div><p class="sub" style="margin-top:18px">${s.edited?'Correction saved.':'See you next workout. 💪'}</p></section>`}
+function renderSummary(){const w=view.workout,s=view.summary,highlights=s.highlights||w.highlights||['⭐ Workout complete'],backupCurrent=db.lastBackupWorkoutId===w.id,title=s.edited?'✏️ Workout Updated':'🏋️ Workout Complete!',message=s.edited?'Your corrected workout now totals':'Congratulations — you lifted';return `<section class="card summary"><h2>${title}</h2><div class="sub">${w.day} · ${w.title}</div><div class="congrats-volume">${message} ${s.volume.toLocaleString()} pounds${s.edited?'.':' today!'}</div><div class="highlights">${highlights.map(h=>`<div class="highlight">${esc(h)}</div>`).join('')}</div><div class="remember"><div class="sub">Today you'll remember:</div><strong>${esc(w.primaryHighlight||highlights[0])}</strong></div><div class="summary-stats"><div class="stat"><strong>${s.exercises}</strong><span>exercises</span></div><div class="stat"><strong>${s.sets}</strong><span>sets logged</span></div><div class="stat"><strong>${s.duration||'—'}</strong><span>${s.duration?'minutes':'duration'}</span></div></div><div class="sub" style="margin-top:8px">Training volume = weight × reps, including both dumbbells when applicable.</div><div class="notice">✓ Saved on this device<br>${backupCurrent?'✓ Latest workout backup completed':'iCloud backup still needed'}</div><div class="actions" style="margin-top:16px"><button onclick="editWorkout('${w.id}')">Edit Workout</button><button onclick="downloadBackup(view.workout)">Save to iCloud</button><button class="primary" onclick="goHome()">Return Home</button></div><p class="sub" style="margin-top:18px">${s.edited?'Correction saved.':'See you next workout. 💪'}</p></section>`}
 function renderHistory(){
  const rows=[...db.history].sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date));
  return `<section class="card pad"><strong>Workout History</strong><div class="sub">Your strength story, workout by workout. Tap Edit to correct a completed workout.</div>${rows.length?rows.map(w=>`<div class="history-item"><div class="history-top"><div><div class="history-title">${w.day} · ${w.title}</div><div class="history-meta">${w.date} · ${totalVolume(w).toLocaleString()} lb volume</div></div><div class="actions" style="margin-top:0"><button class="small-btn" onclick="editWorkout('${w.id}')">Edit</button><button class="small-btn" onclick="downloadBackup(db.history.find(x=>x.id==='${w.id}'))">Backup</button></div></div>${(w.highlights||[]).slice(0,3).map(h=>`<div class="sub" style="margin-top:6px">${esc(h)}</div>`).join('')}${w.notes?`<div class="sub" style="margin-top:6px">${esc(w.notes)}</div>`:''}</div>`).join(''):'<p class="sub">No completed workouts yet.</p>'}</section>`;
 }
 function render(){
- migrateDatabaseToV09();migrateOldFriday();const app=document.getElementById('app'),footer=document.getElementById('footer'),back=document.getElementById('backBtn'),sub=document.getElementById('headerSub');
+ migrateDatabaseToV10();migrateOldFriday();const app=document.getElementById('app'),footer=document.getElementById('footer'),back=document.getElementById('backBtn'),sub=document.getElementById('headerSub');
  back.classList.toggle('hidden',view.screen==='home');back.onclick=goHome;
  if(view.screen==='home'){sub.textContent='Know your history. Challenge yourself appropriately.';app.innerHTML=renderHome();footer.classList.add('hidden')}
  if(view.screen==='workout'){sub.textContent=`${view.editingId?'Editing · ':''}${view.day} · ${programs[view.day].title} · July 2026`;app.innerHTML=renderWorkout();footer.classList.remove('hidden');footer.innerHTML=view.editingId?`<button onclick="cancelEdit()">Cancel</button><button class="primary" onclick="finishWorkout()">Save Changes</button>`:`<button onclick="resetWorkout()">Reset</button><button class="primary" ${allStationsDone(view.workout)?'':'disabled'} onclick="finishWorkout()">Finish Workout</button>`}
