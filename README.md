@@ -123,7 +123,8 @@ When a new version is published:
 | **v0.8** | Screen Wake Lock support |
 | **v0.9** | Edit completed workouts |
 | **v10** | Improved iCloud backup workflow |
-| **v11** | Improved background color and scroll|
+| **v11** | Improved background color and scroll landing|
+| **v12** | Changed color rules that exercises beside one another will have different pastel backgrounds|
 
 ---
 
