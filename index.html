@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#172033">
-<title>Fearless Lift Log v11</title>
+<title>Fearless Lift Log v12</title>
 <style>
 :root{
   --bg:#f3f4f6;--card:#fff;--ink:#172033;--muted:#667085;--line:#d0d5dd;
@@ -412,19 +412,18 @@ function difficulty(value,id,index){return `<select onchange="updateValue('${id}
 function stepper(id,index,field,value,placeholder){return `<div class="stepper"><button type="button" onclick="step('${id}',${index},'${field}',-1)">−</button><input type="number" inputmode="decimal" value="${esc(value)}" placeholder="${placeholder}" onchange="updateValue('${id}',${index},'${field}',this.value)"><button type="button" onclick="step('${id}',${index},'${field}',1)">+</button></div>`}
 
 const EXERCISE_COLORS=['#eef8ee','#fceff4','#eef5fc','#fff8e8','#f4effc','#eef9f8','#fff0eb','#f3f6ea'];
-function exerciseColor(id){
- let hash=0;
- for(const ch of String(id))hash=((hash<<5)-hash)+ch.charCodeAt(0);
- return EXERCISE_COLORS[Math.abs(hash)%EXERCISE_COLORS.length];
+function exerciseColor(exerciseIndex,stationNumber){
+ const stationOffset=((Number(stationNumber)||1)-1)*3;
+ return EXERCISE_COLORS[(stationOffset+exerciseIndex)%EXERCISE_COLORS.length];
 }
 
-function exerciseHtml(id){
+function exerciseHtml(id,exerciseIndex=0,stationNumber=1){
  const ex=exerciseDefinition(id),d=view.workout.data[id];
  let body='';
  if(ex.kind==='cardio') body=`<div class="field-grid three"><div class="field"><label>Speed</label><input inputmode="decimal" value="${esc(d.speed)}" onchange="updateValue('${id}',0,'speed',this.value)"></div><div class="field"><label>Distance</label><input inputmode="decimal" value="${esc(d.distance)}" onchange="updateValue('${id}',0,'distance',this.value)"></div><div class="field"><label>Difficulty</label><select onchange="updateValue('${id}',0,'difficulty',this.value)">${DIFFICULTIES.map(([v,l])=>`<option value="${v}" ${d.difficulty===v?'selected':''}>${l}</option>`).join('')}</select></div></div><div class="field" style="margin-top:8px"><label>Notes</label><input value="${esc(d.notes)}" placeholder="Incline, intervals, most/all…" onchange="updateValue('${id}',0,'notes',this.value)"></div>`;
  else body=d.map((s,i)=>setHtml(id,ex,s,i)).join('')+`<div class="actions"><button onclick="addSet('${id}',true)">Repeat Previous Set</button><button onclick="addSet('${id}',false)">Add Empty Set</button></div>`;
  const inc=ex.increment!=null?`<div class="increment-row">Weight +/− changes by <select onchange="setIncrement('${id}',this.value)">${INCREMENTS.map(v=>`<option value="${v}" ${currentIncrement(id)===v?'selected':''}>${v} lb</option>`).join('')}</select></div>`:'';
- return `<div class="exercise" style="--exercise-bg:${exerciseColor(id)}"><h3>${ex.name}</h3><div class="hint">${ex.label}${ex.note?` · ${ex.note}`:''}</div><div class="previous">${lastExerciseSummary(id,view.day)}</div>${body}${inc}</div>`;
+ return `<div class="exercise" style="--exercise-bg:${exerciseColor(exerciseIndex,stationNumber)}"><h3>${ex.name}</h3><div class="hint">${ex.label}${ex.note?` · ${ex.note}`:''}</div><div class="previous">${lastExerciseSummary(id,view.day)}</div>${body}${inc}</div>`;
 }
 function setHtml(id,ex,s,i){
  let fields='';
@@ -462,14 +461,14 @@ function renderHome(){
  const backupCurrent=!!last&&db.lastBackupWorkoutId===last.id;
  return `<section class="card hero"><h2>Ready to lift? 🏋️</h2><p>Choose today's workout. Your entries save automatically on this device.</p><div class="day-grid">${days.map(d=>`<button class="${d===weekday?'primary':''}" onclick="openDay('${d}')">${d}<span class="sub" style="display:block;color:${d===weekday?'#d0d5dd':'var(--muted)'}">${programs[d].title}</span></button>`).join('')}</div></section>
  <section class="card pad"><strong>Your Strength Journey</strong><div class="journey-grid"><div class="journey-box"><strong>${db.history.length}</strong><span>workouts logged</span></div><div class="journey-box"><strong>${last?last.day:'—'}</strong><span>last workout</span></div></div>${last?`<div class="previous"><strong>Last highlight</strong><br>${esc(last.primaryHighlight||last.highlights?.[0]||'⭐ Workout complete')}</div>`:'<p class="sub">Your first completed workout will begin your story.</p>'}<div class="previous"><strong>Backup status</strong><br>${backupCurrent?'✓ Latest workout backed up':'Latest workout has not been saved to iCloud yet'}<div class="sub" style="margin-top:5px">iPhone requires you to approve each file save. Choose Save to Files → iCloud Drive → Fearless Lift Log → Backups.</div></div><div class="actions"><button onclick="openHistory()">View History</button><button onclick="openExerciseIndex()">Exercise Index</button><button onclick="openImport()">Import Workouts</button><button onclick="downloadAll()">Back Up All Data to iCloud</button></div></section>
- <section class="card pad"><strong>Built for the gym</strong><div class="sub" style="line-height:1.65;margin-top:8px">Fearless Lift Log displays workout information only—nothing beyond your lifting history and progress.<br><span style="font-size:11px">Data model v11 · Color-Coded Exercises · Guided Station Navigation · Screen Awake · Editable History · iCloud Backup</span></div></section>`;
+ <section class="card pad"><strong>Built for the gym</strong><div class="sub" style="line-height:1.65;margin-top:8px">Fearless Lift Log displays workout information only—nothing beyond your lifting history and progress.<br><span style="font-size:11px">Data model v12 · Distinct Station Colors · Guided Station Navigation · Screen Awake · Editable History · iCloud Backup</span></div></section>`;
 }
 function renderWorkout(){
  const w=view.workout,p=programs[view.day];
  const startCard=!w.startStation?`<section class="card pad"><strong>Which station are you starting at?</strong><div class="sub">The circular order is recorded automatically.</div><div class="start-grid">${[1,2,3,4].map(n=>`<button onclick="startWorkout(${n})">${n}</button>`).join('')}</div></section>`:'';
  const order=w.startStation?`<div class="order">Started at Station ${w.startStation} · ${w.stationOrder.join(' → ')}</div>`:'';
  const stationOrder=w.startStation?w.stationOrder:[1,2,3,4];
- const stations=stationOrder.map((n,pos)=>{const done=!!w.completed[n],ids=p.stations[n];return `<section class="card" id="station-${n}" style="scroll-margin-top:88px"><div class="station-head" onclick="this.nextElementSibling.classList.toggle('hidden')"><div><div class="station-title">Station ${n}</div><div class="station-meta">${w.startStation?['1st','2nd','3rd','4th'][pos]+' in workout':'Choose a starting station'}</div></div><span class="badge ${done?'done':''}">${done?'Complete':'Open'}</span></div><div class="station-body ${done?'hidden':''}">${ids.map(exerciseHtml).join('')}<button class="complete ${done?'done':''}" onclick="event.stopPropagation();toggleStation(${n})">${done?'✓ Station Complete':'Mark Station Complete'}</button></div></section>`}).join('');
+ const stations=stationOrder.map((n,pos)=>{const done=!!w.completed[n],ids=p.stations[n];return `<section class="card" id="station-${n}" style="scroll-margin-top:88px"><div class="station-head" onclick="this.nextElementSibling.classList.toggle('hidden')"><div><div class="station-title">Station ${n}</div><div class="station-meta">${w.startStation?['1st','2nd','3rd','4th'][pos]+' in workout':'Choose a starting station'}</div></div><span class="badge ${done?'done':''}">${done?'Complete':'Open'}</span></div><div class="station-body ${done?'hidden':''}">${ids.map((id,exerciseIndex)=>exerciseHtml(id,exerciseIndex,n)).join('')}<button class="complete ${done?'done':''}" onclick="event.stopPropagation();toggleStation(${n})">${done?'✓ Station Complete':'Mark Station Complete'}</button></div></section>`}).join('');
  const notice=view.editingId?'✏️ Editing a completed workout. Make your corrections, then tap Save Changes.':'☀️ Screen stays awake while this workout is open. It returns to your normal Auto-Lock after you finish or leave the workout.';
  return `<div class="awake-note">${notice}</div>${startCard}${order}${stations}<section class="card pad" id="workout-notes" style="scroll-margin-top:88px"><strong>Workout notes</strong><textarea id="workoutNotes" placeholder="Anything worth remembering…" onchange="view.workout.notes=this.value;saveDraft()">${esc(w.notes)}</textarea></section>`;
 }
