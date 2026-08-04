@@ -125,6 +125,8 @@ When a new version is published:
 | **v10** | Improved iCloud backup workflow |
 | **v11** | Improved background color and scroll landing|
 | **v12** | Changed color rules that exercises beside one another will have different pastel backgrounds|
+| **v13** | Imported new months program |
+| **v14** | Corrected history look back, restore last workout button and added bands to MonsterWalks |
 
 ---
 
