@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#172033">
-<title>Fearless Lift Log v13</title>
+<title>Fearless Lift Log v14.2</title>
 <style>
 :root{
   --bg:#f3f4f6;--card:#fff;--ink:#172033;--muted:#667085;--line:#d0d5dd;
@@ -60,6 +60,7 @@ const STORAGE_KEY='fearlessLiftLog_v02';
 const OLD_KEY='fearlessLiftLogFriday_v01';
 const INCREMENTS=[1.25,2.5,5,10,20,25];
 const BANDS=['Red','Orange','Yellow','Green','Blue','Purple','Black'];
+const MONSTER_WALK_BANDS=['Green','Blue','Yellow','Red','Black'];
 const DIFFICULTIES=[['','Effort'],['E','Easy'],['M','Medium'],['H','Hard']];
 
 const EXERCISE_ALIASES={
@@ -84,7 +85,7 @@ const exercises={
  reverse_fly:{name:'Reverse Fly',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Pull',equipment:'Dumbbells'},
  drop_set_three_point_row:{name:'Drop Set 3-Point Row',kind:'drop',label:'Cable weight',increment:5,multiplier:1,category:'Upper Body Pull',equipment:'Cable'},
  overhead_slam:{name:'Overhead Slam',kind:'weight',label:'Ball weight',increment:5,multiplier:1,category:'Power',equipment:'Medicine ball'},
- barbell_back_squat:{name:'BB Back Squat',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Lower Body Push',equipment:'Barbell'},
+ barbell_back_squat:{name:'Back Squat',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Lower Body Push',equipment:'Barbell',target:'6–8'},
  seated_vertical_jump:{name:'Seated Vertical Jump',kind:'weight',label:'External weight',increment:5,multiplier:1,category:'Power',equipment:'Bodyweight / external load'},
  seated_alternating_shoulder_press:{name:'Seated Alternating Shoulder Press',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells'},
  lateral_raise:{name:'Lateral Raise',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells'},
@@ -111,6 +112,7 @@ const HISTORICAL_NAME_ALIASES={"1/2 turkish get up":"1_2_turkish_get_up","b-stan
 Object.assign(exercises,HISTORICAL_EXERCISE_SEED);
 
 Object.assign(exercises,{
+ barbell_back_squat:{name:'Back Squat',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Lower Body Push',equipment:'Barbell',target:'6–8'},
  horizontal_pull_apart:{name:'Horizontal Pull Apart',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Upper Body Pull',equipment:'Band',target:'10'},
  pull_up_assisted:{name:'Pull Up',kind:'pullup',label:'Assistance setup and reps',increment:null,multiplier:0,category:'Upper Body Pull',equipment:'Bands',target:'5+',cue:'Substitute seated lat pulldown with handles if needed.'},
  meadow_row:{name:'Meadow Row',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Upper Body Pull',equipment:'Landmine',target:'8 each side'},
@@ -118,7 +120,7 @@ Object.assign(exercises,{
  shoulder_external_rotation:{name:'Shoulder External Rotation',kind:'weight',label:'Weight / resistance',increment:2.5,multiplier:1,category:'Shoulder',equipment:'Cable / band',target:'10 each side'},
  a_frame_russian_twist:{name:'A-Frame Russian Twist',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Core',equipment:'External load',target:'8–10 each side'},
  high_to_low_plank:{name:'High-to-Low Plank',kind:'plankSplit',label:'Full and knee reps',increment:null,multiplier:0,category:'Core',equipment:'Bodyweight',target:'10 total'},
- monster_walks:{name:'Monster Walks',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Lower Body Push',equipment:'Band',target:'6 forward + 6 backward'},
+ monster_walks:{name:'Monster Walks',kind:'band',label:'Band color',bandOptions:MONSTER_WALK_BANDS,increment:null,multiplier:0,category:'Lower Body Push',equipment:'Band',target:'6 forward + 6 backward'},
  back_squat:{name:'Back Squat',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Lower Body Push',equipment:'Barbell',target:'6–8'},
  dumbbell_fly:{name:'Dumbbell Fly',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells',target:'10–12'},
  single_arm_push_press:{name:'Single-Arm Push Press',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Upper Body Push',equipment:'Dumbbell / kettlebell',target:'5 each side'},
@@ -151,7 +153,7 @@ Object.assign(exercises,{
 
 const programs={
  Monday:{title:'Upper Body Pull',month:'August 2026',stations:{1:{name:'Rack',duration:'9.5 min',exercises:['pull_up_assisted','meadow_row']},2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},3:{name:'Bench',duration:'9.5 min · 4 sets',exercises:['slider_reverse_lunge','shoulder_external_rotation']},4:{name:'Floor',duration:'9.5 min',exercises:['a_frame_russian_twist','overhead_tricep_extension','high_to_low_plank']}}},
- Tuesday:{title:'Lower Body Push',month:'August 2026',stations:{1:{name:'Rack',duration:'9.5 min',exercises:['monster_walks','back_squat']},2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},3:{name:'Bench',duration:'9.5 min',exercises:['dumbbell_fly','single_arm_push_press']},4:{name:'Floor',duration:'9.5 min',exercises:['cossack_squat','half_kneeling_soleus_raise','half_kneeling_rainbow_slam']}}},
+ Tuesday:{title:'Lower Body Push',month:'August 2026',stations:{1:{name:'Rack',duration:'9.5 min',exercises:['monster_walks','barbell_back_squat']},2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},3:{name:'Bench',duration:'9.5 min',exercises:['dumbbell_fly','single_arm_push_press']},4:{name:'Floor',duration:'9.5 min',exercises:['cossack_squat','half_kneeling_soleus_raise','half_kneeling_rainbow_slam']}}},
  Wednesday:{title:'Hinge Focus',month:'August 2026',stations:{1:{name:'Rack',duration:'9.5 min',exercises:['standing_banded_cable_hip_flexion','hip_thrust']},2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},3:{name:'Bench',duration:'9.5 min',exercises:['copenhagen_dip','dumbbell_rdl']},4:{name:'Floor',duration:'9.5 min',exercises:['scap_push_up','push_up','hammer_curl']}}},
  Thursday:{title:'Upper Body Push',month:'August 2026',stations:{1:{name:'Rack',duration:'9.5 min',exercises:['barbell_bench_press','horizontal_pull_apart']},2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},3:{name:'Bench',duration:'9.5 min',exercises:['pause_goblet_squat','bent_elbow_lateral_raise']},4:{name:'Floor',duration:'9.5 min',exercises:['plate_squat_overhead_press','alternating_single_leg_v_up']}}},
  Friday:{title:'Lower Body Pull',month:'August 2026',stations:{1:{name:'Rack',duration:'9.5 min',exercises:['deadlift','reverse_nordic']},2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},3:{name:'Bench',duration:'9.5 min',exercises:['elevated_plank_single_arm_row','concentration_curl']},4:{name:'Floor',duration:'9.5 min',exercises:['hamstring_curl','dumbbell_wood_chopper']}}},
@@ -218,15 +220,21 @@ function remapExerciseData(data,sourceLibrary={}){
  return out;
 }
 
-function migrateDatabaseToV10(){
- if(db.version==='13')return;
- db.history=(db.history||[]).map(w=>({...w,version:'10',data:remapExerciseData(w.data)}));
- db.drafts=Object.fromEntries(Object.entries(db.drafts||{}).map(([day,w])=>[day,{...w,version:'10',data:remapExerciseData(w.data)}]));
- db.increments=Object.fromEntries(Object.entries(db.increments||{}).map(([id,v])=>[canonicalExerciseId(id),Number(v)]).filter(([id,v])=>exerciseDefinition(id)&&Number.isFinite(v)&&v>0));
- db.exerciseLibrary=db.exerciseLibrary||{};db.version='13';saveDb();
+function migrateDatabaseToV14(){
+ if(db.version==='14.2')return;
+ const unifyBackSquat=data=>{
+  const mapped=remapExerciseData(data);
+  if(mapped.back_squat&&!mapped.barbell_back_squat)mapped.barbell_back_squat=mapped.back_squat;
+  delete mapped.back_squat;
+  return mapped;
+ };
+ db.history=(db.history||[]).map(w=>({...w,version:'14.2',data:unifyBackSquat(w.data)}));
+ db.drafts=Object.fromEntries(Object.entries(db.drafts||{}).map(([day,w])=>[day,{...w,version:'14.2',data:unifyBackSquat(w.data)}]));
+ db.increments=Object.fromEntries(Object.entries(db.increments||{}).map(([id,v])=>[id==='back_squat'?'barbell_back_squat':canonicalExerciseId(id),Number(v)]).filter(([id,v])=>exerciseDefinition(id)&&Number.isFinite(v)&&v>0));
+ db.exerciseLibrary=db.exerciseLibrary||{};db.version='14.2';saveDb();
 }
 
-function blankDb(){return {version:'13' ,program:'August 2026',history:[],drafts:{},increments:{},exerciseLibrary:{},lastBackupAt:null,lastBackupWorkoutId:null}}
+function blankDb(){return {version:'14.2' ,program:'August 2026',history:[],drafts:{},increments:{},exerciseLibrary:{},lastBackupAt:null,lastBackupWorkoutId:null}}
 function loadDb(){try{return {...blankDb(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch{return blankDb()}}
 function saveDb(){localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
@@ -254,7 +262,7 @@ function migrateOldFriday(){
 }
 
 function newWorkout(day,date=today()){
- const w={id:uid(),version:'13',program:programs[day].month||'August 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
+ const w={id:uid(),version:'14.2',program:programs[day].month||'August 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
  Object.values(programs[day].stations).flatMap(st=>st.exercises).forEach(id=>w.data[id]=defaultData(exerciseDefinition(id)));
  return w;
 }
@@ -270,28 +278,93 @@ function defaultData(ex){
 function currentIncrement(id){return Number(db.increments[id]??exercises[id].increment??2.5)}
 function setIncrement(id,v){db.increments[id]=Number(v);saveDb();render()}
 function lastWorkout(day){return [...db.history].filter(h=>h.day===day).sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date))[0]}
-function lastExerciseSummary(id,day){
- const h=lastWorkout(day); if(!h||!h.data?.[id]) return 'No prior workout recorded yet.';
- const ex=exerciseDefinition(id),d=h.data[id];
- if(ex.kind==='cardio') return `Last ${day}: speed ${d.speed||'—'}${d.distance?` · distance ${d.distance}`:''}${d.setup?` · ${d.setup}`:''}`;
- if(!Array.isArray(d)) return 'Prior data available.';
+const EXERCISE_HISTORY_GROUPS=[
+ ['barbell_back_squat','back_squat'],
+ ['deadlift','barbell_deadlift','conventional_deadlift'],
+ ['barbell_bench_press','bench'],
+ ['overhead_tricep_extension','tricep'],
+ ['walking_lunges','lunges']
+];
+function normalizeExerciseIdentity(value){
+ return normalizeExerciseName(value)
+  .replace(/\bbb\b/g,'barbell')
+  .replace(/\bdb\b/g,'dumbbell')
+  .replace(/\bkb\b/g,'kettlebell')
+  .replace(/\bsa\b/g,'single arm')
+  .replace(/\bsl\b/g,'single leg')
+  .replace(/\brdl\b/g,'romanian deadlift')
+  .replace(/\bpull ups\b/g,'pull up')
+  .replace(/\bpush ups\b/g,'push up')
+  .replace(/\blunges\b/g,'lunge')
+  .replace(/\bcurls\b/g,'curl')
+  .replace(/\bextensions\b/g,'extension')
+  .replace(/\s+/g,' ')
+  .trim();
+}
+function exerciseIdentityKeys(id){
+ const keys=new Set();
+ const definitions=allExerciseDefinitions();
+ const add=value=>{const normalized=normalizeExerciseIdentity(value);if(normalized)keys.add(normalized)};
+ const addDefinition=exerciseId=>{add(exerciseId);const def=definitions[exerciseId];if(def?.name)add(def.name)};
+ const canonical=canonicalExerciseId(id);
+ addDefinition(id);addDefinition(canonical);
+ for(const [alias,target] of Object.entries(EXERCISE_ALIASES))if(canonicalExerciseId(target)===canonical)add(alias);
+ for(const [alias,target] of Object.entries(HISTORICAL_NAME_ALIASES))if(canonicalExerciseId(target)===canonical)add(alias);
+ for(const group of EXERCISE_HISTORY_GROUPS){
+  const canonicalGroup=group.map(value=>canonicalExerciseId(value));
+  if(group.includes(id)||group.includes(canonical)||canonicalGroup.includes(canonical))for(const alias of group)addDefinition(alias);
+ }
+ return keys;
+}
+function exerciseIdsMatch(targetId,candidateId){
+ const targetKeys=exerciseIdentityKeys(targetId),candidateKeys=exerciseIdentityKeys(candidateId);
+ return [...targetKeys].some(key=>candidateKeys.has(key));
+}
+function mostRecentExerciseRecord(id){
+ return [...db.history]
+  .sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date))
+  .map(h=>{
+   const exerciseId=Object.keys(h.data||{}).find(candidateId=>exerciseIdsMatch(id,candidateId));
+   return exerciseId?{workout:h,exerciseId}:null;
+  })
+  .find(Boolean)||null;
+}
+function formatHistoryDate(value){
+ if(!value)return 'unknown date';
+ const d=new Date(value+'T12:00:00');
+ return Number.isNaN(d.getTime())?value:d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+function lastExerciseSummary(id){
+ const record=mostRecentExerciseRecord(id); if(!record) return 'No prior workout recorded yet.';
+ const h=record.workout,ex=exerciseDefinition(id),d=h.data[record.exerciseId],date=formatHistoryDate(h.date);
+ if(ex.kind==='cardio') return `Last performed ${date}: speed ${d.speed||'—'}${d.distance?` · distance ${d.distance}`:''}${d.setup?` · ${d.setup}`:''}`;
+ if(!Array.isArray(d)) return `Last performed ${date}: prior data available.`;
  const parts=d.map(s=>{
   let main='';
   if(ex.kind==='pullup') main=`${Array.isArray(s.bands)&&s.bands.length?s.bands.join(' + '):'No band listed'} · hook ${s.hookHeight||'—'} · ${s.reps||'—'} reps`;
   else if(ex.kind==='plankSplit') main=`${s.fullReps||0} full + ${s.kneeReps||0} knee`;
-  else if(ex.kind==='band') main=`${s.weight||s.band||'—'} · ${s.reps||'—'} reps`;
+  else if(ex.kind==='band') main=`${s.weight||s.band||'—'} band · ${s.reps||'—'} reps`;
   else if(ex.kind==='time') main=`${s.seconds||'—'} sec`;
   else if(ex.kind==='reps') main=`${s.reps||'—'} reps`;
   else if(ex.kind==='drop') main=`${s.weight1||'—'}→${s.weight2||'—'} × ${s.reps||'—'}`;
   else main=`${s.weight||'—'} lb × ${s.reps||'—'}`;
   return `${main}${s.difficulty?` · ${s.difficulty}`:''}${s.setup?` · ${s.setup}`:''}`;
  }).join(' | ');
- return `Last ${day}: ${parts}`;
+ return `Last performed ${date}: ${parts}`;
 }
 
 function goHome(){saveDraft();releaseWakeLock();view={screen:'home',day:null,workout:null,summary:null,editingId:null};render()}
 function openDay(day){saveDraft();let w=db.drafts[day];if(!w||w.date!==today())w=newWorkout(day);db.drafts[day]=w;saveDb();view={screen:'workout',day,workout:w,summary:null,editingId:null};requestWakeLock();render()}
 function openHistory(){saveDraft();releaseWakeLock();view={screen:'history',day:null,workout:null,summary:null,editingId:null};render()}
+function replayLastFinish(){
+ const last=[...db.history].sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date))[0];
+ if(!last)return;
+ saveDraft();releaseWakeLock();
+ const w=JSON.parse(JSON.stringify(last));
+ const summary=w.finishSummary?JSON.parse(JSON.stringify(w.finishSummary)):{volume:totalVolume(w),sets:countSets(w),exercises:countExercises(w),duration:durationMinutes(w),highlights:w.highlights||['⭐ Workout complete'],edited:false};
+ view={screen:'summary',day:w.day,workout:w,summary,editingId:null};
+ render();
+}
 function editWorkout(id){const original=db.history.find(w=>w.id===id);if(!original)return;view={screen:'workout',day:original.day,workout:JSON.parse(JSON.stringify(original)),summary:null,editingId:id};requestWakeLock();render()}
 function cancelEdit(){releaseWakeLock();openHistory()}
 function saveDraft(){if(view.workout&&!view.workout.finishedAt){db.drafts[view.day]=view.workout;saveDb()}}
@@ -365,10 +438,11 @@ function finishWorkout(){
  const w=view.workout,editing=!!view.editingId;if(!editing&&!allStationsDone(w)){alert('Mark all stations complete before finishing the workout.');return}
  w.notes=document.getElementById('workoutNotes')?.value||w.notes||'';
  if(!editing)w.finishedAt=new Date().toISOString();
- w.version='13';w.highlights=workoutHighlights(w);w.primaryHighlight=w.highlights[0];
+ w.version='14.1';w.highlights=workoutHighlights(w);w.primaryHighlight=w.highlights[0];
+ w.finishSummary={volume:totalVolume(w),sets:countSets(w),exercises:countExercises(w),duration:durationMinutes(w),highlights:[...w.highlights],edited:editing};
  if(editing){const index=db.history.findIndex(x=>x.id===view.editingId);if(index<0){alert('This workout could not be found.');return}db.history[index]=JSON.parse(JSON.stringify(w));}
  else{db.history.push(JSON.parse(JSON.stringify(w)));delete db.drafts[view.day];}
- saveDb();releaseWakeLock();view.summary={volume:totalVolume(w),sets:countSets(w),exercises:countExercises(w),duration:durationMinutes(w),highlights:w.highlights,edited:editing};view.screen='summary';view.editingId=null;render();
+ saveDb();releaseWakeLock();view.summary=JSON.parse(JSON.stringify(w.finishSummary));view.screen='summary';view.editingId=null;render();
 }
 function backupFilename(workout){const d=new Date(workout.finishedAt||Date.now()),hh=String(d.getHours()).padStart(2,'0'),mm=String(d.getMinutes()).padStart(2,'0'),title=workout.title.replace(/[^a-z0-9]+/gi,'');return `${workout.date}-${hh}${mm}-${workout.day}-${title}.json`}
 function makeJsonFile(payload,filename){
@@ -397,12 +471,12 @@ async function saveFileToICloud(file,workoutId=null){
 }
 async function downloadBackup(workout=view.workout){
  if(!workout)return;
- const payload={app:'Fearless Lift Log',version:'13',exportedAt:new Date().toISOString(),workout};
+ const payload={app:'Fearless Lift Log',version:'14.1',exportedAt:new Date().toISOString(),workout};
  const file=makeJsonFile(payload,backupFilename(workout));
  await saveFileToICloud(file,workout.id);
 }
 async function downloadAll(){
- const payload={app:'Fearless Lift Log',version:'13',exportedAt:new Date().toISOString(),exerciseLibrary:allExerciseDefinitions(),...db};
+ const payload={app:'Fearless Lift Log',version:'14.1',exportedAt:new Date().toISOString(),exerciseLibrary:allExerciseDefinitions(),...db};
  const file=makeJsonFile(payload,`fearless-lift-log-all-data-${today()}.json`);
  await saveFileToICloud(file,db.history.at(-1)?.id||null);
 }
@@ -478,13 +552,13 @@ function exerciseHtml(id,exerciseIndex=0,stationNumber=1){
  if(ex.kind==='cardio') body=`<div class="field-grid three"><div class="field"><label>Speed</label><input inputmode="decimal" value="${esc(d.speed)}" onchange="updateValue('${id}',0,'speed',this.value)"></div><div class="field"><label>Distance</label><input inputmode="decimal" value="${esc(d.distance)}" onchange="updateValue('${id}',0,'distance',this.value)"></div><div class="field"><label>Difficulty</label><select onchange="updateValue('${id}',0,'difficulty',this.value)">${DIFFICULTIES.map(([v,l])=>`<option value="${v}" ${d.difficulty===v?'selected':''}>${l}</option>`).join('')}</select></div></div><div class="field" style="margin-top:8px"><label>Notes</label><input value="${esc(d.notes)}" placeholder="Incline, intervals, most/all…" onchange="updateValue('${id}',0,'notes',this.value)"></div>`;
  else body=d.map((s,i)=>setHtml(id,ex,s,i)).join('')+`<div class="actions"><button onclick="addSet('${id}',true)">Repeat Previous Performance</button><button onclick="addSet('${id}',false)">Add Empty Set</button></div>`;
  const inc=ex.increment!=null?`<div class="increment-row">Weight +/− changes by <select onchange="setIncrement('${id}',this.value)">${INCREMENTS.map(v=>`<option value="${v}" ${currentIncrement(id)===v?'selected':''}>${v} lb</option>`).join('')}</select></div>`:'';
- return `<div class="exercise" style="--exercise-bg:${exerciseColor(exerciseIndex,stationNumber)}"><h3>${ex.name}</h3><div class="hint">${ex.target?`Target: ${ex.target}`:ex.label}${ex.note?` · ${ex.note}`:''}</div>${ex.cue?`<div class="cue"><strong>Coach cue:</strong> ${esc(ex.cue)}</div>`:''}<div class="previous">${lastExerciseSummary(id,view.day)}</div>${body}${inc}</div>`;
+ return `<div class="exercise" style="--exercise-bg:${exerciseColor(exerciseIndex,stationNumber)}"><h3>${ex.name}</h3><div class="hint">${ex.target?`Target: ${ex.target}`:ex.label}${ex.note?` · ${ex.note}`:''}</div>${ex.cue?`<div class="cue"><strong>Coach cue:</strong> ${esc(ex.cue)}</div>`:''}<div class="previous">${lastExerciseSummary(id)}</div>${body}${inc}</div>`;
 }
 function setHtml(id,ex,s,i){
  let fields='';
  if(ex.kind==='pullup') fields=`<div class="field" style="grid-column:1/-1"><label>Assistance bands (choose all used)</label><div class="band-grid">${BANDS.map(b=>`<label class="band-choice"><input type="checkbox" ${Array.isArray(s.bands)&&s.bands.includes(b)?'checked':''} onchange="toggleBand('${id}',${i},'${b}',this.checked)"><span>${b}</span></label>`).join('')}</div></div><div class="field"><label>Hook height (1–25)</label><input type="number" inputmode="numeric" min="1" max="25" value="${esc(s.hookHeight)}" onchange="updateValue('${id}',${i},'hookHeight',this.value)"></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='plankSplit') fields=`<div class="field"><label>Full-plank reps</label>${stepper(id,i,'fullReps',s.fullReps,'0')}</div><div class="field"><label>Knee-plank reps</label>${stepper(id,i,'kneeReps',s.kneeReps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
- else if(ex.kind==='band') fields=`<div class="field"><label>Band color</label><select onchange="updateValue('${id}',${i},'weight',this.value)"><option value="">Choose</option>${BANDS.map(b=>`<option ${String(s.weight||'').toLowerCase()===b.toLowerCase()?'selected':''}>${b}</option>`).join('')}</select></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else if(ex.kind==='band') fields=`<div class="field"><label>Band color</label><select onchange="updateValue('${id}',${i},'weight',this.value)"><option value="">Choose</option>${(ex.bandOptions||BANDS).map(b=>`<option ${String(s.weight||'').toLowerCase()===b.toLowerCase()?'selected':''}>${b}</option>`).join('')}</select></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='time') fields=`<div class="field"><label>Seconds</label>${stepper(id,i,'seconds',s.seconds,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='reps') fields=`<div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='drop') fields=`<div class="field"><label>Weight 1</label>${stepper(id,i,'weight1',s.weight1,'lb')}</div><div class="field"><label>Weight 2</label>${stepper(id,i,'weight2',s.weight2,'lb')}</div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
@@ -518,7 +592,7 @@ function renderHome(){
  const weekday=dayForDate(),days=Object.keys(programs),rows=[...db.history].sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date)),last=rows[0];
  const backupCurrent=!!last&&db.lastBackupWorkoutId===last.id;
  return `<section class="card hero"><h2>Ready to lift? 🏋️</h2><p>Choose today's workout. Your entries save automatically on this device.</p><div class="day-grid">${days.map(d=>`<button class="${d===weekday?'primary':''}" onclick="openDay('${d}')">${d}<span class="sub" style="display:block;color:${d===weekday?'#d0d5dd':'var(--muted)'}">${programs[d].title}</span></button>`).join('')}</div></section>
- <section class="card pad"><strong>Your Strength Journey</strong><div class="journey-grid"><div class="journey-box"><strong>${db.history.length}</strong><span>workouts logged</span></div><div class="journey-box"><strong>${last?last.day:'—'}</strong><span>last workout</span></div></div>${last?`<div class="previous"><strong>Last highlight</strong><br>${esc(last.primaryHighlight||last.highlights?.[0]||'⭐ Workout complete')}</div>`:'<p class="sub">Your first completed workout will begin your story.</p>'}<div class="previous"><strong>Backup status</strong><br>${backupCurrent?'✓ Latest workout backed up':'Latest workout has not been saved to iCloud yet'}<div class="sub" style="margin-top:5px">iPhone requires you to approve each file save. Choose Save to Files → iCloud Drive → Fearless Lift Log → Backups.</div></div><div class="actions"><button onclick="openHistory()">View History</button><button onclick="openExerciseIndex()">Exercise Index</button><button onclick="openImport()">Import Workouts</button><button onclick="downloadAll()">Back Up All Data to iCloud</button></div></section>`;
+ <section class="card pad"><strong>Your Strength Journey</strong><div class="journey-grid"><div class="journey-box"><strong>${db.history.length}</strong><span>workouts logged</span></div><div class="journey-box"><strong>${last?last.day:'—'}</strong><span>last workout</span></div></div>${last?`<div class="previous"><strong>Last highlight</strong><br>${esc(last.primaryHighlight||last.highlights?.[0]||'⭐ Workout complete')}</div>`:'<p class="sub">Your first completed workout will begin your story.</p>'}<div class="previous"><strong>Backup status</strong><br>${backupCurrent?'✓ Latest workout backed up':'Latest workout has not been saved to iCloud yet'}<div class="sub" style="margin-top:5px">iPhone requires you to approve each file save. Choose Save to Files → iCloud Drive → Fearless Lift Log → Backups.</div></div><div class="actions">${last?`<button onclick="replayLastFinish()">⭐ Replay Last Finish Screen</button>`:''}<button onclick="openHistory()">View History</button><button onclick="openExerciseIndex()">Exercise Index</button><button onclick="openImport()">Import Workouts</button><button onclick="downloadAll()">Back Up All Data to iCloud</button></div></section>`;
 }
 function renderWorkout(){
  const w=view.workout,p=programs[view.day],nums=stationNumbers();
@@ -536,7 +610,7 @@ function renderHistory(){
  return `<section class="card pad"><strong>Workout History</strong><div class="sub">Your strength story, workout by workout. Tap Edit to correct a completed workout.</div>${rows.length?rows.map(w=>`<div class="history-item"><div class="history-top"><div><div class="history-title">${w.day} · ${w.title}</div><div class="history-meta">${w.date} · ${totalVolume(w).toLocaleString()} lb volume</div></div><div class="actions" style="margin-top:0"><button class="small-btn" onclick="editWorkout('${w.id}')">Edit</button><button class="small-btn" onclick="downloadBackup(db.history.find(x=>x.id==='${w.id}'))">Backup</button></div></div>${(w.highlights||[]).slice(0,3).map(h=>`<div class="sub" style="margin-top:6px">${esc(h)}</div>`).join('')}${w.notes?`<div class="sub" style="margin-top:6px">${esc(w.notes)}</div>`:''}</div>`).join(''):'<p class="sub">No completed workouts yet.</p>'}</section>`;
 }
 function render(){
- migrateDatabaseToV10();migrateOldFriday();const app=document.getElementById('app'),footer=document.getElementById('footer'),back=document.getElementById('backBtn'),sub=document.getElementById('headerSub');
+ migrateDatabaseToV14();migrateOldFriday();const app=document.getElementById('app'),footer=document.getElementById('footer'),back=document.getElementById('backBtn'),sub=document.getElementById('headerSub');
  back.classList.toggle('hidden',view.screen==='home');back.onclick=goHome;
  if(view.screen==='home'){sub.textContent='Know your history. Challenge yourself appropriately.';app.innerHTML=renderHome();footer.classList.add('hidden')}
  if(view.screen==='workout'){sub.textContent=`${view.editingId?'Editing · ':''}${view.day} · ${programs[view.day].title} · ${programs[view.day].month||'August 2026'}`;app.innerHTML=renderWorkout();footer.classList.remove('hidden');footer.innerHTML=view.editingId?`<button onclick="cancelEdit()">Cancel</button><button class="primary" onclick="finishWorkout()">Save Changes</button>`:`<button onclick="resetWorkout()">Reset</button><button class="primary" ${allStationsDone(view.workout)?'':'disabled'} onclick="finishWorkout()">Finish Workout</button>`}
