@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#172033">
-<title>Fearless Lift Log v14.2</title>
+<title>Fearless Lift Log v14.4</title>
 <style>
 :root{
   --bg:#f3f4f6;--card:#fff;--ink:#172033;--muted:#667085;--line:#d0d5dd;
@@ -127,7 +127,7 @@ Object.assign(exercises,{
  cossack_squat:{name:'Cossack Squat',kind:'weight',label:'Weight / resistance',increment:2.5,multiplier:1,category:'Lower Body Push',equipment:'Varies',target:'5 each side'},
  half_kneeling_soleus_raise:{name:'Half-Kneeling Soleus Raise',kind:'weight',label:'Weight / resistance',increment:2.5,multiplier:1,category:'Lower Body',equipment:'Varies',target:'8 each side'},
  half_kneeling_rainbow_slam:{name:'Half-Kneeling Rainbow Slam',kind:'weight',label:'Ball weight',increment:2.5,multiplier:1,category:'Power',equipment:'Medicine ball',target:'5 each side'},
- standing_banded_cable_hip_flexion:{name:'Standing Banded/Cable Hip Flexion',kind:'weight',label:'Resistance / cable weight',increment:5,multiplier:1,category:'Hinge',equipment:'Band / cable',target:'6 each side'},
+ standing_banded_cable_hip_flexion:{name:'Standing Banded Hip Flexion',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Hinge',equipment:'Band',bandOptions:['Green','Blue','Purple'],target:'6 each side'},
  hip_thrust:{name:'Hip Thrust',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Hinge',equipment:'Barbell / dumbbell',target:'8–10'},
  copenhagen_dip:{name:'Copenhagen Dip',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Core',equipment:'Bodyweight',target:'6–10 each side'},
  scap_push_up:{name:'Scap Push-Up',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Upper Body Push',equipment:'Bodyweight',target:'10'},
@@ -150,6 +150,11 @@ Object.assign(exercises,{
  single_leg_plyo_step_up:{name:'Single-Leg Plyo Step-Up',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Power',equipment:'Box / bench',target:'4 each side'}
 });
 
+// Structured logging overrides for the current program.
+Object.assign(exercises,{
+ push_up:{...exercises.push_up,name:'Push Up',kind:'pushupVariation',label:'Variation and reps',increment:null,multiplier:0,category:'Upper Body Push',equipment:'Bodyweight'},
+ hammer_curl:{...exercises.hammer_curl,name:'Hammer Curl',kind:'weightHold',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Upper Body Pull',equipment:'Dumbbells'}
+});
 
 const programs={
  Monday:{title:'Upper Body Pull',month:'August 2026',stations:{1:{name:'Rack',duration:'9.5 min',exercises:['pull_up_assisted','meadow_row']},2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},3:{name:'Bench',duration:'9.5 min · 4 sets',exercises:['slider_reverse_lunge','shoulder_external_rotation']},4:{name:'Floor',duration:'9.5 min',exercises:['a_frame_russian_twist','overhead_tricep_extension','high_to_low_plank']}}},
@@ -221,22 +226,22 @@ function remapExerciseData(data,sourceLibrary={}){
 }
 
 function migrateDatabaseToV14(){
- if(db.version==='14.2')return;
+ if(db.version==='14.3')return;
  const unifyBackSquat=data=>{
   const mapped=remapExerciseData(data);
   if(mapped.back_squat&&!mapped.barbell_back_squat)mapped.barbell_back_squat=mapped.back_squat;
   delete mapped.back_squat;
   return mapped;
  };
- db.history=(db.history||[]).map(w=>({...w,version:'14.2',data:unifyBackSquat(w.data)}));
- db.drafts=Object.fromEntries(Object.entries(db.drafts||{}).map(([day,w])=>[day,{...w,version:'14.2',data:unifyBackSquat(w.data)}]));
+ db.history=(db.history||[]).map(w=>({...w,version:'14.4',data:unifyBackSquat(w.data)}));
+ db.drafts=Object.fromEntries(Object.entries(db.drafts||{}).map(([day,w])=>[day,{...w,version:'14.4',data:unifyBackSquat(w.data)}]));
  db.increments=Object.fromEntries(Object.entries(db.increments||{}).map(([id,v])=>[id==='back_squat'?'barbell_back_squat':canonicalExerciseId(id),Number(v)]).filter(([id,v])=>exerciseDefinition(id)&&Number.isFinite(v)&&v>0));
- db.exerciseLibrary=db.exerciseLibrary||{};db.version='14.2';saveDb();
+ db.exerciseLibrary=db.exerciseLibrary||{};db.version='14.3';saveDb();
 }
 
-function blankDb(){return {version:'14.2' ,program:'August 2026',history:[],drafts:{},increments:{},exerciseLibrary:{},lastBackupAt:null,lastBackupWorkoutId:null}}
+function blankDb(){return {version:'14.4' ,program:'August 2026',history:[],drafts:{},increments:{},exerciseLibrary:{},lastBackupAt:null,lastBackupWorkoutId:null}}
 function loadDb(){try{return {...blankDb(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch{return blankDb()}}
-function saveDb(){localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}
+function saveDb(){exerciseHistoryIndexCache=null;localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
 function today(){return new Date().toISOString().slice(0,10)}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
@@ -262,7 +267,7 @@ function migrateOldFriday(){
 }
 
 function newWorkout(day,date=today()){
- const w={id:uid(),version:'14.2',program:programs[day].month||'August 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
+ const w={id:uid(),version:'14.4',program:programs[day].month||'August 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
  Object.values(programs[day].stations).flatMap(st=>st.exercises).forEach(id=>w.data[id]=defaultData(exerciseDefinition(id)));
  return w;
 }
@@ -270,12 +275,14 @@ function defaultData(ex){
  if(ex.kind==='cardio') return {speed:'',distance:'',difficulty:'',notes:'',setup:''};
  if(ex.kind==='pullup') return [{bands:[],hookHeight:'',reps:'',difficulty:'',setup:''}];
  if(ex.kind==='plankSplit') return [{fullReps:'',kneeReps:'',difficulty:'',setup:''}];
+ if(ex.kind==='pushupVariation') return [{variation:'',reps:'',difficulty:'',setup:''}];
+ if(ex.kind==='weightHold') return [{weight:'',reps:'',holdSeconds:'',difficulty:'',setup:''}];
  if(ex.kind==='time') return [{seconds:'',difficulty:'',setup:''}];
  if(ex.kind==='reps') return [{reps:'',difficulty:'',setup:''}];
  if(ex.kind==='drop') return [{weight1:'',weight2:'',reps:'',difficulty:'',setup:''}];
  return [{weight:'',reps:'',difficulty:'',setup:''}];
 }
-function currentIncrement(id){return Number(db.increments[id]??exercises[id].increment??2.5)}
+function currentIncrement(id){return Number(db.increments[id]??exerciseDefinition(id).increment??2.5)}
 function setIncrement(id,v){db.increments[id]=Number(v);saveDb();render()}
 function lastWorkout(day){return [...db.history].filter(h=>h.day===day).sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date))[0]}
 const EXERCISE_HISTORY_GROUPS=[
@@ -285,6 +292,8 @@ const EXERCISE_HISTORY_GROUPS=[
  ['overhead_tricep_extension','tricep'],
  ['walking_lunges','lunges']
 ];
+const exerciseHistoryKeyCache=new Map();
+let exerciseHistoryIndexCache=null;
 function normalizeExerciseIdentity(value){
  return normalizeExerciseName(value)
   .replace(/\bbb\b/g,'barbell')
@@ -301,33 +310,39 @@ function normalizeExerciseIdentity(value){
   .replace(/\s+/g,' ')
   .trim();
 }
-function exerciseIdentityKeys(id){
- const keys=new Set();
- const definitions=allExerciseDefinitions();
- const add=value=>{const normalized=normalizeExerciseIdentity(value);if(normalized)keys.add(normalized)};
- const addDefinition=exerciseId=>{add(exerciseId);const def=definitions[exerciseId];if(def?.name)add(def.name)};
- const canonical=canonicalExerciseId(id);
- addDefinition(id);addDefinition(canonical);
- for(const [alias,target] of Object.entries(EXERCISE_ALIASES))if(canonicalExerciseId(target)===canonical)add(alias);
- for(const [alias,target] of Object.entries(HISTORICAL_NAME_ALIASES))if(canonicalExerciseId(target)===canonical)add(alias);
+function historicalExerciseKey(id){
+ const raw=String(id||'');
+ if(exerciseHistoryKeyCache.has(raw))return exerciseHistoryKeyCache.get(raw);
+ const canonical=canonicalExerciseId(raw);
+ let representative=canonical;
  for(const group of EXERCISE_HISTORY_GROUPS){
   const canonicalGroup=group.map(value=>canonicalExerciseId(value));
-  if(group.includes(id)||group.includes(canonical)||canonicalGroup.includes(canonical))for(const alias of group)addDefinition(alias);
+  if(group.includes(raw)||group.includes(canonical)||canonicalGroup.includes(canonical)){
+   representative=canonicalExerciseId(group[0]);
+   break;
+  }
  }
- return keys;
+ const def=allExerciseDefinitions()[representative]||allExerciseDefinitions()[canonical];
+ const key=normalizeExerciseIdentity(def?.name||representative||canonical||raw);
+ exerciseHistoryKeyCache.set(raw,key);
+ exerciseHistoryKeyCache.set(canonical,key);
+ return key;
 }
-function exerciseIdsMatch(targetId,candidateId){
- const targetKeys=exerciseIdentityKeys(targetId),candidateKeys=exerciseIdentityKeys(candidateId);
- return [...targetKeys].some(key=>candidateKeys.has(key));
+function buildExerciseHistoryIndex(){
+ if(exerciseHistoryIndexCache)return exerciseHistoryIndexCache;
+ const index=new Map();
+ const rows=[...db.history].sort((a,b)=>String(b.finishedAt||b.date||'').localeCompare(String(a.finishedAt||a.date||'')));
+ for(const workout of rows){
+  for(const exerciseId of Object.keys(workout.data||{})){
+   const key=historicalExerciseKey(exerciseId);
+   if(key&&!index.has(key))index.set(key,{workout,exerciseId});
+  }
+ }
+ exerciseHistoryIndexCache=index;
+ return index;
 }
 function mostRecentExerciseRecord(id){
- return [...db.history]
-  .sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date))
-  .map(h=>{
-   const exerciseId=Object.keys(h.data||{}).find(candidateId=>exerciseIdsMatch(id,candidateId));
-   return exerciseId?{workout:h,exerciseId}:null;
-  })
-  .find(Boolean)||null;
+ return buildExerciseHistoryIndex().get(historicalExerciseKey(id))||null;
 }
 function formatHistoryDate(value){
  if(!value)return 'unknown date';
@@ -337,12 +352,14 @@ function formatHistoryDate(value){
 function lastExerciseSummary(id){
  const record=mostRecentExerciseRecord(id); if(!record) return 'No prior workout recorded yet.';
  const h=record.workout,ex=exerciseDefinition(id),d=h.data[record.exerciseId],date=formatHistoryDate(h.date);
- if(ex.kind==='cardio') return `Last performed ${date}: speed ${d.speed||'—'}${d.distance?` · distance ${d.distance}`:''}${d.setup?` · ${d.setup}`:''}`;
+ if(ex.kind==='cardio') return `Last performed ${date}: speed ${d?.speed||'—'}${d?.distance?` · distance ${d.distance}`:''}${d?.setup?` · ${d.setup}`:''}`;
  if(!Array.isArray(d)) return `Last performed ${date}: prior data available.`;
  const parts=d.map(s=>{
   let main='';
   if(ex.kind==='pullup') main=`${Array.isArray(s.bands)&&s.bands.length?s.bands.join(' + '):'No band listed'} · hook ${s.hookHeight||'—'} · ${s.reps||'—'} reps`;
   else if(ex.kind==='plankSplit') main=`${s.fullReps||0} full + ${s.kneeReps||0} knee`;
+  else if(ex.kind==='pushupVariation') main=`${s.variation||'Variation not listed'} · ${s.reps||'—'} reps`;
+  else if(ex.kind==='weightHold') main=`${s.weight||'—'} lb × ${s.reps||'—'}${s.holdSeconds?` · ${s.holdSeconds} sec hold`:''}`;
   else if(ex.kind==='band') main=`${s.weight||s.band||'—'} band · ${s.reps||'—'} reps`;
   else if(ex.kind==='time') main=`${s.seconds||'—'} sec`;
   else if(ex.kind==='reps') main=`${s.reps||'—'} reps`;
@@ -354,7 +371,16 @@ function lastExerciseSummary(id){
 }
 
 function goHome(){saveDraft();releaseWakeLock();view={screen:'home',day:null,workout:null,summary:null,editingId:null};render()}
-function openDay(day){saveDraft();let w=db.drafts[day];if(!w||w.date!==today())w=newWorkout(day);db.drafts[day]=w;saveDb();view={screen:'workout',day,workout:w,summary:null,editingId:null};requestWakeLock();render()}
+function repairWorkoutForProgram(workout,day){
+ const w=workout||newWorkout(day);
+ w.day=day;w.title=programs[day].title;w.program=programs[day].month||w.program||'August 2026';
+ w.data=w.data||{};w.completed=w.completed||{};w.stationOrder=Array.isArray(w.stationOrder)?w.stationOrder:[];
+ for(const id of Object.values(programs[day].stations).flatMap(st=>st.exercises)){
+  if(w.data[id]===undefined)w.data[id]=defaultData(exerciseDefinition(id));
+ }
+ return w;
+}
+function openDay(day){try{saveDraft();let w=db.drafts[day];if(!w||w.date!==today())w=newWorkout(day);w=repairWorkoutForProgram(w,day);db.drafts[day]=w;saveDb();view={screen:'workout',day,workout:w,summary:null,editingId:null};requestWakeLock();render()}catch(err){console.error('Could not open workout:',err);alert('The workout could not open. Please close and reopen the app. Your saved history is safe.')}}
 function openHistory(){saveDraft();releaseWakeLock();view={screen:'history',day:null,workout:null,summary:null,editingId:null};render()}
 function replayLastFinish(){
  const last=[...db.history].sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date))[0];
@@ -365,7 +391,7 @@ function replayLastFinish(){
  view={screen:'summary',day:w.day,workout:w,summary,editingId:null};
  render();
 }
-function editWorkout(id){const original=db.history.find(w=>w.id===id);if(!original)return;view={screen:'workout',day:original.day,workout:JSON.parse(JSON.stringify(original)),summary:null,editingId:id};requestWakeLock();render()}
+function editWorkout(id){const original=db.history.find(w=>w.id===id);if(!original)return;const workout=repairWorkoutForProgram(JSON.parse(JSON.stringify(original)),original.day);view={screen:'workout',day:original.day,workout,summary:null,editingId:id};requestWakeLock();render()}
 function cancelEdit(){releaseWakeLock();openHistory()}
 function saveDraft(){if(view.workout&&!view.workout.finishedAt){db.drafts[view.day]=view.workout;saveDb()}}
 function stationNumbers(day=view.day){return Object.keys(programs[day].stations).map(Number).sort((a,b)=>a-b)}
@@ -392,7 +418,7 @@ function toggleBand(id,index,band,checked){const set=view.workout.data[id][index
 function addSet(id,repeat){const ex=exerciseDefinition(id),arr=view.workout.data[id];const base=arr[arr.length-1]||defaultData(ex)[0];arr.push(repeat?{...base}:defaultData(ex)[0]);saveDraft();render()}
 function deleteSet(id,index){const ex=exerciseDefinition(id),arr=view.workout.data[id];if(arr.length===1)arr[0]=defaultData(ex)[0];else arr.splice(index,1);saveDraft();render()}
 function step(id,index,field,direction){
- const arr=view.workout.data[id],inc=['reps','seconds','fullReps','kneeReps'].includes(field)?1:currentIncrement(id);let n=parseFloat(arr[index][field]||0);n=Math.max(0,Math.round((n+direction*inc)*100)/100);arr[index][field]=String(n);saveDraft();render();
+ const arr=view.workout.data[id],inc=['reps','seconds','holdSeconds','fullReps','kneeReps'].includes(field)?1:currentIncrement(id);let n=parseFloat(arr[index][field]||0);n=Math.max(0,Math.round((n+direction*inc)*100)/100);arr[index][field]=String(n);saveDraft();render();
 }
 function resetWorkout(){if(confirm(`Clear today's ${view.day} workout and start over?`)){db.drafts[view.day]=newWorkout(view.day);view.workout=db.drafts[view.day];saveDb();render()}}
 function allStationsDone(w){return stationNumbers(w.day).every(n=>w.completed[n])}
@@ -558,6 +584,8 @@ function setHtml(id,ex,s,i){
  let fields='';
  if(ex.kind==='pullup') fields=`<div class="field" style="grid-column:1/-1"><label>Assistance bands (choose all used)</label><div class="band-grid">${BANDS.map(b=>`<label class="band-choice"><input type="checkbox" ${Array.isArray(s.bands)&&s.bands.includes(b)?'checked':''} onchange="toggleBand('${id}',${i},'${b}',this.checked)"><span>${b}</span></label>`).join('')}</div></div><div class="field"><label>Hook height (1–25)</label><input type="number" inputmode="numeric" min="1" max="25" value="${esc(s.hookHeight)}" onchange="updateValue('${id}',${i},'hookHeight',this.value)"></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='plankSplit') fields=`<div class="field"><label>Full-plank reps</label>${stepper(id,i,'fullReps',s.fullReps,'0')}</div><div class="field"><label>Knee-plank reps</label>${stepper(id,i,'kneeReps',s.kneeReps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else if(ex.kind==='pushupVariation') fields=`<div class="field"><label>Push-up variation</label><select onchange="updateValue('${id}',${i},'variation',this.value)"><option value="">Choose</option>${['Toe Push-Up','Knee Push-Up','Hybrid (toes down / knees up)'].map(v=>`<option value="${v}" ${s.variation===v?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else if(ex.kind==='weightHold') fields=`<div class="field"><label>${ex.label}</label>${stepper(id,i,'weight',s.weight,'lb')}</div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Hold time (seconds)</label>${stepper(id,i,'holdSeconds',s.holdSeconds,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='band') fields=`<div class="field"><label>Band color</label><select onchange="updateValue('${id}',${i},'weight',this.value)"><option value="">Choose</option>${(ex.bandOptions||BANDS).map(b=>`<option ${String(s.weight||'').toLowerCase()===b.toLowerCase()?'selected':''}>${b}</option>`).join('')}</select></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='time') fields=`<div class="field"><label>Seconds</label>${stepper(id,i,'seconds',s.seconds,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='reps') fields=`<div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
