@@ -127,6 +127,7 @@ When a new version is published:
 | **v12** | Changed color rules that exercises beside one another will have different pastel backgrounds|
 | **v13** | Imported new months program |
 | **v14** | Corrected history look back, restore last workout button and added bands to MonsterWalks |
+| **v15** | Increase font size of last perform, add band colors to pull apart, changed last perform to set 3,2,1 order |
 
 ---
 
