@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#172033">
-<title>Fearless Lift Log v14.4</title>
+<title>Fearless Lift Log v15</title>
 <style>
 :root{
   --bg:#f3f4f6;--card:#fff;--ink:#172033;--muted:#667085;--line:#d0d5dd;
@@ -29,7 +29,7 @@ button:disabled{opacity:.45}.small-btn{min-height:38px;padding:8px 10px;font-siz
 .station-head{padding:14px;display:flex;align-items:center;gap:10px;cursor:pointer}.station-title{font-weight:850;font-size:18px;flex:1}.station-meta{font-size:12px;color:var(--muted);margin-top:2px}
 .badge{font-size:12px;font-weight:750;border-radius:999px;padding:5px 9px;background:#e5e7eb}.badge.done{background:var(--goodbg);color:var(--good)}
 .station-body{padding:0 12px 14px}.exercise{border:1px solid rgba(23,32,51,.09);border-radius:14px;padding:14px 12px 10px;margin:10px 0;background:var(--exercise-bg,#f8fafc);box-shadow:0 1px 3px rgba(16,24,40,.04)}.exercise h3{font-size:16px;margin:0 0 2px}.hint{font-size:12px;color:var(--muted);margin-bottom:8px}
-.previous{font-size:12px;background:var(--soft);border-radius:10px;padding:8px 10px;margin:7px 0 10px;line-height:1.4}
+.previous{font-size:13px;background:var(--soft);border-radius:10px;padding:8px 10px;margin:7px 0 10px;line-height:1.4}
 .set-card{background:#fafafa;border:1px solid #e4e7ec;border-radius:12px;padding:10px;margin:8px 0}.set-title{font-weight:850;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
 .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field-grid.three{grid-template-columns:1fr 1fr 1fr}.field{min-width:0}label{display:block;font-size:11px;color:var(--muted);margin:0 0 4px}
 input,select,textarea{width:100%;border:1px solid #c7cbd1;border-radius:10px;padding:9px;background:#fff;font:inherit;font-size:16px;min-height:44px}input[type=number]{text-align:center}textarea{min-height:80px;text-align:left}
@@ -113,7 +113,7 @@ Object.assign(exercises,HISTORICAL_EXERCISE_SEED);
 
 Object.assign(exercises,{
  barbell_back_squat:{name:'Back Squat',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Lower Body Push',equipment:'Barbell',target:'6–8'},
- horizontal_pull_apart:{name:'Horizontal Pull Apart',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Upper Body Pull',equipment:'Band',target:'10'},
+ horizontal_pull_apart:{name:'Horizontal Pull Apart',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Upper Body Pull',equipment:'Band',target:'10',bandOptions:['Green','Blue','Purple']},
  pull_up_assisted:{name:'Pull Up',kind:'pullup',label:'Assistance setup and reps',increment:null,multiplier:0,category:'Upper Body Pull',equipment:'Bands',target:'5+',cue:'Substitute seated lat pulldown with handles if needed.'},
  meadow_row:{name:'Meadow Row',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Upper Body Pull',equipment:'Landmine',target:'8 each side'},
  slider_reverse_lunge:{name:'Slider Reverse Lunge',kind:'weight',label:'Weight / resistance',increment:2.5,multiplier:1,category:'Lower Body Push',equipment:'Slider',target:'6–8 each side',cue:'Complete one side at a time.'},
@@ -226,20 +226,20 @@ function remapExerciseData(data,sourceLibrary={}){
 }
 
 function migrateDatabaseToV14(){
- if(db.version==='14.3')return;
+ if(db.version==='15')return;
  const unifyBackSquat=data=>{
   const mapped=remapExerciseData(data);
   if(mapped.back_squat&&!mapped.barbell_back_squat)mapped.barbell_back_squat=mapped.back_squat;
   delete mapped.back_squat;
   return mapped;
  };
- db.history=(db.history||[]).map(w=>({...w,version:'14.4',data:unifyBackSquat(w.data)}));
- db.drafts=Object.fromEntries(Object.entries(db.drafts||{}).map(([day,w])=>[day,{...w,version:'14.4',data:unifyBackSquat(w.data)}]));
+ db.history=(db.history||[]).map(w=>({...w,version:'15',data:unifyBackSquat(w.data)}));
+ db.drafts=Object.fromEntries(Object.entries(db.drafts||{}).map(([day,w])=>[day,{...w,version:'15',data:unifyBackSquat(w.data)}]));
  db.increments=Object.fromEntries(Object.entries(db.increments||{}).map(([id,v])=>[id==='back_squat'?'barbell_back_squat':canonicalExerciseId(id),Number(v)]).filter(([id,v])=>exerciseDefinition(id)&&Number.isFinite(v)&&v>0));
- db.exerciseLibrary=db.exerciseLibrary||{};db.version='14.3';saveDb();
+ db.exerciseLibrary=db.exerciseLibrary||{};db.version='15';saveDb();
 }
 
-function blankDb(){return {version:'14.4' ,program:'August 2026',history:[],drafts:{},increments:{},exerciseLibrary:{},lastBackupAt:null,lastBackupWorkoutId:null}}
+function blankDb(){return {version:'15' ,program:'August 2026',history:[],drafts:{},increments:{},exerciseLibrary:{},lastBackupAt:null,lastBackupWorkoutId:null}}
 function loadDb(){try{return {...blankDb(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch{return blankDb()}}
 function saveDb(){exerciseHistoryIndexCache=null;localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
@@ -267,7 +267,7 @@ function migrateOldFriday(){
 }
 
 function newWorkout(day,date=today()){
- const w={id:uid(),version:'14.4',program:programs[day].month||'August 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
+ const w={id:uid(),version:'15',program:programs[day].month||'August 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
  Object.values(programs[day].stations).flatMap(st=>st.exercises).forEach(id=>w.data[id]=defaultData(exerciseDefinition(id)));
  return w;
 }
@@ -354,7 +354,7 @@ function lastExerciseSummary(id){
  const h=record.workout,ex=exerciseDefinition(id),d=h.data[record.exerciseId],date=formatHistoryDate(h.date);
  if(ex.kind==='cardio') return `Last performed ${date}: speed ${d?.speed||'—'}${d?.distance?` · distance ${d.distance}`:''}${d?.setup?` · ${d.setup}`:''}`;
  if(!Array.isArray(d)) return `Last performed ${date}: prior data available.`;
- const parts=d.map(s=>{
+ const parts=[...d].reverse().map(s=>{
   let main='';
   if(ex.kind==='pullup') main=`${Array.isArray(s.bands)&&s.bands.length?s.bands.join(' + '):'No band listed'} · hook ${s.hookHeight||'—'} · ${s.reps||'—'} reps`;
   else if(ex.kind==='plankSplit') main=`${s.fullReps||0} full + ${s.kneeReps||0} knee`;
@@ -464,7 +464,7 @@ function finishWorkout(){
  const w=view.workout,editing=!!view.editingId;if(!editing&&!allStationsDone(w)){alert('Mark all stations complete before finishing the workout.');return}
  w.notes=document.getElementById('workoutNotes')?.value||w.notes||'';
  if(!editing)w.finishedAt=new Date().toISOString();
- w.version='14.1';w.highlights=workoutHighlights(w);w.primaryHighlight=w.highlights[0];
+ w.version='15';w.highlights=workoutHighlights(w);w.primaryHighlight=w.highlights[0];
  w.finishSummary={volume:totalVolume(w),sets:countSets(w),exercises:countExercises(w),duration:durationMinutes(w),highlights:[...w.highlights],edited:editing};
  if(editing){const index=db.history.findIndex(x=>x.id===view.editingId);if(index<0){alert('This workout could not be found.');return}db.history[index]=JSON.parse(JSON.stringify(w));}
  else{db.history.push(JSON.parse(JSON.stringify(w)));delete db.drafts[view.day];}
@@ -497,12 +497,12 @@ async function saveFileToICloud(file,workoutId=null){
 }
 async function downloadBackup(workout=view.workout){
  if(!workout)return;
- const payload={app:'Fearless Lift Log',version:'14.1',exportedAt:new Date().toISOString(),workout};
+ const payload={app:'Fearless Lift Log',version:'15',exportedAt:new Date().toISOString(),workout};
  const file=makeJsonFile(payload,backupFilename(workout));
  await saveFileToICloud(file,workout.id);
 }
 async function downloadAll(){
- const payload={app:'Fearless Lift Log',version:'14.1',exportedAt:new Date().toISOString(),exerciseLibrary:allExerciseDefinitions(),...db};
+ const payload={app:'Fearless Lift Log',version:'15',exportedAt:new Date().toISOString(),exerciseLibrary:allExerciseDefinitions(),...db};
  const file=makeJsonFile(payload,`fearless-lift-log-all-data-${today()}.json`);
  await saveFileToICloud(file,db.history.at(-1)?.id||null);
 }
