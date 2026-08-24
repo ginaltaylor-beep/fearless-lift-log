@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#172033">
-<title>Fearless Lift Log v15.1</title>
+<title>Fearless Lift Log v15.2</title>
 <style>
 :root{
   --bg:#f3f4f6;--card:#fff;--ink:#172033;--muted:#667085;--line:#d0d5dd;
@@ -19,7 +19,12 @@ h1{font-size:21px;margin:0;flex:1}.sub{font-size:13px;color:var(--muted);margin-
 main{max-width:820px;margin:auto;padding:14px 12px calc(96px + env(safe-area-inset-bottom))}
 .card{background:var(--card);border:1px solid var(--line);border-radius:16px;margin:0 0 12px;overflow:hidden;box-shadow:var(--shadow)}
 .pad{padding:16px}.hero{padding:18px}.hero h2{margin:0 0 6px;font-size:23px}.hero p{margin:0;color:var(--muted);line-height:1.45}
-.day-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}.day-grid button:last-child{grid-column:1/-1}
+.day-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.difficulty-guide{margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.difficulty-guide strong{display:block;font-size:13px;margin-bottom:6px}
+.difficulty-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:13px}
+.difficulty-row span{text-align:center;white-space:nowrap}
+.difficulty-note{font-size:11px;color:var(--muted);text-align:center;margin-top:6px}
 button{border:0;border-radius:12px;padding:12px 14px;font:inherit;font-weight:750;background:#e4e7ec;color:var(--ink);min-height:46px}
 button.primary{background:var(--accent);color:#fff}button.secondary{background:#fff;border:1px solid var(--line)}button.good{background:var(--good);color:#fff}
 button:disabled{opacity:.45}.small-btn{min-height:38px;padding:8px 10px;font-size:14px}
@@ -637,7 +642,7 @@ function renderExerciseIndex(){
 function renderHome(){
  const weekday=dayForDate(),days=Object.keys(programs),rows=[...db.history].sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date)),last=rows[0];
  const backupCurrent=!!last&&db.lastBackupWorkoutId===last.id;
- return `<section class="card hero"><h2>Ready to lift? 🏋️</h2><p>Choose today's workout. Your entries save automatically on this device.</p><div class="day-grid">${days.map(d=>`<button class="${d===weekday?'primary':''}" onclick="openDay('${d}')">${d}<span class="sub" style="display:block;color:${d===weekday?'#d0d5dd':'var(--muted)'}">${programs[d].title}</span></button>`).join('')}</div></section>
+ return `<section class="card hero"><h2>Ready to lift? 🏋️</h2><p>Choose today's workout. Your entries save automatically on this device.</p><div class="day-grid">${days.map(d=>`<button class="${d===weekday?'primary':''}" onclick="openDay('${d}')">${d}<span class="sub" style="display:block;color:${d===weekday?'#d0d5dd':'var(--muted)'}">${programs[d].title}</span></button>`).join('')}</div><div class="difficulty-guide"><strong>Difficulty Guide</strong><div class="difficulty-row"><span><b>E:</b> ~3+ reps left</span><span><b>M:</b> ~2 reps left</span><span><b>H:</b> ~0–1 reps left</span></div><div class="difficulty-note">Rate by reps left — not by how hard it felt.</div></div></section>
  <section class="card pad"><strong>Your Strength Journey</strong><div class="journey-grid"><div class="journey-box"><strong>${db.history.length}</strong><span>workouts logged</span></div><div class="journey-box"><strong>${last?last.day:'—'}</strong><span>last workout</span></div></div>${last?`<div class="previous"><strong>Last highlight</strong><br>${esc(last.primaryHighlight||last.highlights?.[0]||'⭐ Workout complete')}</div>`:'<p class="sub">Your first completed workout will begin your story.</p>'}<div class="previous"><strong>Backup status</strong><br>${backupCurrent?'✓ Latest workout backed up':'Latest workout has not been saved to iCloud yet'}<div class="sub" style="margin-top:5px">iPhone requires you to approve each file save. Choose Save to Files → iCloud Drive → Fearless Lift Log → Backups.</div></div><div class="actions">${last?`<button onclick="replayLastFinish()">⭐ Replay Last Finish Screen</button>`:''}<button onclick="openHistory()">View History</button><button onclick="openExerciseIndex()">Exercise Index</button><button onclick="openImport()">Import Workouts</button><button onclick="downloadAll()">Back Up All Data to iCloud</button></div></section>`;
 }
 function renderWorkout(){
