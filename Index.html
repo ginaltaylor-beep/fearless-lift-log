@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#172033">
+<title>Fearless Lift Log v16.2</title>
+<style>
+:root{
+  --bg:#f3f4f6;--card:#fff;--ink:#172033;--muted:#667085;--line:#d0d5dd;
+  --accent:#172033;--accent2:#344054;--soft:#eef2ff;--good:#166534;--goodbg:#dcfce7;
+  --warn:#92400e;--warnbg:#fef3c7;--danger:#991b1b;--shadow:0 2px 8px rgba(16,24,40,.06)
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+header{position:sticky;top:0;z-index:20;background:rgba(243,244,246,.96);backdrop-filter:blur(12px);padding:calc(12px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid var(--line)}
+.header-row{max-width:820px;margin:auto;display:flex;align-items:center;gap:10px}
+h1{font-size:21px;margin:0;flex:1}.sub{font-size:13px;color:var(--muted);margin-top:3px}
+main{max-width:820px;margin:auto;padding:14px 12px calc(96px + env(safe-area-inset-bottom))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;margin:0 0 12px;overflow:hidden;box-shadow:var(--shadow)}
+.pad{padding:16px}.hero{padding:18px}.hero h2{margin:0 0 6px;font-size:23px}.hero p{margin:0;color:var(--muted);line-height:1.45}
+.day-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}
+.difficulty-guide{margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.difficulty-guide strong{display:block;font-size:13px;margin-bottom:6px}
+.difficulty-row{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;font-size:13px}
+.difficulty-row span{text-align:center;white-space:nowrap}
+.difficulty-note{font-size:11px;color:var(--muted);text-align:center;margin-top:6px}
+button{border:0;border-radius:12px;padding:12px 14px;font:inherit;font-weight:750;background:#e4e7ec;color:var(--ink);min-height:46px}
+button.primary{background:var(--accent);color:#fff}button.secondary{background:#fff;border:1px solid var(--line)}button.good{background:var(--good);color:#fff}
+button:disabled{opacity:.45}.small-btn{min-height:38px;padding:8px 10px;font-size:14px}
+.nav-btn{background:transparent;padding:6px 8px;min-height:36px;font-size:22px}
+.start-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}.start-grid button{padding:15px 6px}
+.order{font-weight:800;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin:0 0 12px}
+.station-head{padding:14px;display:flex;align-items:center;gap:10px;cursor:pointer}.station-title{font-weight:850;font-size:18px;flex:1}.station-meta{font-size:12px;color:var(--muted);margin-top:2px}
+.badge{font-size:12px;font-weight:750;border-radius:999px;padding:5px 9px;background:#e5e7eb}.badge.done{background:var(--goodbg);color:var(--good)}
+.station-body{padding:0 12px 14px}.exercise{border:1px solid rgba(23,32,51,.09);border-radius:14px;padding:14px 12px 10px;margin:10px 0;background:var(--exercise-bg,#f8fafc);box-shadow:0 1px 3px rgba(16,24,40,.04)}.exercise h3{font-size:16px;margin:0 0 2px}.hint{font-size:12px;color:var(--muted);margin-bottom:8px}
+.previous{font-size:13px;background:var(--soft);border-radius:10px;padding:8px 10px;margin:7px 0 10px;line-height:1.4}
+.set-card{background:#fafafa;border:1px solid #e4e7ec;border-radius:12px;padding:10px;margin:8px 0}.set-title{font-weight:850;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field-grid.three{grid-template-columns:1fr 1fr 1fr}.field{min-width:0}label{display:block;font-size:11px;color:var(--muted);margin:0 0 4px}
+input,select,textarea{width:100%;border:1px solid #c7cbd1;border-radius:10px;padding:9px;background:#fff;font:inherit;font-size:16px;min-height:44px}input[type=number]{text-align:center}textarea{min-height:80px;text-align:left}
+.stepper{display:grid;grid-template-columns:44px 1fr 44px;gap:5px}.stepper button{padding:0;min-height:44px;font-size:22px;background:#e4e7ec}.stepper input{min-width:0}
+.increment-row{display:flex;align-items:center;gap:8px;margin:8px 0 0;font-size:12px;color:var(--muted)}.increment-row select{width:auto;min-height:36px;padding:6px 26px 6px 8px;font-size:14px}
+.actions{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}.actions button{flex:1}.delete{background:#fee2e2;color:var(--danger);min-height:36px;padding:6px 10px}
+
+.cue{font-size:12px;line-height:1.45;background:rgba(255,255,255,.62);border-left:4px solid rgba(23,32,51,.22);border-radius:8px;padding:8px 10px;margin:7px 0 9px}
+.setup-field{margin-top:9px}.setup-field textarea{min-height:58px;font-size:15px}
+.technique-focus{grid-column:1/-1;display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.68);border:1px solid #d0d5dd;border-radius:10px;padding:9px 10px;margin-top:2px;font-size:14px;font-weight:700}.technique-focus input{width:21px;min-height:21px;margin:0;flex:0 0 auto}.technique-focus .tf-note{font-size:11px;font-weight:500;color:var(--muted);margin-left:auto}
+.band-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:4px}.band-choice{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.72);border:1px solid #d0d5dd;border-radius:9px;padding:8px;font-size:14px}.band-choice input{width:20px;min-height:20px;margin:0}
+.station-location{font-size:13px;font-weight:800;color:var(--accent2);margin-top:2px}.program-badge{display:inline-block;margin-left:6px;font-size:11px;border-radius:999px;padding:3px 7px;background:#eef2ff;color:#344054;vertical-align:middle}
+
+.complete{width:100%;margin-top:14px;background:var(--goodbg);color:var(--good);min-height:49px}.complete.done{background:var(--good);color:#fff}
+.footer{position:fixed;left:0;right:0;bottom:0;z-index:15;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-top:1px solid var(--line);padding:8px 12px calc(8px + env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:center}.footer button{max-width:390px;flex:1}
+.summary{text-align:center;padding:22px 18px}.congrats-volume{background:var(--goodbg);color:var(--good);border-radius:14px;padding:15px 12px;margin:16px 0 4px;font-size:19px;font-weight:850;line-height:1.35}.highlights{text-align:left;background:#fffaf0;border:1px solid #f3dfad;border-radius:14px;padding:13px 14px;margin:16px 0}.highlight{font-weight:760;line-height:1.4;padding:5px 0}.remember{background:var(--accent);color:#fff;border-radius:14px;padding:14px;margin:16px 0;text-align:left}.remember .sub{color:#d0d5dd}.journey-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.journey-box{background:#f8fafc;border-radius:12px;padding:12px}.journey-box strong{display:block;font-size:19px}.journey-box span{font-size:11px;color:var(--muted)}.summary h2{font-size:25px;margin:0 0 6px}.big-number{font-size:42px;font-weight:900;letter-spacing:-1px;margin:14px 0 2px}.summary-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:18px 0}.stat{background:#f8fafc;border-radius:12px;padding:11px 6px}.stat strong{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}
+.history-item{padding:13px 0;border-bottom:1px solid #e5e7eb}.history-item:last-child{border-bottom:0}.history-top{display:flex;gap:10px;align-items:flex-start}.history-title{font-weight:800;flex:1}.history-meta{font-size:12px;color:var(--muted);margin-top:3px}
+.notice{background:var(--warnbg);color:var(--warn);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.4;margin-top:12px}.awake-note{background:var(--goodbg);color:var(--good);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.4;margin:0 0 12px}.hidden{display:none!important}
+@media(max-width:520px){.field-grid.three{grid-template-columns:1fr 1fr}.summary-stats{grid-template-columns:1fr 1fr 1fr}.day-grid{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<header><div class="header-row"><button id="backBtn" class="nav-btn hidden" aria-label="Back">‹</button><div><h1>Fearless Lift Log</h1><div id="headerSub" class="sub">Know your history. Challenge yourself appropriately.</div></div></div></header>
+<main id="app"></main>
+<div id="footer" class="footer hidden"></div>
+<input id="importInput" class="hidden" type="file" accept="application/json,.json" multiple>
+<script src="program.js"></script>
+<script>
+const STORAGE_KEY='fearlessLiftLog_v02';
+const OLD_KEY='fearlessLiftLogFriday_v01';
+const INCREMENTS=[1.25,2.5,5,10,20,25];
+const BANDS=['Red','Orange','Yellow','Green','Blue','Purple','Black'];
+const MONSTER_WALK_BANDS=['Green','Blue','Yellow','Red','Black'];
+const DIFFICULTIES=[['','Effort'],['E','Easy'],['M','Medium'],['H','Hard']];
+
+const EXERCISE_ALIASES={
+ bandedThoracic:'banded_wall_thoracic_rotation',bbOverheadPress:'barbell_overhead_press',altDbBench:'alternating_dumbbell_bench_press',bicepCurls:'dumbbell_bicep_curls',frontRackStepOut:'front_rack_step_out_squats',battleRopes:'alternating_battle_ropes',treadmill:'treadmill',
+ closeGripLat:'close_grip_lat_pulldown',cableDeadbug:'cable_overhead_deadbug',slRdl:'single_leg_romanian_deadlift',reverseFly:'reverse_fly',dropSetRow:'drop_set_three_point_row',overheadSlam:'overhead_slam',
+ backSquat:'barbell_back_squat',seatedVerticalJump:'seated_vertical_jump',seatedAltShoulder:'seated_alternating_shoulder_press',lateralRaise:'lateral_raise',forwardStepUp:'forward_step_up',calfRaise:'front_foot_elevated_calf_raise',pogoJump:'front_foot_elevated_pogo_jump',
+ bbRdl:'barbell_romanian_deadlift',seatedCableRow:'seated_single_arm_cable_row',slHipThrust:'single_leg_hip_thrust',kbSwing:'kettlebell_swing',strictCurl:'strict_bicep_curl',skullCrushers:'skull_crushers',plankRockets:'plank_rockets',
+ bench:'barbell_bench_press',bandrow:'bent_over_banded_row',lunges:'walking_lunges',tricep:'overhead_tricep_extension',frontraise:'alternating_supinated_cross_body_dumbbell_front_raise',dbsitup:'dumbbell_sit_up'
+};
+
+const exercises={
+ banded_wall_thoracic_rotation:{name:'Banded Wall Thoracic Rotation',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Mobility',equipment:'Resistance band'},
+ barbell_overhead_press:{name:'BB Overhead Press',kind:'weight',label:'Total weight',increment:2.5,multiplier:1,category:'Upper Body Push',equipment:'Barbell'},
+ alternating_dumbbell_bench_press:{name:'Alternating DB Bench Press',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells'},
+ dumbbell_bicep_curls:{name:'Bicep Curls',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Pull',equipment:'Dumbbells'},
+ front_rack_step_out_squats:{name:'Front Rack Step-Out Squats',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Lower Body Push',equipment:'Barbell'},
+ alternating_battle_ropes:{name:'Alternating Battle Ropes',kind:'time',label:'Seconds',increment:null,multiplier:0,category:'Conditioning',equipment:'Battle ropes'},
+ treadmill:{name:'Treadmill',kind:'cardio',label:'Speed',increment:null,multiplier:0,category:'Conditioning',equipment:'Treadmill'},
+ close_grip_lat_pulldown:{name:'Close-Grip Lat Pulldown',kind:'weight',label:'Cable weight',increment:5,multiplier:1,category:'Upper Body Pull',equipment:'Cable'},
+ cable_overhead_deadbug:{name:'Cable Overhead Deadbug',kind:'weight',label:'Cable weight',increment:5,multiplier:1,category:'Core',equipment:'Cable'},
+ single_leg_romanian_deadlift:{name:'SL RDL',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Hinge',equipment:'Dumbbells',note:'Single-Leg Romanian Deadlift.'},
+ reverse_fly:{name:'Reverse Fly',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Pull',equipment:'Dumbbells'},
+ drop_set_three_point_row:{name:'Drop Set 3-Point Row',kind:'drop',label:'Cable weight',increment:5,multiplier:1,category:'Upper Body Pull',equipment:'Cable'},
+ overhead_slam:{name:'Overhead Slam',kind:'weight',label:'Ball weight',increment:5,multiplier:1,category:'Power',equipment:'Medicine ball'},
+ barbell_back_squat:{name:'Back Squat',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Lower Body Push',equipment:'Barbell',target:'6–8'},
+ seated_vertical_jump:{name:'Seated Vertical Jump',kind:'weight',label:'External weight',increment:5,multiplier:1,category:'Power',equipment:'Bodyweight / external load'},
+ seated_alternating_shoulder_press:{name:'Seated Alternating Shoulder Press',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells'},
+ lateral_raise:{name:'Lateral Raise',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells'},
+ forward_step_up:{name:'Forward Step-Up',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Lower Body Push',equipment:'Dumbbells / box'},
+ front_foot_elevated_calf_raise:{name:'Front-Foot-Elevated Calf Raise',kind:'weight',label:'External weight',increment:2.5,multiplier:1,category:'Lower Body',equipment:'External load'},
+ front_foot_elevated_pogo_jump:{name:'Front-Foot-Elevated Pogo Jump',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Power',equipment:'Bodyweight'},
+ barbell_romanian_deadlift:{name:'BB RDL',kind:'weight',label:'Total weight',increment:10,multiplier:1,category:'Hinge',equipment:'Barbell'},
+ seated_single_arm_cable_row:{name:'Seated SA Cable Row',kind:'weight',label:'Cable weight',increment:5,multiplier:1,category:'Upper Body Pull',equipment:'Cable'},
+ single_leg_hip_thrust:{name:'SL Hip Thrust',kind:'weight',label:'External weight',increment:2.5,multiplier:1,category:'Hinge',equipment:'External load'},
+ kettlebell_swing:{name:'KB Swing',kind:'weight',label:'Kettlebell weight',increment:5,multiplier:1,category:'Hinge',equipment:'Kettlebell'},
+ strict_bicep_curl:{name:'Strict Bicep Curl',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Pull',equipment:'Dumbbells'},
+ skull_crushers:{name:'Skull Crushers',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells'},
+ plank_rockets:{name:'Plank Rockets',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Core',equipment:'Bodyweight'},
+ barbell_bench_press:{name:'Bench Press',kind:'weight',label:'Total weight',increment:2.5,multiplier:1,category:'Upper Body Push',equipment:'Barbell'},
+ bent_over_banded_row:{name:'Bent Over Banded Row',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Upper Body Pull',equipment:'Resistance band'},
+ walking_lunges:{name:'Walking Lunges',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Lower Body',equipment:'Dumbbells',note:'Enter total reps across both legs (8 right + 8 left = 16).'},
+ overhead_tricep_extension:{name:'Overhead Tricep Extensions',kind:'weight',label:'One dumbbell total',increment:2.5,multiplier:1,category:'Upper Body Push',equipment:'Dumbbell'},
+ alternating_supinated_cross_body_dumbbell_front_raise:{name:'Alternating Supinated Cross-Body DB Front Raise',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells'},
+ dumbbell_sit_up:{name:'DB Sit-Up',kind:'weight',label:'One dumbbell total',increment:2.5,multiplier:1,category:'Core',equipment:'Dumbbell'}
+};
+
+const HISTORICAL_EXERCISE_SEED={"1_2_turkish_get_up":{"name":"1/2 Turkish Get Up","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Power","equipment":"External load"},"b_stance_landmine_rdl":{"name":"B-Stance Landmine RDL","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Hinge","equipment":"Barbell / specialty bar"},"barbell_back_squat":{"name":"Barbell Back Squat","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Lower Body Push","equipment":"Barbell / specialty bar"},"barbell_back_squat_pause":{"name":"Barbell Back Squat (Pause)","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Lower Body Push","equipment":"Barbell / specialty bar"},"barbell_back_squat_tempo_3_2_1_lower":{"name":"Barbell Back Squat (tempo: 3-2-1 lower)","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Lower Body Push","equipment":"Barbell / specialty bar"},"barbell_bench_press":{"name":"Barbell Bench Press","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Upper Body Push","equipment":"Barbell / specialty bar"},"barbell_bent_over_row":{"name":"Barbell Bent Over Row","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Upper Body Pull","equipment":"Barbell / specialty bar"},"barbell_box_squat":{"name":"Barbell Box Squat","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Lower Body Push","equipment":"Barbell / specialty bar"},"barbell_deadlift":{"name":"Barbell Deadlift","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Hinge","equipment":"Barbell / specialty bar"},"barbell_hip_thrust":{"name":"Barbell Hip Thrust","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Hinge","equipment":"Barbell / specialty bar"},"barbell_push_press":{"name":"Barbell Push Press","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Upper Body Push","equipment":"Barbell / specialty bar"},"barbell_reverse_lunge":{"name":"Barbell Reverse Lunge","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Lower Body Push","equipment":"Barbell / specialty bar"},"bench_support_row":{"name":"Bench Support Row","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Upper Body Pull","equipment":"External load"},"bench_supported_row":{"name":"Bench Supported Row","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Upper Body Pull","equipment":"External load"},"bent_over_y_s":{"name":"Bent Over Y's","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Other","equipment":"External load"},"bulgarian_split_squat":{"name":"Bulgarian Split Squat","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Lower Body Push","equipment":"External load"},"cable_tricep_pushdown_extension":{"name":"Cable Tricep Pushdown/Extension","kind":"weight","label":"Cable weight","increment":5,"multiplier":1,"category":"Upper Body Push","equipment":"Cable"},"close_grip_bench_press":{"name":"Close Grip Bench Press","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Upper Body Push","equipment":"External load"},"conventional_deadlift":{"name":"Conventional Deadlift","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Hinge","equipment":"External load"},"dumbbell_bench_press":{"name":"Dumbbell Bench Press","kind":"weight","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Upper Body Push","equipment":"Dumbbells"},"dumbbell_deadlift_w_2_second_pause":{"name":"Dumbbell Deadlift w/ 2-second Pause","kind":"weight","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Hinge","equipment":"Dumbbells"},"dumbbell_hip_thrust_hold":{"name":"Dumbbell Hip Thrust + Hold","kind":"time","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Hinge","equipment":"Dumbbells"},"dumbbell_pullover":{"name":"Dumbbell Pullover","kind":"weight","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Upper Body Push","equipment":"Dumbbells"},"dumbbell_push_press":{"name":"Dumbbell Push Press","kind":"weight","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Upper Body Push","equipment":"Dumbbells"},"dumbbell_rdl":{"name":"Dumbbell RDL","kind":"weight","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Hinge","equipment":"Dumbbells"},"dumbbell_reverse_lunge":{"name":"Dumbbell Reverse Lunge","kind":"weight","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Lower Body Push","equipment":"Dumbbells"},"eccentric_step_down":{"name":"Eccentric Step Down","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Lower Body Push","equipment":"External load"},"farmers_carry":{"name":"Farmers Carry","kind":"weight","label":"Weight / load","increment":2.5,"multiplier":1,"category":"Carry","equipment":"External load"},"front_squat":{"name":"Front Squat","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Lower Body Push","equipment":"External load"},"hammer_curl":{"name":"Hammer Curl","kind":"weight","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Upper Body Pull","equipment":"Dumbbells"},"hanging_knee_raise":{"name":"Hanging Knee Raise","kind":"reps","label":"Reps","increment":null,"multiplier":0,"category":"Other","equipment":"Bodyweight"},"hex_bar_deadlift":{"name":"Hex Bar Deadlift","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Hinge","equipment":"Barbell / specialty bar"},"hex_bar_deadlift_b_stance":{"name":"Hex Bar Deadlift (B-Stance)","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Hinge","equipment":"Barbell / specialty bar"},"hex_bar_deadlift_with_pause":{"name":"Hex Bar Deadlift with pause","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Hinge","equipment":"Barbell / specialty bar"},"hip_airplanes":{"name":"Hip Airplanes","kind":"reps","label":"Reps","increment":null,"multiplier":0,"category":"Other","equipment":"Bodyweight"},"incline_barbell_bench_press":{"name":"Incline Barbell Bench Press","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Upper Body Push","equipment":"Barbell / specialty bar"},"incline_bench_press":{"name":"Incline Bench Press","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Upper Body Push","equipment":"External load"},"incline_dumbbell_bench_press":{"name":"Incline Dumbbell Bench Press","kind":"weight","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Upper Body Push","equipment":"Dumbbells"},"lat_pull_down":{"name":"Lat Pull Down","kind":"weight","label":"Cable weight","increment":5,"multiplier":1,"category":"Upper Body Pull","equipment":"Cable"},"lateral_raise":{"name":"Lateral Raise","kind":"weight","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Other","equipment":"Dumbbells"},"offset_carry":{"name":"Offset Carry","kind":"weight","label":"Weight / load","increment":2.5,"multiplier":1,"category":"Carry","equipment":"External load"},"overhead_tricep_extension":{"name":"Overhead Tricep Extension","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Upper Body Push","equipment":"External load"},"push_up":{"name":"Push Up","kind":"reps","label":"Reps","increment":null,"multiplier":0,"category":"Upper Body Push","equipment":"Bodyweight"},"renegade_row_dumbbell_squat_jump_squat_circuit":{"name":"Renegade Row / Dumbbell Squat / Jump Squat Circuit","kind":"weight","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Power","equipment":"Dumbbells"},"reverse_fly":{"name":"Reverse Fly","kind":"weight","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Upper Body Pull","equipment":"Dumbbells"},"reverse_plank":{"name":"Reverse Plank","kind":"time","label":"Seconds","increment":null,"multiplier":0,"category":"Other","equipment":"External load"},"seated_alternating_bicep_curl":{"name":"Seated Alternating Bicep Curl","kind":"weight","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Upper Body Pull","equipment":"Dumbbells"},"seated_high_to_low_row":{"name":"Seated High to Low Row","kind":"weight","label":"Cable weight","increment":5,"multiplier":1,"category":"Upper Body Pull","equipment":"Cable"},"seated_lat_pulldown_handles":{"name":"Seated Lat Pulldown (handles)","kind":"weight","label":"Cable weight","increment":5,"multiplier":1,"category":"Upper Body Pull","equipment":"Cable"},"seated_shoulder_press":{"name":"Seated Shoulder Press","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Upper Body Push","equipment":"External load"},"single_arm_landmine_press":{"name":"Single Arm Landmine Press","kind":"weight","label":"Total weight","increment":5,"multiplier":1,"category":"Upper Body Push","equipment":"Barbell / specialty bar"},"single_arm_overhead_march":{"name":"Single Arm Overhead March","kind":"weight","label":"Weight / load","increment":2.5,"multiplier":1,"category":"Carry","equipment":"External load"},"slide_lateral_lunge":{"name":"Slide Lateral Lunge","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Lower Body Push","equipment":"External load"},"slider_hamstring_curl_3_second_lower":{"name":"Slider Hamstring Curl (3-second lower)","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Upper Body Pull","equipment":"External load"},"snatch":{"name":"Snatch","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Power","equipment":"External load"},"spanish_squat":{"name":"Spanish Squat","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Lower Body Push","equipment":"External load"},"strict_bicep_curl":{"name":"Strict Bicep Curl","kind":"weight","label":"Weight (each hand)","increment":2.5,"multiplier":2,"category":"Upper Body Pull","equipment":"Dumbbells"},"treadmill":{"name":"Treadmill","kind":"cardio","label":"Speed","increment":null,"multiplier":0,"category":"Conditioning","equipment":"Treadmill"},"tricep_dips":{"name":"Tricep Dips","kind":"reps","label":"Reps","increment":null,"multiplier":0,"category":"Upper Body Push","equipment":"Bodyweight"},"upright_row":{"name":"Upright Row","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Upper Body Pull","equipment":"External load"},"walking_lunges":{"name":"Walking Lunges","kind":"weight","label":"Weight","increment":2.5,"multiplier":1,"category":"Lower Body Push","equipment":"External load"},"wall_clam":{"name":"Wall Clam","kind":"reps","label":"Reps","increment":null,"multiplier":0,"category":"Other","equipment":"Bodyweight"}};
+const HISTORICAL_NAME_ALIASES={"1/2 turkish get up":"1_2_turkish_get_up","b-stance landmine rdl":"b_stance_landmine_rdl","barbell back squat":"barbell_back_squat","barbell back squat (pause)":"barbell_back_squat_pause","barbell back squat (tempo: 3-2-1 lower)":"barbell_back_squat_tempo_3_2_1_lower","barbell bench press":"barbell_bench_press","barbell bent over row":"barbell_bent_over_row","barbell box squat":"barbell_box_squat","barbell deadlift":"barbell_deadlift","barbell hip thrust":"barbell_hip_thrust","barbell push press":"barbell_push_press","barbell rdl":"barbell_romanian_deadlift","barbell reverse lunge":"barbell_reverse_lunge","bench support row":"bench_support_row","bench supported row":"bench_supported_row","bent over y's":"bent_over_y_s","bicep curls":"dumbbell_bicep_curls","bulgarian split squat":"bulgarian_split_squat","cable tricep pushdown/extension":"cable_tricep_pushdown_extension","close grip bench press":"close_grip_bench_press","conventional deadlift":"conventional_deadlift","dumbbell bench press":"dumbbell_bench_press","dumbbell deadlift w/ 2-second pause":"dumbbell_deadlift_w_2_second_pause","dumbbell hip thrust + hold":"dumbbell_hip_thrust_hold","dumbbell pullover":"dumbbell_pullover","dumbbell push press":"dumbbell_push_press","dumbbell rdl":"dumbbell_rdl","dumbbell reverse lunge":"dumbbell_reverse_lunge","eccentric step down":"eccentric_step_down","farmers carry":"farmers_carry","front squat":"front_squat","hammer curl":"hammer_curl","hanging knee raise":"hanging_knee_raise","hex bar deadlift":"hex_bar_deadlift","hex bar deadlift (b-stance)":"hex_bar_deadlift_b_stance","hex bar deadlift with pause":"hex_bar_deadlift_with_pause","hip airplanes":"hip_airplanes","incline barbell bench press":"incline_barbell_bench_press","incline bench press":"incline_bench_press","incline dumbbell bench press":"incline_dumbbell_bench_press","lat pull down":"lat_pull_down","lateral raise":"lateral_raise","offset carry":"offset_carry","overhead tricep extension":"overhead_tricep_extension","overhead tricep extensions":"overhead_tricep_extension","push up":"push_up","renegade row / dumbbell squat / jump squat circuit":"renegade_row_dumbbell_squat_jump_squat_circuit","reverse fly":"reverse_fly","reverse plank":"reverse_plank","seated alternating bicep curl":"seated_alternating_bicep_curl","seated high to low row":"seated_high_to_low_row","seated lat pulldown (handles)":"seated_lat_pulldown_handles","seated shoulder press":"seated_shoulder_press","single arm landmine press":"single_arm_landmine_press","single arm overhead march":"single_arm_overhead_march","single leg hip thrust (dumbbell)":"single_leg_hip_thrust","slide lateral lunge":"slide_lateral_lunge","slider hamstring curl (3-second lower)":"slider_hamstring_curl_3_second_lower","snatch":"snatch","spanish squat":"spanish_squat","strict bicep curl":"strict_bicep_curl","treadmill":"treadmill","tricep dips":"tricep_dips","upright row":"upright_row","walking lunges":"walking_lunges","wall clam":"wall_clam"};
+Object.assign(exercises,HISTORICAL_EXERCISE_SEED);
+
+// Monthly workout programming is loaded from program.js.
+if(!window.FEARLESS_PROGRAM || !window.FEARLESS_PROGRAM.programs){
+ throw new Error('Fearless Lift Log program.js could not be loaded.');
+}
+Object.assign(exercises, window.FEARLESS_PROGRAM.exercises || {});
+const programs = window.FEARLESS_PROGRAM.programs;
+const STATION_ICONS={1:'🏋️',2:'🏃',3:'🪑',4:'🤸'};
+
+let db=loadDb();
+let view={screen:'home',day:null,workout:null,summary:null,editingId:null};
+let wakeLock=null;
+let wakeLockWanted=false;
+
+async function requestWakeLock(){
+ wakeLockWanted=true;
+ if(!('wakeLock' in navigator))return false;
+ try{
+  if(!wakeLock)wakeLock=await navigator.wakeLock.request('screen');
+  wakeLock.addEventListener('release',()=>{wakeLock=null});
+  return true;
+ }catch(err){
+  console.warn('Screen wake lock unavailable:',err);
+  return false;
+ }
+}
+async function releaseWakeLock(){
+ wakeLockWanted=false;
+ if(wakeLock){try{await wakeLock.release()}catch(err){console.warn('Could not release wake lock:',err)}wakeLock=null}
+}
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='visible'&&wakeLockWanted&&view.screen==='workout')requestWakeLock();
+});
+
+function normalizeExerciseName(value){return String(value||'').trim().toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9]+/g,' ').trim()}
+function slugExerciseName(value){return normalizeExerciseName(value).replace(/\s+/g,'_')||`exercise_${uid()}`}
+function allExerciseDefinitions(){return {...exercises,...(db?.exerciseLibrary||{})}}
+function rebuildExerciseLookup(){
+ const defs=allExerciseDefinitions();
+ return Object.fromEntries(Object.entries(defs).flatMap(([id,ex])=>[[normalizeExerciseName(ex.name),id],[normalizeExerciseName(id),id]]));
+}
+function canonicalExerciseId(value){
+ const raw=String(value||'').trim();
+ const lower=raw.toLowerCase();
+ const lookup=rebuildExerciseLookup();
+ return EXERCISE_ALIASES[raw]||HISTORICAL_NAME_ALIASES[lower]||lookup[normalizeExerciseName(raw)]||slugExerciseName(raw);
+}
+function genericExerciseDefinition(id,name=id){
+ return {name:String(name||id).replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()),kind:'weight',label:'Weight / resistance',increment:2.5,multiplier:1,category:'Historical',equipment:'Varies',historical:true};
+}
+function ensureExerciseDefinition(id,definition){
+ if(exercises[id])return exercises[id];
+ db.exerciseLibrary=db.exerciseLibrary||{};
+ if(!db.exerciseLibrary[id])db.exerciseLibrary[id]={...genericExerciseDefinition(id,definition?.name||id),...(definition||{})};
+ return db.exerciseLibrary[id];
+}
+function exerciseDefinition(id){return exercises[id]||db.exerciseLibrary?.[id]||ensureExerciseDefinition(id)}
+function remapExerciseData(data,sourceLibrary={}){
+ const out={};
+ for(const [rawId,value] of Object.entries(data||{})){
+  const sourceDef=sourceLibrary[rawId]||sourceLibrary[canonicalExerciseId(rawId)]||null;
+  const id=canonicalExerciseId(sourceDef?.name||rawId);
+  ensureExerciseDefinition(id,sourceDef||{name:rawId});
+  out[id]=value;
+ }
+ return out;
+}
+
+function migrateDatabaseToV14(){
+ if(db.version==='15')return;
+ const unifyBackSquat=data=>{
+  const mapped=remapExerciseData(data);
+  if(mapped.back_squat&&!mapped.barbell_back_squat)mapped.barbell_back_squat=mapped.back_squat;
+  delete mapped.back_squat;
+  return mapped;
+ };
+ db.history=(db.history||[]).map(w=>({...w,version:'16',data:unifyBackSquat(w.data)}));
+ db.drafts=Object.fromEntries(Object.entries(db.drafts||{}).map(([day,w])=>[day,{...w,version:'16',data:unifyBackSquat(w.data)}]));
+ db.increments=Object.fromEntries(Object.entries(db.increments||{}).map(([id,v])=>[id==='back_squat'?'barbell_back_squat':canonicalExerciseId(id),Number(v)]).filter(([id,v])=>exerciseDefinition(id)&&Number.isFinite(v)&&v>0));
+ db.exerciseLibrary=db.exerciseLibrary||{};db.version='15.1';saveDb();
+}
+
+function blankDb(){return {version:'16' ,program:'August 2026',history:[],drafts:{},increments:{},exerciseLibrary:{},lastBackupAt:null,lastBackupWorkoutId:null}}
+function loadDb(){try{return {...blankDb(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch{return blankDb()}}
+function saveDb(){exerciseHistoryIndexCache=null;localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}
+function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+function today(){return new Date().toISOString().slice(0,10)}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function dayForDate(dateStr=today()){return new Date(dateStr+'T12:00:00').toLocaleDateString('en-US',{weekday:'long'})}
+
+function migrateOldFriday(){
+ if(localStorage.getItem('fearlessLiftLog_v02_migrated')) return;
+ try{
+  const old=JSON.parse(localStorage.getItem(OLD_KEY)||'null');
+  if(old&&old.data&&Object.keys(old.data).length){
+   const already=db.history.some(h=>h.date===old.date&&h.day==='Friday');
+   if(!already){
+    const w=newWorkout('Friday',old.date||'2026-07-24');
+    w.startStation=old.startStation||1;w.stationOrder=old.stationOrder||[1,2,3,4];w.completed=old.completed||{};w.notes=old.notes||'';
+    for(const oldId of ['bench','bandrow','lunges','tricep','frontraise','dbsitup']){const id=canonicalExerciseId(oldId);if(old.data[oldId])w.data[id]=old.data[oldId]}
+    if(old.data.treadmill) w.data.treadmill=old.data.treadmill;
+    w.finishedAt=(old.date||'2026-07-24')+'T12:00:00';
+    db.history.push(w);saveDb();
+   }
+  }
+ }catch(e){}
+ localStorage.setItem('fearlessLiftLog_v02_migrated','1');
+}
+
+function newWorkout(day,date=today()){
+ const w={id:uid(),version:'16',program:programs[day].month||'August 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
+ Object.values(programs[day].stations).flatMap(st=>st.exercises).forEach(id=>w.data[id]=defaultData(exerciseDefinition(id)));
+ return w;
+}
+function defaultData(ex){
+ if(ex.kind==='cardio') return {speed:'',distance:'',difficulty:'',notes:'',setup:'',techniqueFocus:false};
+ if(ex.kind==='pullup') return [{bands:[],hookHeight:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='plankSplit') return [{fullReps:'',kneeReps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='pushupVariation') return [{variation:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='weightHold') return [{weight:'',reps:'',holdSeconds:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='hamstringCurl') return [{weight:'',reps:'',variation:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='singleLegPlyo') return [{weight:'',boxHeight:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='time') return [{seconds:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='reps') return [{reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='drop') return [{weight1:'',weight2:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ return [{weight:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+}
+function currentIncrement(id){return Number(db.increments[id]??exerciseDefinition(id).increment??2.5)}
+function setIncrement(id,v){db.increments[id]=Number(v);saveDb();render()}
+function lastWorkout(day){return [...db.history].filter(h=>h.day===day).sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date))[0]}
+const EXERCISE_HISTORY_GROUPS=[
+ ['barbell_back_squat','back_squat'],
+ ['deadlift','barbell_deadlift','conventional_deadlift'],
+ ['barbell_bench_press','bench'],
+ ['overhead_tricep_extension','tricep'],
+ ['walking_lunges','lunges']
+];
+const exerciseHistoryKeyCache=new Map();
+let exerciseHistoryIndexCache=null;
+function normalizeExerciseIdentity(value){
+ return normalizeExerciseName(value)
+  .replace(/\bbb\b/g,'barbell')
+  .replace(/\bdb\b/g,'dumbbell')
+  .replace(/\bkb\b/g,'kettlebell')
+  .replace(/\bsa\b/g,'single arm')
+  .replace(/\bsl\b/g,'single leg')
+  .replace(/\brdl\b/g,'romanian deadlift')
+  .replace(/\bpull ups\b/g,'pull up')
+  .replace(/\bpush ups\b/g,'push up')
+  .replace(/\blunges\b/g,'lunge')
+  .replace(/\bcurls\b/g,'curl')
+  .replace(/\bextensions\b/g,'extension')
+  .replace(/\s+/g,' ')
+  .trim();
+}
+function historicalExerciseKey(id){
+ const raw=String(id||'');
+ if(exerciseHistoryKeyCache.has(raw))return exerciseHistoryKeyCache.get(raw);
+ const canonical=canonicalExerciseId(raw);
+ let representative=canonical;
+ for(const group of EXERCISE_HISTORY_GROUPS){
+  const canonicalGroup=group.map(value=>canonicalExerciseId(value));
+  if(group.includes(raw)||group.includes(canonical)||canonicalGroup.includes(canonical)){
+   representative=canonicalExerciseId(group[0]);
+   break;
+  }
+ }
+ const def=allExerciseDefinitions()[representative]||allExerciseDefinitions()[canonical];
+ const key=normalizeExerciseIdentity(def?.name||representative||canonical||raw);
+ exerciseHistoryKeyCache.set(raw,key);
+ exerciseHistoryKeyCache.set(canonical,key);
+ return key;
+}
+function buildExerciseHistoryIndex(){
+ if(exerciseHistoryIndexCache)return exerciseHistoryIndexCache;
+ const index=new Map();
+ const rows=[...db.history].sort((a,b)=>String(b.finishedAt||b.date||'').localeCompare(String(a.finishedAt||a.date||'')));
+ for(const workout of rows){
+  for(const exerciseId of Object.keys(workout.data||{})){
+   const key=historicalExerciseKey(exerciseId);
+   if(key&&!index.has(key))index.set(key,{workout,exerciseId});
+  }
+ }
+ exerciseHistoryIndexCache=index;
+ return index;
+}
+function mostRecentExerciseRecord(id){
+ return buildExerciseHistoryIndex().get(historicalExerciseKey(id))||null;
+}
+function formatHistoryDate(value){
+ if(!value)return 'unknown date';
+ const d=new Date(value+'T12:00:00');
+ return Number.isNaN(d.getTime())?value:d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+}
+function lastExerciseSummary(id){
+ const record=mostRecentExerciseRecord(id); if(!record) return 'No prior workout recorded yet.';
+ const h=record.workout,ex=exerciseDefinition(id),d=h.data[record.exerciseId],date=formatHistoryDate(h.date);
+ if(ex.kind==='cardio') return `Last performed ${date}: speed ${d?.speed||'—'}${d?.distance?` · distance ${d.distance}`:''}${d?.techniqueFocus?' · 🎯 Technique focus':''}${d?.setup?` · ${d.setup}`:''}`;
+ if(!Array.isArray(d)) return `Last performed ${date}: prior data available.`;
+ const parts=[...d].reverse().map(s=>{
+  let main='';
+  if(ex.kind==='pullup') main=`${Array.isArray(s.bands)&&s.bands.length?s.bands.join(' + '):'No band listed'} · hook ${s.hookHeight||'—'} · ${s.reps||'—'} reps`;
+  else if(ex.kind==='plankSplit') main=`${s.fullReps||0} full + ${s.kneeReps||0} knee`;
+  else if(ex.kind==='pushupVariation') main=`${s.variation||'Variation not listed'} · ${s.reps||'—'} reps`;
+  else if(ex.kind==='weightHold') main=`${s.weight||'—'} lb × ${s.reps||'—'}${s.holdSeconds?` · ${s.holdSeconds} sec hold`:''}`;
+  else if(ex.kind==='hamstringCurl') main=`${s.reps||'—'} reps · ${s.variation||'Variation not listed'}${s.weight?` · ${s.weight} lb`:''}`;
+  else if(ex.kind==='singleLegPlyo') main=`${s.weight||'—'} lb each × ${s.reps||'—'} each side${s.boxHeight?` · box ${s.boxHeight}`:''}`;
+  else if(ex.kind==='band') main=`${s.weight||s.band||'—'} band · ${s.reps||'—'} reps`;
+  else if(ex.kind==='time') main=`${s.seconds||'—'} sec`;
+  else if(ex.kind==='reps') main=`${s.reps||'—'} reps`;
+  else if(ex.kind==='drop') main=`${s.weight1||'—'}→${s.weight2||'—'} × ${s.reps||'—'}`;
+  else main=`${s.weight||'—'} lb × ${s.reps||'—'}`;
+  return `${main}${s.difficulty?` · ${s.difficulty}`:''}${s.techniqueFocus?' · 🎯 Technique focus':''}${s.setup?` · ${s.setup}`:''}`;
+ }).join(' | ');
+ return `Last performed ${date}: ${parts}`;
+}
+
+function goHome(){saveDraft();releaseWakeLock();view={screen:'home',day:null,workout:null,summary:null,editingId:null};render()}
+function repairWorkoutForProgram(workout,day){
+ const w=workout||newWorkout(day);
+ w.day=day;w.title=programs[day].title;w.program=programs[day].month||w.program||'August 2026';
+ w.data=w.data||{};w.completed=w.completed||{};w.stationOrder=Array.isArray(w.stationOrder)?w.stationOrder:[];
+ for(const id of Object.values(programs[day].stations).flatMap(st=>st.exercises)){
+  if(w.data[id]===undefined)w.data[id]=defaultData(exerciseDefinition(id));
+ }
+ return w;
+}
+function openDay(day){try{saveDraft();let w=db.drafts[day];if(!w||w.date!==today())w=newWorkout(day);w=repairWorkoutForProgram(w,day);db.drafts[day]=w;saveDb();view={screen:'workout',day,workout:w,summary:null,editingId:null};requestWakeLock();render()}catch(err){console.error('Could not open workout:',err);alert('The workout could not open. Please close and reopen the app. Your saved history is safe.')}}
+function openHistory(){saveDraft();releaseWakeLock();view={screen:'history',day:null,workout:null,summary:null,editingId:null};render()}
+function replayLastFinish(){
+ const last=[...db.history].sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date))[0];
+ if(!last)return;
+ saveDraft();releaseWakeLock();
+ const w=JSON.parse(JSON.stringify(last));
+ const summary=w.finishSummary?JSON.parse(JSON.stringify(w.finishSummary)):{volume:totalVolume(w),sets:countSets(w),exercises:countExercises(w),duration:durationMinutes(w),highlights:w.highlights||['⭐ Workout complete'],edited:false};
+ view={screen:'summary',day:w.day,workout:w,summary,editingId:null};
+ render();
+}
+function editWorkout(id){const original=db.history.find(w=>w.id===id);if(!original)return;const workout=repairWorkoutForProgram(JSON.parse(JSON.stringify(original)),original.day);view={screen:'workout',day:original.day,workout,summary:null,editingId:id};requestWakeLock();render()}
+function cancelEdit(){releaseWakeLock();openHistory()}
+function saveDraft(){if(view.workout&&!view.workout.finishedAt){db.drafts[view.day]=view.workout;saveDb()}}
+function stationNumbers(day=view.day){return Object.keys(programs[day].stations).map(Number).sort((a,b)=>a-b)}
+function startWorkout(n){requestWakeLock();const w=view.workout;if(!w.startStation){const nums=stationNumbers();const idx=nums.indexOf(n);w.startStation=n;w.stationOrder=[...nums.slice(idx),...nums.slice(0,idx)]}saveDraft();render()}
+function toggleStation(n){
+ const completing=!view.workout.completed[n];
+ view.workout.completed[n]=completing;
+ saveDraft();
+ render();
+ requestAnimationFrame(()=>{
+  let target;
+  if(completing){
+   const order=view.workout.stationOrder?.length?view.workout.stationOrder:stationNumbers();
+   const currentIndex=order.indexOf(n);
+   const following=[...order.slice(currentIndex+1),...order.slice(0,currentIndex+1)];
+   const next=following.find(station=>!view.workout.completed[station]);
+   target=next?document.getElementById(`station-${next}`):document.getElementById('workout-notes');
+  }else target=document.getElementById(`station-${n}`);
+  target?.scrollIntoView({behavior:'smooth',block:'start'});
+ });
+}
+function updateValue(id,index,field,value){const d=view.workout.data[id];if(Array.isArray(d))d[index][field]=value;else d[field]=value;saveDraft()}
+function toggleBand(id,index,band,checked){const set=view.workout.data[id][index];set.bands=Array.isArray(set.bands)?set.bands:[];if(checked&&!set.bands.includes(band))set.bands.push(band);if(!checked)set.bands=set.bands.filter(x=>x!==band);saveDraft()}
+function addSet(id,repeat){const ex=exerciseDefinition(id),arr=view.workout.data[id];const base=arr[arr.length-1]||defaultData(ex)[0];arr.push(repeat?{...base}:defaultData(ex)[0]);saveDraft();render()}
+function deleteSet(id,index){const ex=exerciseDefinition(id),arr=view.workout.data[id];if(arr.length===1)arr[0]=defaultData(ex)[0];else arr.splice(index,1);saveDraft();render()}
+function step(id,index,field,direction){
+ const arr=view.workout.data[id],inc=['reps','seconds','holdSeconds','fullReps','kneeReps','boxHeight'].includes(field)?1:currentIncrement(id);let n=parseFloat(arr[index][field]||0);n=Math.max(0,Math.round((n+direction*inc)*100)/100);arr[index][field]=String(n);saveDraft();render();
+}
+function resetWorkout(){if(confirm(`Clear today's ${view.day} workout and start over?`)){db.drafts[view.day]=newWorkout(view.day);view.workout=db.drafts[view.day];saveDb();render()}}
+function allStationsDone(w){return stationNumbers(w.day).every(n=>w.completed[n])}
+function sideMultiplier(ex){
+ if(Number(ex?.sideMultiplier)>0)return Number(ex.sideMultiplier);
+ return /each side/i.test(String(ex?.target||''))?2:1;
+}
+function totalVolume(w){
+ let total=0;
+ for(const [id,d] of Object.entries(w.data)){
+  const ex=exerciseDefinition(id);if(!ex||!ex.multiplier||!Array.isArray(d))continue;
+  const sides=sideMultiplier(ex);
+  for(const s of d){
+   const reps=Number(s.reps)||0;
+   if(ex.kind==='drop')total+=((Number(s.weight1)||0)+(Number(s.weight2)||0))*reps*ex.multiplier*sides;
+   else total+=(Number(s.weight)||0)*reps*ex.multiplier*sides;
+  }
+ }
+ return Math.round(total);
+}
+function hasLoggedValue(obj){return Object.values(obj||{}).some(v=>typeof v==='boolean'?v:String(v).trim()!=='')}
+function countSets(w){let n=0;for(const [id,d] of Object.entries(w.data)){const ex=exerciseDefinition(id);if(Array.isArray(d))n+=d.filter(s=>hasLoggedValue(s)).length;else if(exerciseDefinition(id)?.kind==='cardio'&&hasLoggedValue(d))n++}return n}
+function countExercises(w){let n=0;for(const d of Object.values(w.data)){if(Array.isArray(d)){if(d.some(s=>hasLoggedValue(s)))n++}else if(hasLoggedValue(d))n++}return n}
+function durationMinutes(w){if(!w.startedAt||!w.finishedAt)return null;return Math.max(1,Math.round((new Date(w.finishedAt)-new Date(w.startedAt))/60000))}
+function exerciseMax(id,w){const ex=exerciseDefinition(id),d=w?.data?.[id];if(!ex||!Array.isArray(d))return 0;if(ex.kind==='drop')return Math.max(0,...d.flatMap(s=>[Number(s.weight1)||0,Number(s.weight2)||0]));if(!['weight'].includes(ex.kind))return 0;return Math.max(0,...d.map(s=>Number(s.weight)||0))}
+function repsAtMax(id,w,max){const d=w?.data?.[id];if(!Array.isArray(d)||!max)return 0;return d.reduce((n,s)=>n+((Number(s.weight)||0)===max?(Number(s.reps)||0):0),0)}
+function comparablePrevious(w){return [...db.history].filter(h=>h.day===w.day&&h.id!==w.id&&(h.finishedAt||h.date)<(w.finishedAt||w.date)).sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date))[0]}
+function workoutHighlights(w){
+ const previous=comparablePrevious(w),highlights=[],improvements=[];
+ for(const id of Object.keys(w.data)){
+  const ex=exerciseDefinition(id),now=exerciseMax(id,w);if(!ex||!now)continue;
+  const priorBest=Math.max(0,...db.history.filter(h=>h.id!==w.id).map(h=>exerciseMax(id,h)));
+  const previousMax=exerciseMax(id,previous);
+  if(priorBest&&now>priorBest){improvements.push({rank:100+now,text:`⭐ New ${ex.name} personal best — ${now} lb`});continue}
+  if(priorBest&&now===priorBest){improvements.push({rank:70,text:`⭐ Matched your best ${ex.name} — ${now} lb`});continue}
+  if(previousMax&&now>previousMax){improvements.push({rank:80,text:`⭐ Increased ${ex.name} from ${previousMax} to ${now} lb`});continue}
+  if(previousMax&&now===previousMax&&repsAtMax(id,w,now)>repsAtMax(id,previous,previousMax)) improvements.push({rank:60,text:`⭐ More reps at your top ${ex.name} weight`});
+ }
+ improvements.sort((a,b)=>b.rank-a.rank);highlights.push(...improvements.slice(0,3).map(x=>x.text));
+ const priorVolume=previous?totalVolume(previous):0,volume=totalVolume(w);
+ if(previous&&volume>priorVolume&&highlights.length<3)highlights.push(`📈 Higher ${w.title} volume than last time`);
+ if(allStationsDone(w)&&highlights.length<4)highlights.push('⭐ Completed every station');
+ const expected=Object.values(programs[w.day].stations).flatMap(st=>st.exercises).length;
+ if(countExercises(w)===expected&&highlights.length<4)highlights.push('✅ Logged every exercise');
+ const workoutNumber=db.history.filter(h=>h.id!==w.id).length+1;
+ if([10,25,50,100,250,500].includes(workoutNumber))highlights.unshift(`💪 Workout #${workoutNumber}`);
+ const deadlift=Math.max(exerciseMax('barbell_romanian_deadlift',w),exerciseMax('single_leg_romanian_deadlift',w));
+ const priorDeadlift=Math.max(0,...db.history.filter(h=>h.id!==w.id).map(h=>Math.max(exerciseMax('barbell_romanian_deadlift',h),exerciseMax('single_leg_romanian_deadlift',h))));
+ if(deadlift>=200&&priorDeadlift<200)highlights.unshift('🔥 First 200 lb deadlift!');
+ const bench=exerciseMax('barbell_bench_press',w),priorBench=Math.max(0,...db.history.filter(h=>h.id!==w.id).map(h=>exerciseMax('barbell_bench_press',h)));
+ if(bench>=100&&priorBench<100)highlights.unshift('🔥 First 100 lb bench press!');
+ if(!highlights.length)highlights.push('⭐ Another workout added to your strength journey');
+ return highlights.slice(0,5);
+}
+function finishWorkout(){
+ const w=view.workout,editing=!!view.editingId;if(!editing&&!allStationsDone(w)){alert('Mark all stations complete before finishing the workout.');return}
+ w.notes=document.getElementById('workoutNotes')?.value||w.notes||'';
+ if(!editing)w.finishedAt=new Date().toISOString();
+ w.version='16';w.highlights=workoutHighlights(w);w.primaryHighlight=w.highlights[0];
+ w.finishSummary={volume:totalVolume(w),sets:countSets(w),exercises:countExercises(w),duration:durationMinutes(w),highlights:[...w.highlights],edited:editing};
+ if(editing){const index=db.history.findIndex(x=>x.id===view.editingId);if(index<0){alert('This workout could not be found.');return}db.history[index]=JSON.parse(JSON.stringify(w));}
+ else{db.history.push(JSON.parse(JSON.stringify(w)));delete db.drafts[view.day];}
+ saveDb();releaseWakeLock();view.summary=JSON.parse(JSON.stringify(w.finishSummary));view.screen='summary';view.editingId=null;render();
+}
+function backupFilename(workout){const d=new Date(workout.finishedAt||Date.now()),hh=String(d.getHours()).padStart(2,'0'),mm=String(d.getMinutes()).padStart(2,'0'),title=workout.title.replace(/[^a-z0-9]+/gi,'');return `${workout.date}-${hh}${mm}-${workout.day}-${title}.json`}
+function makeJsonFile(payload,filename){
+ return new File([JSON.stringify(payload,null,2)],filename,{type:'application/json'});
+}
+async function saveFileToICloud(file,workoutId=null){
+ const message='On the next screen, choose Save to Files, then iCloud Drive → Fearless Lift Log → Backups.';
+ if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+  alert(message);
+  try{
+   await navigator.share({title:'Fearless Lift Log Backup',text:'Fearless Lift Log backup file',files:[file]});
+   db.lastBackupAt=new Date().toISOString();
+   if(workoutId)db.lastBackupWorkoutId=workoutId;
+   saveDb();render();
+   return true;
+  }catch(err){
+   if(err?.name!=='AbortError')alert('The iCloud save sheet could not open. A normal download will be used instead.');
+   else return false;
+  }
+ }
+ const a=document.createElement('a');
+ a.href=URL.createObjectURL(file);a.download=file.name;a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ alert('The backup was downloaded. In Files, move it to iCloud Drive → Fearless Lift Log → Backups.');
+ return false;
+}
+async function downloadBackup(workout=view.workout){
+ if(!workout)return;
+ const payload={app:'Fearless Lift Log',version:'16',exportedAt:new Date().toISOString(),workout};
+ const file=makeJsonFile(payload,backupFilename(workout));
+ await saveFileToICloud(file,workout.id);
+}
+async function downloadAll(){
+ const payload={app:'Fearless Lift Log',version:'16',exportedAt:new Date().toISOString(),exerciseLibrary:allExerciseDefinitions(),...db};
+ const file=makeJsonFile(payload,`fearless-lift-log-all-data-${today()}.json`);
+ await saveFileToICloud(file,db.history.at(-1)?.id||null);
+}
+
+function workoutIdentity(w){
+ return [w.date||'',w.day||'',w.title||''].join('|').toLowerCase();
+}
+function normalizedImportedWorkout(raw,sourceLibrary={}){
+ const w=raw?.workout||raw;
+ if(!w||typeof w!=='object'||!w.date||!w.day||!w.data)return null;
+ const copy=JSON.parse(JSON.stringify(w));
+ copy.id=copy.id||uid();
+ copy.version='0.5';
+ copy.program=copy.program||'Historical Import';
+ copy.title=copy.title||programs[copy.day]?.title||'Workout';
+ copy.completed=copy.completed||{1:true,2:true,3:true,4:true};
+ copy.stationOrder=copy.stationOrder||[1,2,3,4];
+ copy.finishedAt=copy.finishedAt||`${copy.date}T12:00:00`;
+ copy.startedAt=copy.startedAt||copy.finishedAt;
+ copy.notes=copy.notes||'';
+ copy.data=remapExerciseData(copy.data,sourceLibrary);
+ if(!Object.keys(copy.data).length)return null;
+ return copy;
+}
+function collectImportedWorkouts(payload){
+ if(Array.isArray(payload))return payload;
+ if(payload?.workout)return [payload.workout];
+ if(Array.isArray(payload?.history))return payload.history;
+ if(Array.isArray(payload?.workouts))return payload.workouts;
+ return [];
+}
+function openImport(){document.getElementById('importInput').click()}
+async function importWorkoutFiles(fileList){
+ const files=[...fileList];
+ if(!files.length)return;
+ let imported=0,duplicates=0,invalid=0;
+ const existingIds=new Set(db.history.map(w=>w.id));
+ const existingKeys=new Set(db.history.map(workoutIdentity));
+ for(const file of files){
+  try{
+   const payload=JSON.parse(await file.text());
+   const sourceLibrary=payload?.exerciseLibrary||payload?.db?.exerciseLibrary||{};
+   for(const [rawId,def] of Object.entries(sourceLibrary)){const id=canonicalExerciseId(def?.name||rawId);ensureExerciseDefinition(id,def)}
+   const rows=collectImportedWorkouts(payload?.db||payload);
+   if(!rows.length){invalid++;continue}
+   for(const raw of rows){
+    const w=normalizedImportedWorkout(raw,sourceLibrary);
+    if(!w){invalid++;continue}
+    const key=workoutIdentity(w);
+    if(existingIds.has(w.id)||existingKeys.has(key)){duplicates++;continue}
+    db.history.push(w);existingIds.add(w.id);existingKeys.add(key);imported++;
+   }
+  }catch{invalid++}
+ }
+ db.history.sort((a,b)=>(a.finishedAt||a.date).localeCompare(b.finishedAt||b.date));
+ saveDb();
+ document.getElementById('importInput').value='';
+ alert(`Import complete: ${imported} workout${imported===1?'':'s'} added, ${duplicates} duplicate${duplicates===1?'':'s'} skipped${invalid?`, ${invalid} file or record${invalid===1?'':'s'} could not be read`:''}.`);
+ render();
+}
+function difficulty(value,id,index){return `<select onchange="updateValue('${id}',${index},'difficulty',this.value)">${DIFFICULTIES.map(([v,l])=>`<option value="${v}" ${value===v?'selected':''}>${l}</option>`).join('')}</select>`}
+function stepper(id,index,field,value,placeholder){return `<div class="stepper"><button type="button" onclick="step('${id}',${index},'${field}',-1)">−</button><input type="number" inputmode="decimal" value="${esc(value)}" placeholder="${placeholder}" onchange="updateValue('${id}',${index},'${field}',this.value)"><button type="button" onclick="step('${id}',${index},'${field}',1)">+</button></div>`}
+
+const EXERCISE_COLORS=['#eef8ee','#fceff4','#eef5fc','#fff8e8','#f4effc','#eef9f8','#fff0eb','#f3f6ea'];
+function exerciseColor(exerciseIndex,stationNumber){
+ const stationOffset=((Number(stationNumber)||1)-1)*3;
+ return EXERCISE_COLORS[(stationOffset+exerciseIndex)%EXERCISE_COLORS.length];
+}
+
+function exerciseHtml(id,exerciseIndex=0,stationNumber=1){
+ const ex=exerciseDefinition(id),d=view.workout.data[id];
+ let body='';
+ if(ex.kind==='cardio') body=`<div class="field-grid three"><div class="field"><label>Speed</label><input inputmode="decimal" value="${esc(d.speed)}" onchange="updateValue('${id}',0,'speed',this.value)"></div><div class="field"><label>Distance</label><input inputmode="decimal" value="${esc(d.distance)}" onchange="updateValue('${id}',0,'distance',this.value)"></div><div class="field"><label>Difficulty</label><select onchange="updateValue('${id}',0,'difficulty',this.value)">${DIFFICULTIES.map(([v,l])=>`<option value="${v}" ${d.difficulty===v?'selected':''}>${l}</option>`).join('')}</select></div></div><label class="technique-focus"><input type="checkbox" ${d.techniqueFocus?'checked':''} onchange="updateValue('${id}',0,'techniqueFocus',this.checked)"><span>🎯 Technique Focus</span><span class="tf-note">intentional form / technique work</span></label><div class="field" style="margin-top:8px"><label>Notes</label><input value="${esc(d.notes)}" placeholder="Incline, intervals, most/all…" onchange="updateValue('${id}',0,'notes',this.value)"></div>`;
+ else body=d.map((s,i)=>setHtml(id,ex,s,i)).join('')+`<div class="actions"><button onclick="addSet('${id}',true)">Repeat Previous Performance</button><button onclick="addSet('${id}',false)">Add Empty Set</button></div>`;
+ const inc=ex.increment!=null?`<div class="increment-row">Weight +/− changes by <select onchange="setIncrement('${id}',this.value)">${INCREMENTS.map(v=>`<option value="${v}" ${currentIncrement(id)===v?'selected':''}>${v} lb</option>`).join('')}</select></div>`:'';
+ return `<div class="exercise" style="--exercise-bg:${exerciseColor(exerciseIndex,stationNumber)}"><h3>${ex.name}</h3><div class="hint">${ex.target?`Target: ${ex.target}`:ex.label}${ex.note?` · ${ex.note}`:''}</div>${ex.cue?`<div class="cue"><strong>Coach cue:</strong> ${esc(ex.cue)}</div>`:''}<div class="previous">${lastExerciseSummary(id)}</div>${body}${inc}</div>`;
+}
+function setHtml(id,ex,s,i){
+ let fields='';
+ if(ex.kind==='pullup') fields=`<div class="field" style="grid-column:1/-1"><label>Assistance bands (choose all used)</label><div class="band-grid">${BANDS.map(b=>`<label class="band-choice"><input type="checkbox" ${Array.isArray(s.bands)&&s.bands.includes(b)?'checked':''} onchange="toggleBand('${id}',${i},'${b}',this.checked)"><span>${b}</span></label>`).join('')}</div></div><div class="field"><label>Hook height (1–25)</label><input type="number" inputmode="numeric" min="1" max="25" value="${esc(s.hookHeight)}" onchange="updateValue('${id}',${i},'hookHeight',this.value)"></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else if(ex.kind==='plankSplit') fields=`<div class="field"><label>Full-plank reps</label>${stepper(id,i,'fullReps',s.fullReps,'0')}</div><div class="field"><label>Knee-plank reps</label>${stepper(id,i,'kneeReps',s.kneeReps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else if(ex.kind==='pushupVariation') fields=`<div class="field"><label>Push-up variation</label><select onchange="updateValue('${id}',${i},'variation',this.value)"><option value="">Choose</option>${['Toe Push-Up','Knee Push-Up','Hybrid (toes down / knees up)'].map(v=>`<option value="${v}" ${s.variation===v?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else if(ex.kind==='weightHold') fields=`<div class="field"><label>${ex.label}</label>${stepper(id,i,'weight',s.weight,'lb')}</div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Hold time (seconds)</label>${stepper(id,i,'holdSeconds',s.holdSeconds,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else if(ex.kind==='hamstringCurl') fields=`<div class="field" style="grid-column:1/-1"><label>Hamstring curl variation</label><select onchange="updateValue('${id}',${i},'variation',this.value)"><option value="">Choose</option>${['Full — hips stay up entire time','Hip Drop — hips up going out / butt down pulling in','Hybrid'].map(v=>`<option value="${v}" ${s.variation===v?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label>${ex.label}</label>${stepper(id,i,'weight',s.weight,'lb')}</div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else if(ex.kind==='singleLegPlyo') fields=`<div class="field"><label>Weight (each hand)</label>${stepper(id,i,'weight',s.weight,'lb')}</div><div class="field"><label>Box height (inches)</label>${stepper(id,i,'boxHeight',s.boxHeight,'in')}</div><div class="field"><label>Reps each side</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else if(ex.kind==='band') fields=`<div class="field"><label>Band color</label><select onchange="updateValue('${id}',${i},'weight',this.value)"><option value="">Choose</option>${(ex.bandOptions||BANDS).map(b=>`<option ${String(s.weight||'').toLowerCase()===b.toLowerCase()?'selected':''}>${b}</option>`).join('')}</select></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else if(ex.kind==='time') fields=`<div class="field"><label>Seconds</label>${stepper(id,i,'seconds',s.seconds,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else if(ex.kind==='reps') fields=`<div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else if(ex.kind==='drop') fields=`<div class="field"><label>Weight 1</label>${stepper(id,i,'weight1',s.weight1,'lb')}</div><div class="field"><label>Weight 2</label>${stepper(id,i,'weight2',s.weight2,'lb')}</div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else fields=`<div class="field"><label>${ex.label}</label>${stepper(id,i,'weight',s.weight,'lb')}</div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ const technique=`<label class="technique-focus"><input type="checkbox" ${s.techniqueFocus?'checked':''} onchange="updateValue('${id}',${i},'techniqueFocus',this.checked)"><span>🎯 Technique Focus</span><span class="tf-note">intentional form / technique work</span></label>`;
+ const setup=`<div class="setup-field" style="grid-column:1/-1"><label>Technique / setup (optional)</label><textarea placeholder="Seat position, attachment, tempo, variation, form notes…" onchange="updateValue('${id}',${i},'setup',this.value)">${esc(s.setup||'')}</textarea></div>`;
+ return `<div class="set-card"><div class="set-title"><span>Set ${i+1}</span><button class="delete small-btn" onclick="deleteSet('${id}',${i})">Remove</button></div><div class="field-grid ${ex.kind==='drop'?'three':''}">${fields}${technique}${setup}</div></div>`;
+}
+
+function openExerciseIndex(){saveDraft();releaseWakeLock();view={screen:'exerciseIndex',day:null,workout:null,summary:null,editingId:null};render()}
+function openReports(){saveDraft();releaseWakeLock();view={screen:'reports',day:null,workout:null,summary:null,editingId:null};render()}
+function openMonthlyReport(){view.screen='monthlyReport';render()}
+function openAllTimeReport(){view.screen='allTimeReport';render()}
+function backToReports(){view.screen='reports';render()}
+function exerciseIndexRows(){
+ const defs=allExerciseDefinitions(),stats={};
+ for(const w of db.history||[]){
+  for(const [id,d] of Object.entries(w.data||{})){
+   const ex=defs[id]||exerciseDefinition(id);const st=stats[id]||(stats[id]={id,name:ex.name,category:ex.category||'Other',first:w.date,last:w.date,workouts:0,best:0,repsAtBest:0,volume:0});
+   st.first=st.first<w.date?st.first:w.date;st.last=st.last>w.date?st.last:w.date;st.workouts++;
+   if(Array.isArray(d))for(const set of d){
+    const wt=Number(set.weight??set.weight1)||0,reps=Number(set.reps)||0;
+    if(wt>st.best){st.best=wt;st.repsAtBest=reps}else if(wt===st.best)st.repsAtBest=Math.max(st.repsAtBest,reps);
+    if(ex.multiplier)st.volume+=wt*reps*ex.multiplier;
+   }
+  }
+ }
+ return Object.values(stats).sort((a,b)=>a.name.localeCompare(b.name));
+}
+function renderExerciseIndex(){
+ const rows=exerciseIndexRows();
+ return `<section class="card pad"><strong>Exercise Index</strong><div class="sub">Built automatically from your workout history.</div>${rows.length?rows.map(r=>`<div class="history-item"><div class="history-title">${esc(r.name)}</div><div class="history-meta">${esc(r.category)} · ${r.workouts} workout${r.workouts===1?'':'s'} · ${r.first} to ${r.last}</div>${r.best?`<div class="sub" style="margin-top:5px">Best recorded weight: ${r.best} lb${r.repsAtBest?` × ${r.repsAtBest}`:''}</div>`:''}</div>`).join(''):'<p class="sub">The index will populate as workouts are imported or completed.</p>'}</section>`;
+}
+
+const REPORT_HOME_EXCLUDED_DATES=new Set(['2026-08-13']);
+const LONG_BAND_STRENGTH={Purple:1,Green:2,Blue:3,Orange:4,Red:5};
+const SMALL_BAND_STRENGTH={Green:1,Blue:2,Yellow:3,Red:4,Black:5};
+const REPORT_BAND_RULES={
+ monster_walks:{family:'small',role:'resistance'},
+ standing_banded_cable_hip_flexion:{family:'long',role:'resistance'},
+ standing_banded_hip_flexion:{family:'long',role:'resistance'},
+ horizontal_pull_apart:{family:'long',role:'resistance'},
+ reverse_nordic:{family:'long',role:'assistance'},
+ reverse_nordic_curl:{family:'long',role:'assistance'}
+};
+function reportComparisonEligible(w){return !!w&&!REPORT_HOME_EXCLUDED_DATES.has(w.date)}
+function reportSetTechniqueFocused(s){return !!s?.techniqueFocus}
+function currentProgramMonth(){return Object.values(programs||{})[0]?.month||window.FEARLESS_PROGRAM?.month||''}
+function monthDatePrefix(month){const d=new Date(`${month} 1`);return Number.isNaN(d.getTime())?'':`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
+function monthlyWorkouts(){const month=currentProgramMonth(),prefix=monthDatePrefix(month);return [...db.history].filter(w=>w.program===month||(prefix&&String(w.date||'').startsWith(prefix))).sort((a,b)=>String(a.date).localeCompare(String(b.date)))}
+function difficultyValue(v){const s=String(v||'').toUpperCase();if(s.startsWith('E'))return 1;if(s.startsWith('M'))return 2;if(s.startsWith('H'))return 3;return null}
+function reportDifficultyLabel(v){return v?` · ${v}`:''}
+function epley(weight,reps){weight=Number(weight)||0;reps=Number(reps)||0;return weight&&reps?weight*(1+reps/30):weight}
+function reportExercisePerformance(w,id){
+ const ex=exerciseDefinition(id),d=w?.data?.[id];if(!ex)return null;
+ if(ex.kind==='cardio')return null;
+ if(!Array.isArray(d))return null;
+ const usable=d.filter(s=>hasLoggedValue(s)&&!reportSetTechniqueFocused(s));if(!usable.length)return null;
+ if(ex.kind==='pullup'){
+  const s=usable.reduce((a,b)=>(Number(b.reps)||0)>(Number(a.reps)||0)?b:a,usable[0]);
+  const bands=Array.isArray(s.bands)?s.bands.filter(Boolean):[];const hook=Number(s.hookHeight)||null,reps=Number(s.reps)||0;
+  return reps?{metric:'pullup',score:reps,label:`${bands.length?bands.join(' + '):'No band listed'} · hook ${hook||'—'} · ${reps} reps${reportDifficultyLabel(s.difficulty)}`,bands,hook,reps,difficulty:difficultyValue(s.difficulty)}:null;
+ }
+ if(ex.kind==='pushupVariation'){
+  const ranks={'Knee Push-Up':1,'Hybrid (toes down / knees up)':2,'Toe Push-Up':3};
+  const s=usable.reduce((a,b)=>((ranks[b.variation]||0)*100+(Number(b.reps)||0))>((ranks[a.variation]||0)*100+(Number(a.reps)||0))?b:a,usable[0]);
+  const rank=ranks[s.variation]||0,reps=Number(s.reps)||0;return reps?{metric:'variation',score:rank*100+reps,label:`${s.variation||'Variation not listed'} · ${reps} reps${reportDifficultyLabel(s.difficulty)}`,rank,reps,difficulty:difficultyValue(s.difficulty)}:null;
+ }
+ if(ex.kind==='plankSplit'){
+  const s=usable.reduce((a,b)=>(Number(b.fullReps)||0)*10+(Number(b.kneeReps)||0)>(Number(a.fullReps)||0)*10+(Number(a.kneeReps)||0)?b:a,usable[0]);
+  const full=Number(s.fullReps)||0,knee=Number(s.kneeReps)||0;return (full||knee)?{metric:'plank',score:full*10+knee,label:`${full} full + ${knee} knee${reportDifficultyLabel(s.difficulty)}`,full,knee,difficulty:difficultyValue(s.difficulty)}:null;
+ }
+ if(ex.kind==='band'){
+  const rule=REPORT_BAND_RULES[id]||null,map=rule?.family==='small'?SMALL_BAND_STRENGTH:LONG_BAND_STRENGTH;
+  const candidates=usable.map(s=>{const band=String(s.weight||s.band||'');return {s,band,rank:map[band]||0,reps:Number(s.reps)||0}}).filter(x=>x.band);
+  if(!candidates.length)return null;
+  const c=candidates.reduce((a,b)=>((rule?.role==='assistance'?-b.rank:b.rank)*100+b.reps)>((rule?.role==='assistance'?-a.rank:a.rank)*100+a.reps)?b:a,candidates[0]);
+  const difficulty=difficultyValue(c.s.difficulty);return {metric:'band',score:(rule?.role==='assistance'?-c.rank:c.rank)*100+c.reps,label:`${c.band} band · ${c.reps||'—'} reps${reportDifficultyLabel(c.s.difficulty)}`,band:c.band,rank:c.rank,reps:c.reps,role:rule?.role||'unknown',difficulty};
+ }
+ if(ex.kind==='time'){
+  const s=usable.reduce((a,b)=>(Number(b.seconds)||0)>(Number(a.seconds)||0)?b:a,usable[0]),seconds=Number(s.seconds)||0;return seconds?{metric:'time',score:seconds,label:`${seconds} sec${reportDifficultyLabel(s.difficulty)}`,seconds,difficulty:difficultyValue(s.difficulty)}:null;
+ }
+ if(ex.kind==='reps'){
+  const s=usable.reduce((a,b)=>(Number(b.reps)||0)>(Number(a.reps)||0)?b:a,usable[0]),reps=Number(s.reps)||0;return reps?{metric:'reps',score:reps,label:`${reps} reps${reportDifficultyLabel(s.difficulty)}`,reps,difficulty:difficultyValue(s.difficulty)}:null;
+ }
+ if(ex.kind==='drop'){
+  const candidates=usable.map(s=>({s,weight:Math.max(Number(s.weight1)||0,Number(s.weight2)||0),reps:Number(s.reps)||0})).filter(x=>x.weight);
+  if(!candidates.length)return null;const c=candidates.reduce((a,b)=>epley(b.weight,b.reps)>epley(a.weight,a.reps)?b:a,candidates[0]);
+  return {metric:'weight',score:epley(c.weight,c.reps),weight:c.weight,reps:c.reps,label:`${c.s.weight1||'—'}→${c.s.weight2||'—'} lb × ${c.reps||'—'}${reportDifficultyLabel(c.s.difficulty)}`,difficulty:difficultyValue(c.s.difficulty)};
+ }
+ const candidates=usable.map(s=>({s,weight:Number(s.weight)||0,reps:Number(s.reps)||0})).filter(x=>x.weight);
+ if(candidates.length){const c=candidates.reduce((a,b)=>epley(b.weight,b.reps)>epley(a.weight,a.reps)?b:a,candidates[0]);return {metric:'weight',score:epley(c.weight,c.reps),weight:c.weight,reps:c.reps,label:`${c.weight} lb${c.reps?` × ${c.reps}`:''}${reportDifficultyLabel(c.s.difficulty)}`,difficulty:difficultyValue(c.s.difficulty)}}
+ const s=usable.reduce((a,b)=>(Number(b.reps)||0)>(Number(a.reps)||0)?b:a,usable[0]),reps=Number(s.reps)||0;return reps?{metric:'reps',score:reps,label:`${reps} reps${reportDifficultyLabel(s.difficulty)}`,reps,difficulty:difficultyValue(s.difficulty)}:null;
+}
+function reportExerciseRows(workouts=[...db.history]){
+ const byKey=new Map();
+ for(const w of [...workouts].sort((a,b)=>String(a.date).localeCompare(String(b.date)))){
+  if(!reportComparisonEligible(w))continue;
+  for(const id of Object.keys(w.data||{})){
+   const perf=reportExercisePerformance(w,id);if(!perf)continue;
+   const key=historicalExerciseKey(id),ex=exerciseDefinition(id);
+   if(!byKey.has(key))byKey.set(key,{name:ex.name,records:[]});
+   byKey.get(key).records.push({date:w.date,id,...perf});
+  }
+ }
+ return [...byKey.values()].map(r=>{const a=r.records[0],z=r.records[r.records.length-1],best=r.records.reduce((x,y)=>y.score>x.score?y:x,a);return {...r,first:a,last:z,best}}).filter(r=>r.records.length>=2);
+}
+function classifyReportRow(r){
+ const a=r.first,z=r.last;if(!a||!z)return {status:'⚪ Insufficient comparable data',note:'More comparable performances are needed.'};
+ if(a.metric!==z.metric)return {status:'↔ Different stimulus/setup',note:'The way this exercise was logged changed, so a direct comparison would be misleading.'};
+ if(a.metric==='pullup'){
+  const sameBands=JSON.stringify([...(a.bands||[])].sort())===JSON.stringify([...(z.bands||[])].sort());
+  if(sameBands&&a.hook&&z.hook&&a.reps===z.reps){if(z.hook<a.hook)return {status:'🟢 Progressed',note:'Same bands and reps with a lower (harder) hook position.'};if(z.hook>a.hook)return {status:'↔ Different assistance setup',note:'Same bands and reps with a higher (easier) hook position.'}}
+  if(sameBands&&z.reps>a.reps&&z.hook===a.hook)return {status:'🟢 Progressed',note:'More reps with the same assistance setup.'};
+  return {status:'↔ Different assistance setup',note:'Bands, hook position, or reps changed together; shown without pretending the setups are mathematically equivalent.'};
+ }
+ if(a.metric==='weight'){
+  const repGap=Math.abs((z.reps||0)-(a.reps||0)),loadDirection=Math.sign((z.weight||0)-(a.weight||0)),repDirection=Math.sign((z.reps||0)-(a.reps||0)),ratio=a.score?z.score/a.score:1;
+  if(repGap>=3&&loadDirection&&repDirection&&loadDirection!==repDirection){return ratio>1.02?{status:'🔵 Progress across rep ranges',note:'Load and reps moved in opposite directions, but estimated capacity improved.'}:{status:'↔ Different stimulus',note:'The rep range changed enough that a direct load comparison is not fair.'}}
+  if(ratio>1.02)return {status:'🟢 Progressed',note:'Comparable strength/capacity increased.'};
+  if(Math.abs(ratio-1)<=.02&&a.difficulty&&z.difficulty&&z.difficulty<a.difficulty)return {status:'🟢 Progressed',note:'Comparable performance was rated easier.'};
+  if(ratio<.95)return {status:'↔ Different stimulus/setup',note:'Latest numbers were lower; this is shown for context rather than labeled a regression.'};
+  return {status:'→ Maintained',note:'Performance remained within a comparable range.'};
+ }
+ if(z.score>a.score)return {status:'🟢 Progressed',note:'Latest comparable performance improved.'};
+ if(z.score===a.score&&a.difficulty&&z.difficulty&&z.difficulty<a.difficulty)return {status:'🟢 Progressed',note:'Same performance was rated easier.'};
+ if(z.score===a.score)return {status:'→ Maintained',note:'Latest comparable performance matches the starting point.'};
+ return {status:'↔ Different stimulus/setup',note:'Latest result differs, but the report does not treat a single lower result as regression.'};
+}
+function techniqueSetCount(workouts){return workouts.reduce((n,w)=>n+Object.values(w.data||{}).reduce((m,d)=>m+(Array.isArray(d)?d.filter(reportSetTechniqueFocused).length:(d?.techniqueFocus?1:0)),0),0)}
+function renderReportCards(rows,limit=999){return rows.slice(0,limit).map(r=>{const c=classifyReportRow(r);return `<div class="history-item"><div class="history-title">${esc(r.name)} · ${c.status}</div><div class="history-meta">${r.first.label} → ${r.last.label} · ${formatHistoryDate(r.first.date)} to ${formatHistoryDate(r.last.date)}</div><div class="sub" style="margin-top:5px">${esc(c.note)}</div><div class="sub" style="margin-top:5px">Best comparable performance: ${r.best.label} on ${formatHistoryDate(r.best.date)}</div></div>`}).join('')}
+function renderReports(){
+ const month=currentProgramMonth();
+ return `<section class="card pad"><strong>Progress Reports</strong><div class="sub">Choose the view that answers the question you have today.</div><div class="actions" style="margin-top:16px;display:grid;gap:12px"><button class="primary" style="text-align:left;padding:16px" onclick="openMonthlyReport()"><strong>📅 Monthly Progress</strong><span class="sub" style="display:block;color:#d0d5dd;margin-top:4px">See how you progressed through ${esc(month||'the current month')}.</span></button><button style="text-align:left;padding:16px" onclick="openAllTimeReport()"><strong>📈 All-Time Progress</strong><span class="sub" style="display:block;margin-top:4px">See patterns and progress across your complete workout history.</span></button></div><div class="previous" style="margin-top:16px"><strong>How comparisons work</strong><br>Weight, reps, exercise variation, assistance/resistance, and difficulty are considered when the data supports it. Technique Focus stays in history but is excluded from performance comparisons. A changed rep range or setup is not automatically treated as regression.</div></section>`;
+}
+function renderMonthlyReport(){
+ const month=currentProgramMonth(),all=monthlyWorkouts(),eligible=all.filter(reportComparisonEligible),rows=reportExerciseRows(all),total=all.reduce((n,w)=>n+totalVolume(w),0),tech=techniqueSetCount(all);
+ const classified=rows.map(r=>({...r,classification:classifyReportRow(r)}));
+ const progressed=classified.filter(r=>r.classification.status.includes('Progressed')||r.classification.status.includes('Progress across')).length,maintained=classified.filter(r=>r.classification.status.includes('Maintained')).length,changed=classified.filter(r=>r.classification.status.includes('Different')).length;
+ return `<section class="card pad"><div class="actions" style="margin:0 0 12px"><button class="small-btn" onclick="backToReports()">← Progress Reports</button></div><strong>📅 ${esc(month||'Monthly')} Progress</strong><div class="sub">A live month-to-date report. It becomes your completed month-end view after the final workout is logged.</div><div class="journey-grid" style="margin-top:14px"><div class="journey-box"><strong>${all.length}</strong><span>workouts</span></div><div class="journey-box"><strong>${total.toLocaleString()}</strong><span>lb training volume</span></div></div><div class="journey-grid" style="margin-top:10px"><div class="journey-box"><strong>${progressed}</strong><span>progress signals</span></div><div class="journey-box"><strong>${tech}</strong><span>technique-focus sets</span></div></div><div class="previous" style="margin-top:14px"><strong>Monthly snapshot</strong><br>🟢/🔵 ${progressed} progressed · → ${maintained} maintained · ↔ ${changed} different stimulus/setup<br>🏠 August 13, 2026 remains in workout and volume totals but is excluded from exercise-performance comparisons because it was your home/limited-equipment workout.</div></section><section class="card pad"><strong>Exercise-by-Exercise</strong><div class="sub">First comparable performance → latest comparable performance, with the full month's trajectory used to identify the best comparable result.</div>${rows.length?renderReportCards(rows):'<p class="sub">More repeated performances are needed for this month.</p>'}</section>`;
+}
+function renderAllTimeReport(){
+ const all=[...db.history].sort((a,b)=>String(a.date).localeCompare(String(b.date))),eligible=all.filter(reportComparisonEligible),rows=reportExerciseRows(all),recent=eligible.slice(-8),recentAvg=recent.length?Math.round(recent.reduce((n,w)=>n+totalVolume(w),0)/recent.length):0,tech=techniqueSetCount(all);
+ const ranked=[...rows].sort((a,b)=>{const ca=classifyReportRow(a).status,cb=classifyReportRow(b).status;return (cb.includes('Progress')?1:0)-(ca.includes('Progress')?1:0)||b.records.length-a.records.length});
+ return `<section class="card pad"><div class="actions" style="margin:0 0 12px"><button class="small-btn" onclick="backToReports()">← Progress Reports</button></div><strong>📈 All-Time Progress</strong><div class="sub">Your complete training history, using comparable exercise performances rather than simply ranking the heaviest number.</div><div class="journey-grid" style="margin-top:14px"><div class="journey-box"><strong>${all.length}</strong><span>workouts logged</span></div><div class="journey-box"><strong>${rows.length}</strong><span>repeat exercises compared</span></div></div><div class="journey-grid" style="margin-top:10px"><div class="journey-box"><strong>${recentAvg.toLocaleString()}</strong><span>avg volume · last ${recent.length}</span></div><div class="journey-box"><strong>${tech}</strong><span>technique-focus sets</span></div></div><div class="previous" style="margin-top:14px"><strong>Comparison rules</strong><br>🎯 Technique Focus sets remain in history but are excluded from performance comparisons.<br>🏠 August 13, 2026 is excluded from exercise-performance comparisons.<br>↔ Meaningful variations such as paused/tempo work remain separate rather than being forced into direct load comparisons.</div></section><section class="card pad"><strong>Long-Term Exercise Progress</strong><div class="sub">First comparable performance → latest, plus the best comparable result found in your history.</div>${ranked.length?renderReportCards(ranked):'<p class="sub">More repeated performances are needed before long-term trends appear.</p>'}</section>`;
+}
+
+function renderHome(){
+ const weekday=dayForDate(),days=Object.keys(programs),rows=[...db.history].sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date)),last=rows[0];
+ const backupCurrent=!!last&&db.lastBackupWorkoutId===last.id;
+ return `<section class="card hero"><h2>Ready to lift? 🏋️</h2><p>Choose today's workout. Your entries save automatically on this device.</p><div class="day-grid">${days.map(d=>`<button class="${d===weekday?'primary':''}" onclick="openDay('${d}')">${d}<span class="sub" style="display:block;color:${d===weekday?'#d0d5dd':'var(--muted)'}">${programs[d].title}</span></button>`).join('')}</div><div class="difficulty-guide"><strong>Difficulty Guide</strong><div class="difficulty-row"><span><b>E:</b> ~3+ reps left</span><span><b>M:</b> ~2 reps left</span><span><b>H:</b> ~0–1 reps left</span></div><div class="difficulty-note">Rate by reps left — not by how hard it felt.</div></div></section>
+ <section class="card pad"><strong>Your Strength Journey</strong><div class="journey-grid"><div class="journey-box"><strong>${db.history.length}</strong><span>workouts logged</span></div><div class="journey-box"><strong>${last?last.day:'—'}</strong><span>last workout</span></div></div>${last?`<div class="previous"><strong>Last highlight</strong><br>${esc(last.primaryHighlight||last.highlights?.[0]||'⭐ Workout complete')}</div>`:'<p class="sub">Your first completed workout will begin your story.</p>'}<div class="previous"><strong>Backup status</strong><br>${backupCurrent?'✓ Latest workout backed up':'Latest workout has not been saved to iCloud yet'}<div class="sub" style="margin-top:5px">iPhone requires you to approve each file save. Choose Save to Files → iCloud Drive → Fearless Lift Log → Backups.</div></div><div class="actions">${last?`<button onclick="replayLastFinish()">⭐ Replay Last Finish Screen</button>`:''}<button onclick="openHistory()">View History</button><button onclick="openExerciseIndex()">Exercise Index</button><button onclick="openReports()">Progress Reports</button><button onclick="openImport()">Import Workouts</button><button onclick="downloadAll()">Back Up All Data to iCloud</button></div></section>`;
+}
+function renderWorkout(){
+ const w=view.workout,p=programs[view.day],nums=stationNumbers();
+ const startCard=!w.startStation?`<section class="card pad"><strong>Which station are you starting at?</strong><div class="sub">The circular order is recorded automatically.</div><div class="start-grid" style="grid-template-columns:repeat(${nums.length},1fr)">${nums.map(n=>`<button onclick="startWorkout(${n})">${n}</button>`).join('')}</div></section>`:'';
+ const order=w.startStation?`<div class="order">Started at Station ${w.startStation} · ${w.stationOrder.join(' → ')}</div>`:'';
+ const stationOrder=w.startStation?w.stationOrder:nums;
+ const ordinals=['1st','2nd','3rd','4th','5th','6th'];
+ const stations=stationOrder.map((n,pos)=>{const done=!!w.completed[n],station=p.stations[n],ids=station.exercises;return `<section class="card" id="station-${n}" style="scroll-margin-top:88px"><div class="station-head" onclick="this.nextElementSibling.classList.toggle('hidden')"><div><div class="station-title"><span aria-hidden="true">${STATION_ICONS[n]||''}</span> Station ${n} • ${esc(station.name)}</div><div class="station-location">${esc(station.duration||'')}</div><div class="station-meta">${w.startStation?ordinals[pos]+' in workout':'Choose a starting station'}</div></div><span class="badge ${done?'done':''}">${done?'Complete':'Open'}</span></div><div class="station-body ${done?'hidden':''}">${ids.map((id,exerciseIndex)=>exerciseHtml(id,exerciseIndex,n)).join('')}<button class="complete ${done?'done':''}" onclick="event.stopPropagation();toggleStation(${n})">${done?'✓ Station Complete':'Mark Station Complete'}</button></div></section>`}).join('');
+ const notice=view.editingId?'✏️ Editing a completed workout. Make your corrections, then tap Save Changes.':'☀️ Screen stays awake while this workout is open. “Repeat Previous Performance” copies load, reps, bands, hook height, variation, difficulty, Technique Focus, and setup notes.';
+ return `<div class="awake-note">${notice}</div>${startCard}${order}${stations}<section class="card pad" id="workout-notes" style="scroll-margin-top:88px"><strong>Workout notes</strong><textarea id="workoutNotes" placeholder="Anything worth remembering…" onchange="view.workout.notes=this.value;saveDraft()">${esc(w.notes)}</textarea></section>`;
+}
+function renderSummary(){const w=view.workout,s=view.summary,highlights=s.highlights||w.highlights||['⭐ Workout complete'],backupCurrent=db.lastBackupWorkoutId===w.id,title=s.edited?'✏️ Workout Updated':'🏋️ Workout Complete!',message=s.edited?'Your corrected workout now totals':'Congratulations — you lifted';return `<section class="card summary"><h2>${title}</h2><div class="sub">${w.day} · ${w.title}</div><div class="congrats-volume">${message} ${s.volume.toLocaleString()} pounds${s.edited?'.':' today!'}</div><div class="highlights">${highlights.map(h=>`<div class="highlight">${esc(h)}</div>`).join('')}</div><div class="remember"><div class="sub">Today you'll remember:</div><strong>${esc(w.primaryHighlight||highlights[0])}</strong></div><div class="summary-stats"><div class="stat"><strong>${s.exercises}</strong><span>exercises</span></div><div class="stat"><strong>${s.sets}</strong><span>sets logged</span></div><div class="stat"><strong>${s.duration||'—'}</strong><span>${s.duration?'minutes':'duration'}</span></div></div><div class="sub" style="margin-top:8px">Training volume = weight × reps, including both dumbbells and both sides when applicable.</div><div class="notice">✓ Saved on this device<br>${backupCurrent?'✓ Latest workout backup completed':'iCloud backup still needed'}</div><div class="actions" style="margin-top:16px"><button onclick="editWorkout('${w.id}')">Edit Workout</button><button onclick="downloadBackup(view.workout)">Save to iCloud</button><button class="primary" onclick="goHome()">Return Home</button></div><p class="sub" style="margin-top:18px">${s.edited?'Correction saved.':'See you next workout. 💪'}</p></section>`}
+function renderHistory(){
+ const rows=[...db.history].sort((a,b)=>(b.finishedAt||b.date).localeCompare(a.finishedAt||a.date));
+ return `<section class="card pad"><strong>Workout History</strong><div class="sub">Your strength story, workout by workout. Tap Edit to correct a completed workout.</div>${rows.length?rows.map(w=>`<div class="history-item"><div class="history-top"><div><div class="history-title">${w.day} · ${w.title}</div><div class="history-meta">${w.date} · ${totalVolume(w).toLocaleString()} lb volume</div></div><div class="actions" style="margin-top:0"><button class="small-btn" onclick="editWorkout('${w.id}')">Edit</button><button class="small-btn" onclick="downloadBackup(db.history.find(x=>x.id==='${w.id}'))">Backup</button></div></div>${(w.highlights||[]).slice(0,3).map(h=>`<div class="sub" style="margin-top:6px">${esc(h)}</div>`).join('')}${w.notes?`<div class="sub" style="margin-top:6px">${esc(w.notes)}</div>`:''}</div>`).join(''):'<p class="sub">No completed workouts yet.</p>'}</section>`;
+}
+function render(){
+ migrateDatabaseToV14();migrateOldFriday();const app=document.getElementById('app'),footer=document.getElementById('footer'),back=document.getElementById('backBtn'),sub=document.getElementById('headerSub');
+ back.classList.toggle('hidden',view.screen==='home');back.onclick=goHome;
+ if(view.screen==='home'){sub.textContent='Know your history. Challenge yourself appropriately.';app.innerHTML=renderHome();footer.classList.add('hidden')}
+ if(view.screen==='workout'){sub.textContent=`${view.editingId?'Editing · ':''}${view.day} · ${programs[view.day].title} · ${programs[view.day].month||'August 2026'}`;app.innerHTML=renderWorkout();footer.classList.remove('hidden');footer.innerHTML=view.editingId?`<button onclick="cancelEdit()">Cancel</button><button class="primary" onclick="finishWorkout()">Save Changes</button>`:`<button onclick="resetWorkout()">Reset</button><button class="primary" ${allStationsDone(view.workout)?'':'disabled'} onclick="finishWorkout()">Finish Workout</button>`}
+ if(view.screen==='summary'){sub.textContent='Workout complete';app.innerHTML=renderSummary();footer.classList.add('hidden')}
+ if(view.screen==='history'){sub.textContent='Your strength journey';app.innerHTML=renderHistory();footer.classList.add('hidden')}
+ if(view.screen==='exerciseIndex'){sub.textContent='Your exercise history';app.innerHTML=renderExerciseIndex();footer.classList.add('hidden')}
+ if(view.screen==='reports'){sub.textContent='Your progress reports';app.innerHTML=renderReports();footer.classList.add('hidden')}
+ if(view.screen==='monthlyReport'){sub.textContent=`${currentProgramMonth()} progress`;app.innerHTML=renderMonthlyReport();footer.classList.add('hidden')}
+ if(view.screen==='allTimeReport'){sub.textContent='Your all-time progress';app.innerHTML=renderAllTimeReport();footer.classList.add('hidden')}
+}
+document.getElementById('importInput').addEventListener('change',e=>importWorkoutFiles(e.target.files));
+window.addEventListener('beforeunload',()=>{saveDraft();releaseWakeLock()});render();
+</script>
+</body>
+</html>
