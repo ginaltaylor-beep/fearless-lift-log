@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#172033">
-<title>Fearless Lift Log v16.3</title>
+<title>Fearless Lift Log v16.4</title>
 <style>
 :root{
   --bg:#f3f4f6;--card:#fff;--ink:#172033;--muted:#667085;--line:#d0d5dd;
@@ -227,7 +227,7 @@ function migrateOldFriday(){
 }
 
 function newWorkout(day,date=today()){
- const w={id:uid(),version:'16',program:programs[day].month||'August 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
+ const w={id:uid(),version:'16',program:programs[day].month||'August 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',includeInProgressReports:true,startedAt:new Date().toISOString(),finishedAt:null};
  Object.values(programs[day].stations).flatMap(st=>st.exercises).forEach(id=>w.data[id]=defaultData(exerciseDefinition(id)));
  return w;
 }
@@ -338,7 +338,7 @@ function goHome(){saveDraft();releaseWakeLock();view={screen:'home',day:null,wor
 function repairWorkoutForProgram(workout,day){
  const w=workout||newWorkout(day);
  w.day=day;w.title=programs[day].title;w.program=programs[day].month||w.program||'August 2026';
- w.data=w.data||{};w.completed=w.completed||{};w.stationOrder=Array.isArray(w.stationOrder)?w.stationOrder:[];
+ w.data=w.data||{};w.completed=w.completed||{};w.stationOrder=Array.isArray(w.stationOrder)?w.stationOrder:[];if(w.includeInProgressReports===undefined)w.includeInProgressReports=true;
  for(const id of Object.values(programs[day].stations).flatMap(st=>st.exercises)){
   if(w.data[id]===undefined)w.data[id]=defaultData(exerciseDefinition(id));
  }
@@ -600,7 +600,6 @@ function renderExerciseIndex(){
  return `<section class="card pad"><strong>Exercise Index</strong><div class="sub">Built automatically from your workout history.</div>${rows.length?rows.map(r=>`<div class="history-item"><div class="history-title">${esc(r.name)}</div><div class="history-meta">${esc(r.category)} · ${r.workouts} workout${r.workouts===1?'':'s'} · ${r.first} to ${r.last}</div>${r.best?`<div class="sub" style="margin-top:5px">Best recorded weight: ${r.best} lb${r.repsAtBest?` × ${r.repsAtBest}`:''}</div>`:''}</div>`).join(''):'<p class="sub">The index will populate as workouts are imported or completed.</p>'}</section>`;
 }
 
-const REPORT_HOME_EXCLUDED_DATES=new Set(['2026-08-13']);
 const LONG_BAND_STRENGTH={Purple:1,Green:2,Blue:3,Orange:4,Red:5};
 const SMALL_BAND_STRENGTH={Green:1,Blue:2,Yellow:3,Red:4,Black:5};
 const REPORT_BAND_RULES={
@@ -611,7 +610,7 @@ const REPORT_BAND_RULES={
  reverse_nordic:{family:'long',role:'assistance'},
  reverse_nordic_curl:{family:'long',role:'assistance'}
 };
-function reportComparisonEligible(w){return !!w&&!REPORT_HOME_EXCLUDED_DATES.has(w.date)}
+function reportComparisonEligible(w){return !!w&&w.includeInProgressReports!==false}
 function reportSetTechniqueFocused(s){return !!s?.techniqueFocus}
 function currentProgramMonth(){return Object.values(programs||{})[0]?.month||window.FEARLESS_PROGRAM?.month||''}
 function monthDatePrefix(month){const d=new Date(`${month} 1`);return Number.isNaN(d.getTime())?'':`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`}
@@ -710,7 +709,7 @@ function renderMonthlyReport(){
  const month=currentProgramMonth(),all=monthlyWorkouts(),eligible=all.filter(reportComparisonEligible),rows=reportExerciseRows(all),total=all.reduce((n,w)=>n+totalVolume(w),0),tech=techniqueSetCount(all);
  const classified=rows.map(r=>({...r,classification:classifyReportRow(r)}));
  const progressed=classified.filter(r=>r.classification.status.includes('Progressed')||r.classification.status.includes('Progress across')).length,maintained=classified.filter(r=>r.classification.status.includes('Maintained')).length,changed=classified.filter(r=>r.classification.status.includes('Different')).length;
- return `<section class="card pad"><div class="actions" style="margin:0 0 12px"><button class="small-btn" onclick="backToReports()">← Progress Reports</button></div><strong>📅 ${esc(month||'Monthly')} Progress</strong><div class="sub">A live month-to-date report. It becomes your completed month-end view after the final workout is logged.</div><div class="journey-grid" style="margin-top:14px"><div class="journey-box"><strong>${all.length}</strong><span>workouts</span></div><div class="journey-box"><strong>${total.toLocaleString()}</strong><span>lb training volume</span></div></div><div class="journey-grid" style="margin-top:10px"><div class="journey-box"><strong>${progressed}</strong><span>progress signals</span></div><div class="journey-box"><strong>${tech}</strong><span>technique-focus sets</span></div></div><div class="previous" style="margin-top:14px"><strong>Monthly snapshot</strong><br>🟢/🔵 ${progressed} progressed · → ${maintained} maintained · ↔ ${changed} different stimulus/setup<br>🏠 August 13, 2026 remains in workout and volume totals but is excluded from exercise-performance comparisons because it was your home/limited-equipment workout.</div></section><section class="card pad"><strong>Exercise-by-Exercise</strong><div class="sub">First comparable performance → latest comparable performance, with the full month's trajectory used to identify the best comparable result.</div>${rows.length?renderReportCards(rows):'<p class="sub">More repeated performances are needed for this month.</p>'}</section>`;
+ return `<section class="card pad"><div class="actions" style="margin:0 0 12px"><button class="small-btn" onclick="backToReports()">← Progress Reports</button></div><strong>📅 ${esc(month||'Monthly')} Progress</strong><div class="sub">A live month-to-date report. It becomes your completed month-end view after the final workout is logged.</div><div class="journey-grid" style="margin-top:14px"><div class="journey-box"><strong>${all.length}</strong><span>workouts</span></div><div class="journey-box"><strong>${total.toLocaleString()}</strong><span>lb training volume</span></div></div><div class="journey-grid" style="margin-top:10px"><div class="journey-box"><strong>${progressed}</strong><span>progress signals</span></div><div class="journey-box"><strong>${tech}</strong><span>technique-focus sets</span></div></div><div class="previous" style="margin-top:14px"><strong>Monthly snapshot</strong><br>🟢/🔵 ${progressed} progressed · → ${maintained} maintained · ↔ ${changed} different stimulus/setup</div></section><section class="card pad"><strong>Exercise-by-Exercise</strong><div class="sub">First comparable performance → latest comparable performance, with the full month's trajectory used to identify the best comparable result.</div>${rows.length?renderReportCards(rows):'<p class="sub">More repeated performances are needed for this month.</p>'}</section>`;
 }
 function renderAllTimeReport(){
  const all=[...db.history].sort((a,b)=>String(a.date).localeCompare(String(b.date))),eligible=all.filter(reportComparisonEligible),rows=reportExerciseRows(all),recent=eligible.slice(-8),recentAvg=recent.length?Math.round(recent.reduce((n,w)=>n+totalVolume(w),0)/recent.length):0,tech=techniqueSetCount(all);
@@ -726,7 +725,7 @@ function renderHome(){
 }
 function renderWorkout(){
  const w=view.workout,p=programs[view.day],nums=stationNumbers();
- const startCard=!w.startStation?`<section class="card pad"><strong>Which station are you starting at?</strong><div class="sub">The circular order is recorded automatically.</div><div class="start-grid" style="grid-template-columns:repeat(${nums.length},1fr)">${nums.map(n=>`<button onclick="startWorkout(${n})">${n}</button>`).join('')}</div></section>`:'';
+ const reportToggle=`<label style="display:flex;align-items:center;gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid #e5e7eb;font-size:12px;color:var(--muted)"><input type="checkbox" style="width:18px;min-height:18px;margin:0" ${w.includeInProgressReports!==false?'checked':''} onchange="view.workout.includeInProgressReports=this.checked;saveDraft()"><span>Include this workout in Progress Reports</span></label>`;const startCard=!w.startStation?`<section class="card pad"><strong>Which station are you starting at?</strong><div class="sub">The circular order is recorded automatically.</div><div class="start-grid" style="grid-template-columns:repeat(${nums.length},1fr)">${nums.map(n=>`<button onclick="startWorkout(${n})">${n}</button>`).join('')}</div>${reportToggle}</section>`:(view.editingId?`<section class="card pad"><strong style="font-size:13px">Progress Reports</strong>${reportToggle}</section>`:'');
  const order=w.startStation?`<div class="order">Started at Station ${w.startStation} · ${w.stationOrder.join(' → ')}</div>`:'';
  const stationOrder=w.startStation?w.stationOrder:nums;
  const ordinals=['1st','2nd','3rd','4th','5th','6th'];
