@@ -77,7 +77,7 @@ The app will now behave much like a native iPhone app.
 ## Complete a Workout
 
 1. Select today's workout.
-2. Choose your starting station.
+2. Choose your starting station. The **Include this workout in Progress Reports** option is checked by default; leave it checked for a normal workout.
 3. Log the requested information for each exercise.
 4. Rate difficulty using **E / M / H** when applicable.
 5. Mark **Technique Focus** when you intentionally prioritize technique or form over load.
@@ -97,6 +97,16 @@ Rate difficulty by the number of reps you believe you had left—not simply by h
 Use **Technique Focus** when you intentionally adjust a set to prioritize things such as form, control, tempo, range of motion, positioning, or movement quality.
 
 You can also use the exercise's Technique / Setup notes to record what you were working on. Technique Focus is stored with your workout history so future progress analysis can distinguish intentional technique work from a change in performance.
+
+### Include this workout in Progress Reports
+
+This option appears when you choose your starting station and is **checked by default**. For a normal workout, simply leave it checked.
+
+Deselect **Include this workout in Progress Reports** when the entire workout was completed under circumstances that would make its performance numbers misleading to compare with your usual training—for example, a home or hotel workout with limited weights, substantially different equipment, or another unusual setup.
+
+The workout is still saved in Workout History and remains part of your training record; it is simply excluded from direct performance comparisons in Progress Reports. This setting applies to the **whole workout**, so you do not need to make the choice for each exercise.
+
+Do **not** deselect it merely because a workout was difficult or your numbers were lower than usual. If it was a normal training session under your usual conditions, leave it included so the reports can reflect the natural ups and downs of your progress.
 
 ---
 
@@ -204,6 +214,8 @@ This allows monthly training programs to be updated without replacing the core a
 | **v15.2** | Moved Saturday beside Friday on the Home Screen and added the E / M / H Difficulty Guide |
 | **v16** | Separated monthly workout programming into `program.js` while keeping the core app in `index.html`; added Technique Focus to every exercise/set as structured workout-history data; preserved historical lookup, Last Performed, exercise-specific logging, Finish Screen/replay, editing, backup/import, and existing workout history |
 | **v16.2** | Added **Progress Reports** with separate **Monthly Progress** and **All-Time Progress** views. Monthly Progress follows the current program month and evaluates comparable performances using exercise context such as load, reps, difficulty, variations, bands, assistance, and Technique Focus. All-Time Progress analyzes the complete saved workout history for longer-term performance trends and best comparable efforts. |
+| **v16.4** | Added a workout-level **Include this workout in Progress Reports** option. It is included by default and can be deselected for unusual sessions whose equipment or conditions would make direct performance comparisons misleading. |
+| **v16.5** | Improved All-Time Progress search with persistent previous/next match navigation while moving through long reports. |
 
 ---
 
