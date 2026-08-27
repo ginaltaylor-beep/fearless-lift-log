@@ -30,6 +30,10 @@ Fearless Lift Log is a lightweight workout tracker that runs directly on your iP
 - 📱 Install on your iPhone Home Screen like a native app
 - 🔄 Receive updated monthly programming when the published app/program files are updated
 - 🧩 Monthly workout programming is separated from the core app beginning with v16, making future program updates safer and simpler
+- 📊 Open **Progress Reports** for two views: **Monthly Progress** and **All-Time Progress**
+- 📅 **Monthly Progress** follows the current program month and summarizes comparable exercise progress as the month develops
+- 📈 **All-Time Progress** uses your saved workout history to show longer-term strength and performance trends
+- 🧠 Progress comparisons account for more than load alone, including reps, difficulty, exercise variations, bands, assistance, and Technique Focus where applicable
 
 ---
 
@@ -93,6 +97,37 @@ Rate difficulty by the number of reps you believe you had left—not simply by h
 Use **Technique Focus** when you intentionally adjust a set to prioritize things such as form, control, tempo, range of motion, positioning, or movement quality.
 
 You can also use the exercise's Technique / Setup notes to record what you were working on. Technique Focus is stored with your workout history so future progress analysis can distinguish intentional technique work from a change in performance.
+
+---
+
+## Progress Reports
+
+Tap **Progress Reports** from the Home Screen to choose between two training-history views.
+
+### 📅 Monthly Progress
+
+**Monthly Progress** analyzes the current program month and updates as workouts are completed. You can open it at any point during the month; after the final workout, it becomes the completed picture of that month’s training.
+
+The report is designed to recognize meaningful progress without assuming that heavier weight always means better performance. Depending on the exercise and available history, it can consider load, reps, difficulty, exercise variation, band resistance or assistance, and other structured workout data.
+
+Monthly comparisons can identify patterns such as:
+
+- Progressed
+- Progress across different rep ranges
+- Maintained performance
+- Different stimulus or setup
+- Technique Focus
+- Insufficient comparable data
+
+Technique Focus sets remain part of workout history but are not treated as performance declines or ordinary PR comparisons.
+
+### 📈 All-Time Progress
+
+**All-Time Progress** looks across your complete saved workout history rather than only the current program month. It is intended to show longer-term exercise performance, repeat performances, best comparable efforts, and broader strength trends.
+
+Related exercises can be understood as part of the same movement family while meaningful variations remain separate for direct performance comparisons. For example, barbell and dumbbell versions, incline and flat pressing, and paused or tempo variations are not treated as interchangeable loads.
+
+The reports are generated from the workout history stored on your device, so corrections made with **Edit Workout** are reflected in future report calculations.
 
 ---
 
@@ -168,6 +203,7 @@ This allows monthly training programs to be updated without replacing the core a
 | **v15** | Increased Last Performed font size, reversed Last Performed set order to newest-first, added Horizontal Pull Apart and Reverse Nordic band choices, added Hamstring Curl variations, added Single-Leg Plyo Step-Up box height/weight logging, and corrected Finish Screen volume math for applicable “each side” exercises |
 | **v15.2** | Moved Saturday beside Friday on the Home Screen and added the E / M / H Difficulty Guide |
 | **v16** | Separated monthly workout programming into `program.js` while keeping the core app in `index.html`; added Technique Focus to every exercise/set as structured workout-history data; preserved historical lookup, Last Performed, exercise-specific logging, Finish Screen/replay, editing, backup/import, and existing workout history |
+| **v16.2** | Added **Progress Reports** with separate **Monthly Progress** and **All-Time Progress** views. Monthly Progress follows the current program month and evaluates comparable performances using exercise context such as load, reps, difficulty, variations, bands, assistance, and Technique Focus. All-Time Progress analyzes the complete saved workout history for longer-term performance trends and best comparable efforts. |
 
 ---
 
