@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#172033">
-<title>Fearless Lift Log v15.2</title>
+<title>Fearless Lift Log v16</title>
 <style>
 :root{
   --bg:#f3f4f6;--card:#fff;--ink:#172033;--muted:#667085;--line:#d0d5dd;
@@ -44,6 +44,7 @@ input,select,textarea{width:100%;border:1px solid #c7cbd1;border-radius:10px;pad
 
 .cue{font-size:12px;line-height:1.45;background:rgba(255,255,255,.62);border-left:4px solid rgba(23,32,51,.22);border-radius:8px;padding:8px 10px;margin:7px 0 9px}
 .setup-field{margin-top:9px}.setup-field textarea{min-height:58px;font-size:15px}
+.technique-focus{grid-column:1/-1;display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.68);border:1px solid #d0d5dd;border-radius:10px;padding:9px 10px;margin-top:2px;font-size:14px;font-weight:700}.technique-focus input{width:21px;min-height:21px;margin:0;flex:0 0 auto}.technique-focus .tf-note{font-size:11px;font-weight:500;color:var(--muted);margin-left:auto}
 .band-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:4px}.band-choice{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.72);border:1px solid #d0d5dd;border-radius:9px;padding:8px;font-size:14px}.band-choice input{width:20px;min-height:20px;margin:0}
 .station-location{font-size:13px;font-weight:800;color:var(--accent2);margin-top:2px}.program-badge{display:inline-block;margin-left:6px;font-size:11px;border-radius:999px;padding:3px 7px;background:#eef2ff;color:#344054;vertical-align:middle}
 
@@ -60,6 +61,7 @@ input,select,textarea{width:100%;border:1px solid #c7cbd1;border-radius:10px;pad
 <main id="app"></main>
 <div id="footer" class="footer hidden"></div>
 <input id="importInput" class="hidden" type="file" accept="application/json,.json" multiple>
+<script src="program.js"></script>
 <script>
 const STORAGE_KEY='fearlessLiftLog_v02';
 const OLD_KEY='fearlessLiftLogFriday_v01';
@@ -116,59 +118,12 @@ const HISTORICAL_EXERCISE_SEED={"1_2_turkish_get_up":{"name":"1/2 Turkish Get Up
 const HISTORICAL_NAME_ALIASES={"1/2 turkish get up":"1_2_turkish_get_up","b-stance landmine rdl":"b_stance_landmine_rdl","barbell back squat":"barbell_back_squat","barbell back squat (pause)":"barbell_back_squat_pause","barbell back squat (tempo: 3-2-1 lower)":"barbell_back_squat_tempo_3_2_1_lower","barbell bench press":"barbell_bench_press","barbell bent over row":"barbell_bent_over_row","barbell box squat":"barbell_box_squat","barbell deadlift":"barbell_deadlift","barbell hip thrust":"barbell_hip_thrust","barbell push press":"barbell_push_press","barbell rdl":"barbell_romanian_deadlift","barbell reverse lunge":"barbell_reverse_lunge","bench support row":"bench_support_row","bench supported row":"bench_supported_row","bent over y's":"bent_over_y_s","bicep curls":"dumbbell_bicep_curls","bulgarian split squat":"bulgarian_split_squat","cable tricep pushdown/extension":"cable_tricep_pushdown_extension","close grip bench press":"close_grip_bench_press","conventional deadlift":"conventional_deadlift","dumbbell bench press":"dumbbell_bench_press","dumbbell deadlift w/ 2-second pause":"dumbbell_deadlift_w_2_second_pause","dumbbell hip thrust + hold":"dumbbell_hip_thrust_hold","dumbbell pullover":"dumbbell_pullover","dumbbell push press":"dumbbell_push_press","dumbbell rdl":"dumbbell_rdl","dumbbell reverse lunge":"dumbbell_reverse_lunge","eccentric step down":"eccentric_step_down","farmers carry":"farmers_carry","front squat":"front_squat","hammer curl":"hammer_curl","hanging knee raise":"hanging_knee_raise","hex bar deadlift":"hex_bar_deadlift","hex bar deadlift (b-stance)":"hex_bar_deadlift_b_stance","hex bar deadlift with pause":"hex_bar_deadlift_with_pause","hip airplanes":"hip_airplanes","incline barbell bench press":"incline_barbell_bench_press","incline bench press":"incline_bench_press","incline dumbbell bench press":"incline_dumbbell_bench_press","lat pull down":"lat_pull_down","lateral raise":"lateral_raise","offset carry":"offset_carry","overhead tricep extension":"overhead_tricep_extension","overhead tricep extensions":"overhead_tricep_extension","push up":"push_up","renegade row / dumbbell squat / jump squat circuit":"renegade_row_dumbbell_squat_jump_squat_circuit","reverse fly":"reverse_fly","reverse plank":"reverse_plank","seated alternating bicep curl":"seated_alternating_bicep_curl","seated high to low row":"seated_high_to_low_row","seated lat pulldown (handles)":"seated_lat_pulldown_handles","seated shoulder press":"seated_shoulder_press","single arm landmine press":"single_arm_landmine_press","single arm overhead march":"single_arm_overhead_march","single leg hip thrust (dumbbell)":"single_leg_hip_thrust","slide lateral lunge":"slide_lateral_lunge","slider hamstring curl (3-second lower)":"slider_hamstring_curl_3_second_lower","snatch":"snatch","spanish squat":"spanish_squat","strict bicep curl":"strict_bicep_curl","treadmill":"treadmill","tricep dips":"tricep_dips","upright row":"upright_row","walking lunges":"walking_lunges","wall clam":"wall_clam"};
 Object.assign(exercises,HISTORICAL_EXERCISE_SEED);
 
-Object.assign(exercises,{
- barbell_back_squat:{name:'Back Squat',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Lower Body Push',equipment:'Barbell',target:'6–8'},
- horizontal_pull_apart:{name:'Horizontal Pull Apart',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Upper Body Pull',equipment:'Band',target:'10',bandOptions:['Green','Blue','Purple']},
- pull_up_assisted:{name:'Pull Up',kind:'pullup',label:'Assistance setup and reps',increment:null,multiplier:0,category:'Upper Body Pull',equipment:'Bands',target:'5+',cue:'Substitute seated lat pulldown with handles if needed.'},
- meadow_row:{name:'Meadow Row',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Upper Body Pull',equipment:'Landmine',target:'8 each side'},
- slider_reverse_lunge:{name:'Slider Reverse Lunge',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Lower Body Push',equipment:'Dumbbells / slider',target:'6–8 each side',cue:'Complete one side at a time.'},
- shoulder_external_rotation:{name:'Shoulder External Rotation',kind:'weight',label:'Weight / resistance',increment:2.5,multiplier:1,category:'Shoulder',equipment:'Cable / band',target:'10 each side'},
- a_frame_russian_twist:{name:'A-Frame Russian Twist',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Core',equipment:'External load',target:'8–10 each side'},
- high_to_low_plank:{name:'High-to-Low Plank',kind:'plankSplit',label:'Full and knee reps',increment:null,multiplier:0,category:'Core',equipment:'Bodyweight',target:'10 total'},
- monster_walks:{name:'Monster Walks',kind:'band',label:'Band color',bandOptions:MONSTER_WALK_BANDS,increment:null,multiplier:0,category:'Lower Body Push',equipment:'Band',target:'6 forward + 6 backward'},
- back_squat:{name:'Back Squat',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Lower Body Push',equipment:'Barbell',target:'6–8'},
- dumbbell_fly:{name:'Dumbbell Fly',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells',target:'10–12'},
- single_arm_push_press:{name:'Single-Arm Push Press',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Upper Body Push',equipment:'Dumbbell / kettlebell',target:'5 each side'},
- cossack_squat:{name:'Cossack Squat',kind:'weight',label:'Weight / resistance',increment:2.5,multiplier:1,category:'Lower Body Push',equipment:'Varies',target:'5 each side'},
- half_kneeling_soleus_raise:{name:'Half-Kneeling Soleus Raise',kind:'weight',label:'Weight / resistance',increment:2.5,multiplier:1,category:'Lower Body',equipment:'Varies',target:'8 each side'},
- half_kneeling_rainbow_slam:{name:'Half-Kneeling Rainbow Slam',kind:'weight',label:'Ball weight',increment:2.5,multiplier:1,category:'Power',equipment:'Medicine ball',target:'5 each side'},
- standing_banded_cable_hip_flexion:{name:'Standing Banded Hip Flexion',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Hinge',equipment:'Band',bandOptions:['Green','Blue','Purple'],target:'6 each side'},
- hip_thrust:{name:'Hip Thrust',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Hinge',equipment:'Barbell / dumbbell',target:'8–10'},
- copenhagen_dip:{name:'Copenhagen Dip',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Core',equipment:'Bodyweight',target:'6–10 each side'},
- scap_push_up:{name:'Scap Push-Up',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Upper Body Push',equipment:'Bodyweight',target:'10'},
- pause_goblet_squat:{name:'Pause Goblet Squat',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Lower Body Push',equipment:'Dumbbell / kettlebell',target:'8–10',cue:'3-second pause.'},
- bent_elbow_lateral_raise:{name:'Bent-Elbow (Bro) Lateral Raise',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Shoulder',equipment:'Dumbbells',target:'8–10'},
- plate_squat_overhead_press:{name:'Plate Squat to Overhead Press',kind:'weight',label:'Plate weight',increment:2.5,multiplier:1,category:'Upper Body Push',equipment:'Plate',target:'10'},
- alternating_single_leg_v_up:{name:'Alternating Single-Leg V-Up',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Core',equipment:'Bodyweight',target:'6–10 each side'},
- deadlift:{name:'Deadlift',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Hinge',equipment:'Barbell',target:'6–8'},
- reverse_nordic:{name:'Reverse Nordic',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Lower Body',equipment:'Band-assisted',bandOptions:['Orange','Green','Purple'],target:'10'},
- elevated_plank_single_arm_row:{name:'Elevated Plank with Single-Arm Row',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Upper Body Pull',equipment:'Dumbbell / cable',target:'8 each side'},
- concentration_curl:{name:'Concentration Curl',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Upper Body Pull',equipment:'Dumbbell',target:'10–12'},
- hamstring_curl:{name:'Hamstring Curl',kind:'hamstringCurl',label:'Weight / resistance',increment:5,multiplier:1,category:'Hinge',equipment:'Machine / slider',target:'10'},
- dumbbell_wood_chopper:{name:'Dumbbell Wood Chopper',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Core',equipment:'Dumbbell',target:'10 each side'},
- landmine_cross_body_push_press:{name:'Landmine Cross-Body Push Press',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Upper Body Push',equipment:'Landmine',target:'6 each side'},
- cable_prayer:{name:'Cable Prayer',kind:'weight',label:'Cable weight',increment:5,multiplier:1,category:'Core',equipment:'Cable',target:'8–10'},
- cable_tricep_extension:{name:'Cable Tricep Extension',kind:'weight',label:'Cable weight',increment:5,multiplier:1,category:'Upper Body Push',equipment:'Cable',target:'8–10'},
- close_grip_dumbbell_bench_press:{name:'Close-Grip Dumbbell Bench Press',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells',target:'8–10'},
- lyt_raise_wrist_extension:{name:'LYT Raise with Wrist Extension',kind:'reps',label:'Rounds',increment:null,multiplier:0,category:'Shoulder',equipment:'Light weights',target:'5 rounds'},
- curtsey_lunge:{name:'Curtsey Lunge',kind:'weight',label:'Weight / resistance',increment:2.5,multiplier:1,category:'Lower Body Push',equipment:'Varies',target:'6 each side',cue:'Nose over knees over toes.'},
- single_leg_plyo_step_up:{name:'Single-Leg Plyo Step-Up',kind:'singleLegPlyo',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Power',equipment:'Dumbbells / box',target:'4 each side'}
-});
-
-// Structured logging overrides for the current program.
-Object.assign(exercises,{
- push_up:{...exercises.push_up,name:'Push Up',kind:'pushupVariation',label:'Variation and reps',increment:null,multiplier:0,category:'Upper Body Push',equipment:'Bodyweight'},
- hammer_curl:{...exercises.hammer_curl,name:'Hammer Curl',kind:'weightHold',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Upper Body Pull',equipment:'Dumbbells'}
-});
-
-const programs={
- Monday:{title:'Upper Body Pull',month:'August 2026',stations:{1:{name:'Rack',duration:'9.5 min',exercises:['pull_up_assisted','meadow_row']},2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},3:{name:'Bench',duration:'9.5 min · 4 sets',exercises:['slider_reverse_lunge','shoulder_external_rotation']},4:{name:'Floor',duration:'9.5 min',exercises:['a_frame_russian_twist','overhead_tricep_extension','high_to_low_plank']}}},
- Tuesday:{title:'Lower Body Push',month:'August 2026',stations:{1:{name:'Rack',duration:'9.5 min',exercises:['monster_walks','barbell_back_squat']},2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},3:{name:'Bench',duration:'9.5 min',exercises:['dumbbell_fly','single_arm_push_press']},4:{name:'Floor',duration:'9.5 min',exercises:['cossack_squat','half_kneeling_soleus_raise','half_kneeling_rainbow_slam']}}},
- Wednesday:{title:'Hinge Focus',month:'August 2026',stations:{1:{name:'Rack',duration:'9.5 min',exercises:['standing_banded_cable_hip_flexion','hip_thrust']},2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},3:{name:'Bench',duration:'9.5 min',exercises:['copenhagen_dip','dumbbell_rdl']},4:{name:'Floor',duration:'9.5 min',exercises:['scap_push_up','push_up','hammer_curl']}}},
- Thursday:{title:'Upper Body Push',month:'August 2026',stations:{1:{name:'Rack',duration:'9.5 min',exercises:['barbell_bench_press','horizontal_pull_apart']},2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},3:{name:'Bench',duration:'9.5 min',exercises:['pause_goblet_squat','bent_elbow_lateral_raise']},4:{name:'Floor',duration:'9.5 min',exercises:['plate_squat_overhead_press','alternating_single_leg_v_up']}}},
- Friday:{title:'Lower Body Pull',month:'August 2026',stations:{1:{name:'Rack',duration:'9.5 min',exercises:['deadlift','reverse_nordic']},2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},3:{name:'Bench',duration:'9.5 min',exercises:['elevated_plank_single_arm_row','concentration_curl']},4:{name:'Floor',duration:'9.5 min',exercises:['hamstring_curl','dumbbell_wood_chopper']}}},
- Saturday:{title:'Accessory Day',month:'August 2026',stations:{1:{name:'Rack',duration:'9.5 min',exercises:['landmine_cross_body_push_press','cable_prayer','cable_tricep_extension']},2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},3:{name:'Bench',duration:'9.5 min',exercises:['close_grip_dumbbell_bench_press','lyt_raise_wrist_extension']},4:{name:'Floor',duration:'9.5 min',exercises:['curtsey_lunge','single_leg_plyo_step_up']}}}
-};
+// Monthly workout programming is loaded from program.js.
+if(!window.FEARLESS_PROGRAM || !window.FEARLESS_PROGRAM.programs){
+ throw new Error('Fearless Lift Log program.js could not be loaded.');
+}
+Object.assign(exercises, window.FEARLESS_PROGRAM.exercises || {});
+const programs = window.FEARLESS_PROGRAM.programs;
 const STATION_ICONS={1:'🏋️',2:'🏃',3:'🪑',4:'🤸'};
 
 let db=loadDb();
@@ -238,13 +193,13 @@ function migrateDatabaseToV14(){
   delete mapped.back_squat;
   return mapped;
  };
- db.history=(db.history||[]).map(w=>({...w,version:'15.1',data:unifyBackSquat(w.data)}));
- db.drafts=Object.fromEntries(Object.entries(db.drafts||{}).map(([day,w])=>[day,{...w,version:'15.1',data:unifyBackSquat(w.data)}]));
+ db.history=(db.history||[]).map(w=>({...w,version:'16',data:unifyBackSquat(w.data)}));
+ db.drafts=Object.fromEntries(Object.entries(db.drafts||{}).map(([day,w])=>[day,{...w,version:'16',data:unifyBackSquat(w.data)}]));
  db.increments=Object.fromEntries(Object.entries(db.increments||{}).map(([id,v])=>[id==='back_squat'?'barbell_back_squat':canonicalExerciseId(id),Number(v)]).filter(([id,v])=>exerciseDefinition(id)&&Number.isFinite(v)&&v>0));
  db.exerciseLibrary=db.exerciseLibrary||{};db.version='15.1';saveDb();
 }
 
-function blankDb(){return {version:'15.1' ,program:'August 2026',history:[],drafts:{},increments:{},exerciseLibrary:{},lastBackupAt:null,lastBackupWorkoutId:null}}
+function blankDb(){return {version:'16' ,program:'August 2026',history:[],drafts:{},increments:{},exerciseLibrary:{},lastBackupAt:null,lastBackupWorkoutId:null}}
 function loadDb(){try{return {...blankDb(),...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch{return blankDb()}}
 function saveDb(){exerciseHistoryIndexCache=null;localStorage.setItem(STORAGE_KEY,JSON.stringify(db))}
 function esc(v){return String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
@@ -272,22 +227,22 @@ function migrateOldFriday(){
 }
 
 function newWorkout(day,date=today()){
- const w={id:uid(),version:'15.1',program:programs[day].month||'August 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
+ const w={id:uid(),version:'16',program:programs[day].month||'August 2026',day,title:programs[day].title,date,startStation:null,stationOrder:[],completed:{},data:{},notes:'',startedAt:new Date().toISOString(),finishedAt:null};
  Object.values(programs[day].stations).flatMap(st=>st.exercises).forEach(id=>w.data[id]=defaultData(exerciseDefinition(id)));
  return w;
 }
 function defaultData(ex){
- if(ex.kind==='cardio') return {speed:'',distance:'',difficulty:'',notes:'',setup:''};
- if(ex.kind==='pullup') return [{bands:[],hookHeight:'',reps:'',difficulty:'',setup:''}];
- if(ex.kind==='plankSplit') return [{fullReps:'',kneeReps:'',difficulty:'',setup:''}];
- if(ex.kind==='pushupVariation') return [{variation:'',reps:'',difficulty:'',setup:''}];
- if(ex.kind==='weightHold') return [{weight:'',reps:'',holdSeconds:'',difficulty:'',setup:''}];
- if(ex.kind==='hamstringCurl') return [{weight:'',reps:'',variation:'',difficulty:'',setup:''}];
- if(ex.kind==='singleLegPlyo') return [{weight:'',boxHeight:'',reps:'',difficulty:'',setup:''}];
- if(ex.kind==='time') return [{seconds:'',difficulty:'',setup:''}];
- if(ex.kind==='reps') return [{reps:'',difficulty:'',setup:''}];
- if(ex.kind==='drop') return [{weight1:'',weight2:'',reps:'',difficulty:'',setup:''}];
- return [{weight:'',reps:'',difficulty:'',setup:''}];
+ if(ex.kind==='cardio') return {speed:'',distance:'',difficulty:'',notes:'',setup:'',techniqueFocus:false};
+ if(ex.kind==='pullup') return [{bands:[],hookHeight:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='plankSplit') return [{fullReps:'',kneeReps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='pushupVariation') return [{variation:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='weightHold') return [{weight:'',reps:'',holdSeconds:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='hamstringCurl') return [{weight:'',reps:'',variation:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='singleLegPlyo') return [{weight:'',boxHeight:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='time') return [{seconds:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='reps') return [{reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='drop') return [{weight1:'',weight2:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ return [{weight:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
 }
 function currentIncrement(id){return Number(db.increments[id]??exerciseDefinition(id).increment??2.5)}
 function setIncrement(id,v){db.increments[id]=Number(v);saveDb();render()}
@@ -359,7 +314,7 @@ function formatHistoryDate(value){
 function lastExerciseSummary(id){
  const record=mostRecentExerciseRecord(id); if(!record) return 'No prior workout recorded yet.';
  const h=record.workout,ex=exerciseDefinition(id),d=h.data[record.exerciseId],date=formatHistoryDate(h.date);
- if(ex.kind==='cardio') return `Last performed ${date}: speed ${d?.speed||'—'}${d?.distance?` · distance ${d.distance}`:''}${d?.setup?` · ${d.setup}`:''}`;
+ if(ex.kind==='cardio') return `Last performed ${date}: speed ${d?.speed||'—'}${d?.distance?` · distance ${d.distance}`:''}${d?.techniqueFocus?' · 🎯 Technique focus':''}${d?.setup?` · ${d.setup}`:''}`;
  if(!Array.isArray(d)) return `Last performed ${date}: prior data available.`;
  const parts=[...d].reverse().map(s=>{
   let main='';
@@ -374,7 +329,7 @@ function lastExerciseSummary(id){
   else if(ex.kind==='reps') main=`${s.reps||'—'} reps`;
   else if(ex.kind==='drop') main=`${s.weight1||'—'}→${s.weight2||'—'} × ${s.reps||'—'}`;
   else main=`${s.weight||'—'} lb × ${s.reps||'—'}`;
-  return `${main}${s.difficulty?` · ${s.difficulty}`:''}${s.setup?` · ${s.setup}`:''}`;
+  return `${main}${s.difficulty?` · ${s.difficulty}`:''}${s.techniqueFocus?' · 🎯 Technique focus':''}${s.setup?` · ${s.setup}`:''}`;
  }).join(' | ');
  return `Last performed ${date}: ${parts}`;
 }
@@ -448,8 +403,9 @@ function totalVolume(w){
  }
  return Math.round(total);
 }
-function countSets(w){let n=0;for(const [id,d] of Object.entries(w.data)){const ex=exerciseDefinition(id);if(Array.isArray(d))n+=d.filter(s=>Object.values(s).some(v=>String(v).trim()!=='')).length;else if(exerciseDefinition(id)?.kind==='cardio'&&Object.values(d).some(v=>String(v).trim()!==''))n++}return n}
-function countExercises(w){let n=0;for(const d of Object.values(w.data)){if(Array.isArray(d)){if(d.some(s=>Object.values(s).some(v=>String(v).trim()!=='')))n++}else if(Object.values(d).some(v=>String(v).trim()!==''))n++}return n}
+function hasLoggedValue(obj){return Object.values(obj||{}).some(v=>typeof v==='boolean'?v:String(v).trim()!=='')}
+function countSets(w){let n=0;for(const [id,d] of Object.entries(w.data)){const ex=exerciseDefinition(id);if(Array.isArray(d))n+=d.filter(s=>hasLoggedValue(s)).length;else if(exerciseDefinition(id)?.kind==='cardio'&&hasLoggedValue(d))n++}return n}
+function countExercises(w){let n=0;for(const d of Object.values(w.data)){if(Array.isArray(d)){if(d.some(s=>hasLoggedValue(s)))n++}else if(hasLoggedValue(d))n++}return n}
 function durationMinutes(w){if(!w.startedAt||!w.finishedAt)return null;return Math.max(1,Math.round((new Date(w.finishedAt)-new Date(w.startedAt))/60000))}
 function exerciseMax(id,w){const ex=exerciseDefinition(id),d=w?.data?.[id];if(!ex||!Array.isArray(d))return 0;if(ex.kind==='drop')return Math.max(0,...d.flatMap(s=>[Number(s.weight1)||0,Number(s.weight2)||0]));if(!['weight'].includes(ex.kind))return 0;return Math.max(0,...d.map(s=>Number(s.weight)||0))}
 function repsAtMax(id,w,max){const d=w?.data?.[id];if(!Array.isArray(d)||!max)return 0;return d.reduce((n,s)=>n+((Number(s.weight)||0)===max?(Number(s.reps)||0):0),0)}
@@ -485,7 +441,7 @@ function finishWorkout(){
  const w=view.workout,editing=!!view.editingId;if(!editing&&!allStationsDone(w)){alert('Mark all stations complete before finishing the workout.');return}
  w.notes=document.getElementById('workoutNotes')?.value||w.notes||'';
  if(!editing)w.finishedAt=new Date().toISOString();
- w.version='15.1';w.highlights=workoutHighlights(w);w.primaryHighlight=w.highlights[0];
+ w.version='16';w.highlights=workoutHighlights(w);w.primaryHighlight=w.highlights[0];
  w.finishSummary={volume:totalVolume(w),sets:countSets(w),exercises:countExercises(w),duration:durationMinutes(w),highlights:[...w.highlights],edited:editing};
  if(editing){const index=db.history.findIndex(x=>x.id===view.editingId);if(index<0){alert('This workout could not be found.');return}db.history[index]=JSON.parse(JSON.stringify(w));}
  else{db.history.push(JSON.parse(JSON.stringify(w)));delete db.drafts[view.day];}
@@ -518,12 +474,12 @@ async function saveFileToICloud(file,workoutId=null){
 }
 async function downloadBackup(workout=view.workout){
  if(!workout)return;
- const payload={app:'Fearless Lift Log',version:'15.1',exportedAt:new Date().toISOString(),workout};
+ const payload={app:'Fearless Lift Log',version:'16',exportedAt:new Date().toISOString(),workout};
  const file=makeJsonFile(payload,backupFilename(workout));
  await saveFileToICloud(file,workout.id);
 }
 async function downloadAll(){
- const payload={app:'Fearless Lift Log',version:'15.1',exportedAt:new Date().toISOString(),exerciseLibrary:allExerciseDefinitions(),...db};
+ const payload={app:'Fearless Lift Log',version:'16',exportedAt:new Date().toISOString(),exerciseLibrary:allExerciseDefinitions(),...db};
  const file=makeJsonFile(payload,`fearless-lift-log-all-data-${today()}.json`);
  await saveFileToICloud(file,db.history.at(-1)?.id||null);
 }
@@ -596,7 +552,7 @@ function exerciseColor(exerciseIndex,stationNumber){
 function exerciseHtml(id,exerciseIndex=0,stationNumber=1){
  const ex=exerciseDefinition(id),d=view.workout.data[id];
  let body='';
- if(ex.kind==='cardio') body=`<div class="field-grid three"><div class="field"><label>Speed</label><input inputmode="decimal" value="${esc(d.speed)}" onchange="updateValue('${id}',0,'speed',this.value)"></div><div class="field"><label>Distance</label><input inputmode="decimal" value="${esc(d.distance)}" onchange="updateValue('${id}',0,'distance',this.value)"></div><div class="field"><label>Difficulty</label><select onchange="updateValue('${id}',0,'difficulty',this.value)">${DIFFICULTIES.map(([v,l])=>`<option value="${v}" ${d.difficulty===v?'selected':''}>${l}</option>`).join('')}</select></div></div><div class="field" style="margin-top:8px"><label>Notes</label><input value="${esc(d.notes)}" placeholder="Incline, intervals, most/all…" onchange="updateValue('${id}',0,'notes',this.value)"></div>`;
+ if(ex.kind==='cardio') body=`<div class="field-grid three"><div class="field"><label>Speed</label><input inputmode="decimal" value="${esc(d.speed)}" onchange="updateValue('${id}',0,'speed',this.value)"></div><div class="field"><label>Distance</label><input inputmode="decimal" value="${esc(d.distance)}" onchange="updateValue('${id}',0,'distance',this.value)"></div><div class="field"><label>Difficulty</label><select onchange="updateValue('${id}',0,'difficulty',this.value)">${DIFFICULTIES.map(([v,l])=>`<option value="${v}" ${d.difficulty===v?'selected':''}>${l}</option>`).join('')}</select></div></div><label class="technique-focus"><input type="checkbox" ${d.techniqueFocus?'checked':''} onchange="updateValue('${id}',0,'techniqueFocus',this.checked)"><span>🎯 Technique Focus</span><span class="tf-note">intentional form / technique work</span></label><div class="field" style="margin-top:8px"><label>Notes</label><input value="${esc(d.notes)}" placeholder="Incline, intervals, most/all…" onchange="updateValue('${id}',0,'notes',this.value)"></div>`;
  else body=d.map((s,i)=>setHtml(id,ex,s,i)).join('')+`<div class="actions"><button onclick="addSet('${id}',true)">Repeat Previous Performance</button><button onclick="addSet('${id}',false)">Add Empty Set</button></div>`;
  const inc=ex.increment!=null?`<div class="increment-row">Weight +/− changes by <select onchange="setIncrement('${id}',this.value)">${INCREMENTS.map(v=>`<option value="${v}" ${currentIncrement(id)===v?'selected':''}>${v} lb</option>`).join('')}</select></div>`:'';
  return `<div class="exercise" style="--exercise-bg:${exerciseColor(exerciseIndex,stationNumber)}"><h3>${ex.name}</h3><div class="hint">${ex.target?`Target: ${ex.target}`:ex.label}${ex.note?` · ${ex.note}`:''}</div>${ex.cue?`<div class="cue"><strong>Coach cue:</strong> ${esc(ex.cue)}</div>`:''}<div class="previous">${lastExerciseSummary(id)}</div>${body}${inc}</div>`;
@@ -614,8 +570,9 @@ function setHtml(id,ex,s,i){
  else if(ex.kind==='reps') fields=`<div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='drop') fields=`<div class="field"><label>Weight 1</label>${stepper(id,i,'weight1',s.weight1,'lb')}</div><div class="field"><label>Weight 2</label>${stepper(id,i,'weight2',s.weight2,'lb')}</div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else fields=`<div class="field"><label>${ex.label}</label>${stepper(id,i,'weight',s.weight,'lb')}</div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ const technique=`<label class="technique-focus"><input type="checkbox" ${s.techniqueFocus?'checked':''} onchange="updateValue('${id}',${i},'techniqueFocus',this.checked)"><span>🎯 Technique Focus</span><span class="tf-note">intentional form / technique work</span></label>`;
  const setup=`<div class="setup-field" style="grid-column:1/-1"><label>Technique / setup (optional)</label><textarea placeholder="Seat position, attachment, tempo, variation, form notes…" onchange="updateValue('${id}',${i},'setup',this.value)">${esc(s.setup||'')}</textarea></div>`;
- return `<div class="set-card"><div class="set-title"><span>Set ${i+1}</span><button class="delete small-btn" onclick="deleteSet('${id}',${i})">Remove</button></div><div class="field-grid ${ex.kind==='drop'?'three':''}">${fields}${setup}</div></div>`;
+ return `<div class="set-card"><div class="set-title"><span>Set ${i+1}</span><button class="delete small-btn" onclick="deleteSet('${id}',${i})">Remove</button></div><div class="field-grid ${ex.kind==='drop'?'three':''}">${fields}${technique}${setup}</div></div>`;
 }
 
 function openExerciseIndex(){saveDraft();releaseWakeLock();view={screen:'exerciseIndex',day:null,workout:null,summary:null};render()}
@@ -652,7 +609,7 @@ function renderWorkout(){
  const stationOrder=w.startStation?w.stationOrder:nums;
  const ordinals=['1st','2nd','3rd','4th','5th','6th'];
  const stations=stationOrder.map((n,pos)=>{const done=!!w.completed[n],station=p.stations[n],ids=station.exercises;return `<section class="card" id="station-${n}" style="scroll-margin-top:88px"><div class="station-head" onclick="this.nextElementSibling.classList.toggle('hidden')"><div><div class="station-title"><span aria-hidden="true">${STATION_ICONS[n]||''}</span> Station ${n} • ${esc(station.name)}</div><div class="station-location">${esc(station.duration||'')}</div><div class="station-meta">${w.startStation?ordinals[pos]+' in workout':'Choose a starting station'}</div></div><span class="badge ${done?'done':''}">${done?'Complete':'Open'}</span></div><div class="station-body ${done?'hidden':''}">${ids.map((id,exerciseIndex)=>exerciseHtml(id,exerciseIndex,n)).join('')}<button class="complete ${done?'done':''}" onclick="event.stopPropagation();toggleStation(${n})">${done?'✓ Station Complete':'Mark Station Complete'}</button></div></section>`}).join('');
- const notice=view.editingId?'✏️ Editing a completed workout. Make your corrections, then tap Save Changes.':'☀️ Screen stays awake while this workout is open. “Repeat Previous Performance” copies load, reps, bands, hook height, variation, difficulty, and setup notes.';
+ const notice=view.editingId?'✏️ Editing a completed workout. Make your corrections, then tap Save Changes.':'☀️ Screen stays awake while this workout is open. “Repeat Previous Performance” copies load, reps, bands, hook height, variation, difficulty, Technique Focus, and setup notes.';
  return `<div class="awake-note">${notice}</div>${startCard}${order}${stations}<section class="card pad" id="workout-notes" style="scroll-margin-top:88px"><strong>Workout notes</strong><textarea id="workoutNotes" placeholder="Anything worth remembering…" onchange="view.workout.notes=this.value;saveDraft()">${esc(w.notes)}</textarea></section>`;
 }
 function renderSummary(){const w=view.workout,s=view.summary,highlights=s.highlights||w.highlights||['⭐ Workout complete'],backupCurrent=db.lastBackupWorkoutId===w.id,title=s.edited?'✏️ Workout Updated':'🏋️ Workout Complete!',message=s.edited?'Your corrected workout now totals':'Congratulations — you lifted';return `<section class="card summary"><h2>${title}</h2><div class="sub">${w.day} · ${w.title}</div><div class="congrats-volume">${message} ${s.volume.toLocaleString()} pounds${s.edited?'.':' today!'}</div><div class="highlights">${highlights.map(h=>`<div class="highlight">${esc(h)}</div>`).join('')}</div><div class="remember"><div class="sub">Today you'll remember:</div><strong>${esc(w.primaryHighlight||highlights[0])}</strong></div><div class="summary-stats"><div class="stat"><strong>${s.exercises}</strong><span>exercises</span></div><div class="stat"><strong>${s.sets}</strong><span>sets logged</span></div><div class="stat"><strong>${s.duration||'—'}</strong><span>${s.duration?'minutes':'duration'}</span></div></div><div class="sub" style="margin-top:8px">Training volume = weight × reps, including both dumbbells and both sides when applicable.</div><div class="notice">✓ Saved on this device<br>${backupCurrent?'✓ Latest workout backup completed':'iCloud backup still needed'}</div><div class="actions" style="margin-top:16px"><button onclick="editWorkout('${w.id}')">Edit Workout</button><button onclick="downloadBackup(view.workout)">Save to iCloud</button><button class="primary" onclick="goHome()">Return Home</button></div><p class="sub" style="margin-top:18px">${s.edited?'Correction saved.':'See you next workout. 💪'}</p></section>`}
