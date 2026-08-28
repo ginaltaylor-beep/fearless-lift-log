@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#172033">
-<title>Fearless Lift Log v16.6</title>
+<title>Fearless Lift Log v16.7</title>
 <style>
 :root{
   --bg:#f3f4f6;--card:#fff;--ink:#172033;--muted:#667085;--line:#d0d5dd;
@@ -659,15 +659,61 @@ function reportExercisePerformance(w,id){
  if(candidates.length){const c=candidates.reduce((a,b)=>epley(b.weight,b.reps)>epley(a.weight,a.reps)?b:a,candidates[0]);return {metric:'weight',score:epley(c.weight,c.reps),weight:c.weight,reps:c.reps,label:`${c.weight} lb${c.reps?` × ${c.reps}`:''}${reportDifficultyLabel(c.s.difficulty)}`,difficulty:difficultyValue(c.s.difficulty)}}
  const s=usable.reduce((a,b)=>(Number(b.reps)||0)>(Number(a.reps)||0)?b:a,usable[0]),reps=Number(s.reps)||0;return reps?{metric:'reps',score:reps,label:`${reps} reps${reportDifficultyLabel(s.difficulty)}`,reps,difficulty:difficultyValue(s.difficulty)}:null;
 }
+// Reporting identity can use station context to resolve historical generic names
+// that may represent either barbell or dumbbell versions of the same movement.
+const REPORT_STATION_EQUIPMENT_IDS=new Set(['hip_thrust','bench_press','bench','deadlift','romanian_deadlift','incline_bench_press']);
+const REPORT_HISTORICAL_STATION_HINTS={
+ 'hip_thrust':[
+  {from:'2025-02-01',to:'2025-02-28',day:'Thursday',station:3},
+  {from:'2025-03-01',to:'2025-03-31',day:'Tuesday',station:1},
+  {from:'2025-09-29',to:'2025-10-31',day:'Monday',station:1},
+  {from:'2026-02-01',to:'2026-02-28',day:'Wednesday',station:1}
+ ]
+};
+function reportProgramStation(w,id){
+ const dayProgram=programs?.[w?.day];
+ if(!dayProgram?.stations)return null;
+ const canonical=canonicalExerciseId(id);
+ for(const [station,def] of Object.entries(dayProgram.stations)){
+  const ids=def?.exercises||[];
+  if(ids.some(x=>canonicalExerciseId(x)===canonical))return Number(station)||null;
+ }
+ return null;
+}
+function reportHistoricalStationHint(w,id){
+ const raw=String(id||''),canonical=canonicalExerciseId(raw),rules=REPORT_HISTORICAL_STATION_HINTS[raw]||REPORT_HISTORICAL_STATION_HINTS[canonical]||[];
+ for(const rule of rules){
+  if(rule.day&&rule.day!==w?.day)continue;
+  if(rule.from&&String(w?.date||'')<rule.from)continue;
+  if(rule.to&&String(w?.date||'')>rule.to)continue;
+  return rule.station;
+ }
+ return null;
+}
+function reportExerciseStation(w,id){return reportProgramStation(w,id)||reportHistoricalStationHint(w,id)||null}
+function reportResolvedIdentity(w,id){
+ const raw=String(id||''),canonical=canonicalExerciseId(raw),baseKey=historicalExerciseKey(id),ex=exerciseDefinition(id);
+ if(!REPORT_STATION_EQUIPMENT_IDS.has(raw)&&!REPORT_STATION_EQUIPMENT_IDS.has(canonical))return {key:baseKey,name:ex.name};
+ const station=reportExerciseStation(w,id);
+ if(station===1){
+  const base=normalizeExerciseIdentity(ex.name).replace(/^barbell\s+/,'').replace(/^dumbbell\s+/,'');
+  return {key:`barbell ${base}`,name:`Barbell ${ex.name.replace(/^(Barbell|Dumbbell)\s+/i,'')}`};
+ }
+ if(station===3||station===4){
+  const base=normalizeExerciseIdentity(ex.name).replace(/^barbell\s+/,'').replace(/^dumbbell\s+/,'');
+  return {key:`dumbbell ${base}`,name:`Dumbbell ${ex.name.replace(/^(Barbell|Dumbbell)\s+/i,'')}`};
+ }
+ return {key:baseKey,name:ex.name};
+}
 function reportExerciseRows(workouts=[...db.history],minRecords=2){
  const byKey=new Map();
  for(const w of [...workouts].sort((a,b)=>String(a.date).localeCompare(String(b.date)))){
   if(!reportComparisonEligible(w))continue;
   for(const id of Object.keys(w.data||{})){
    const perf=reportExercisePerformance(w,id);if(!perf)continue;
-   const key=historicalExerciseKey(id),ex=exerciseDefinition(id);
-   if(!byKey.has(key))byKey.set(key,{key,name:ex.name,records:[]});
-   byKey.get(key).records.push({date:w.date,id,...perf});
+   const resolved=reportResolvedIdentity(w,id),key=resolved.key;
+   if(!byKey.has(key))byKey.set(key,{key,name:resolved.name,records:[]});
+   byKey.get(key).records.push({date:w.date,id,station:reportExerciseStation(w,id),...perf});
   }
  }
  return [...byKey.values()].map(r=>{const a=r.records[0],z=r.records[r.records.length-1],best=r.records.reduce((x,y)=>y.score>x.score?y:x,a);return {...r,first:a,last:z,best}}).filter(r=>r.records.length>=minRecords);
@@ -711,7 +757,7 @@ function currentProgramExerciseOrder(){
  for(const day of Object.keys(programs||{})){
   const stations=programs[day]?.stations||{};
   for(const n of Object.keys(stations).map(Number).sort((a,b)=>a-b)){
-   for(const id of stations[n]?.exercises||[]){const key=historicalExerciseKey(id);if(!seen.has(key)){seen.add(key);out.push({key,id,day,station:n})}}
+   for(const id of stations[n]?.exercises||[]){const resolved=reportResolvedIdentity({day,program:programs[day]?.month||currentProgramMonth()},id),key=resolved.key;if(!seen.has(key)){seen.add(key);out.push({key,id,day,station:n})}}
   }
  }
  return out;
