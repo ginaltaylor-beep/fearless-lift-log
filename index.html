@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#172033">
-<title>Fearless Lift Log v16.8</title>
+<title>Fearless Lift Log v16.9</title>
 <style>
 :root{
   --bg:#f3f4f6;--card:#fff;--ink:#172033;--muted:#667085;--line:#d0d5dd;
@@ -579,6 +579,7 @@ function openExerciseIndex(){saveDraft();releaseWakeLock();view={screen:'exercis
 function openReports(){saveDraft();releaseWakeLock();view={screen:'reports',day:null,workout:null,summary:null,editingId:null};render()}
 function openMonthlyReport(){view.screen='monthlyReport';render()}
 function openAllTimeReport(){view.screen='allTimeReport';render()}
+function openStarsReport(){view.screen='starsReport';render()}
 function backToReports(){view.screen='reports';render()}
 function exerciseIndexRows(){
  const defs=allExerciseDefinitions(),stats={};
@@ -797,11 +798,12 @@ function reportPercentChange(r){
  const pct=reportPercentChangeValue(r);if(!pct)return '';
  const sign=pct.value>0?'+':pct.value<0?'−':'';return `${sign}${Math.abs(pct.value).toFixed(1)}% ${pct.label}`;
 }
-function topThreeImprovementKeys(rows){
- return new Set(rows.map(r=>({r,pct:reportPercentChangeValue(r),c:classifyReportRow(r)}))
+function topThreeImprovementRows(rows){
+ return rows.map(r=>({r,pct:reportPercentChangeValue(r),c:classifyReportRow(r)}))
   .filter(x=>x.pct&&x.pct.value>0&&(x.c.status.includes('Progressed')||x.c.status.includes('Progress across')))
-  .sort((a,b)=>b.pct.value-a.pct.value).slice(0,3).map(x=>x.r.key));
+  .sort((a,b)=>b.pct.value-a.pct.value).slice(0,3).map(x=>x.r);
 }
+function topThreeImprovementKeys(rows){return new Set(topThreeImprovementRows(rows).map(r=>r.key))}
 function currentProgramExerciseOrder(){
  const seen=new Set(),out=[];
  for(const day of Object.keys(programs||{})){
@@ -848,13 +850,21 @@ function stepReportSearch(direction){if(!reportSearchMatches.length){updateRepor
 function scrollToTop(){window.scrollTo({top:0,behavior:'smooth'})}
 function renderReports(){
  const month=currentProgramMonth();
- return `<section class="card pad"><strong>Progress Reports</strong><div class="sub">Choose the view that answers the question you have today.</div><div class="actions" style="margin-top:16px;display:grid;gap:12px"><button class="primary" style="text-align:left;padding:16px" onclick="openMonthlyReport()"><strong>📅 Monthly Progress</strong><span class="sub" style="display:block;color:#d0d5dd;margin-top:4px">See how you progressed through ${esc(month||'the current month')}.</span></button><button style="text-align:left;padding:16px" onclick="openAllTimeReport()"><strong>📈 All-Time Progress</strong><span class="sub" style="display:block;margin-top:4px">See patterns and progress across your complete workout history.</span></button></div><div class="previous" style="margin-top:16px"><strong>How comparisons work</strong><br>Weight, reps, exercise variation, assistance/resistance, and difficulty are considered when the data supports it. Technique Focus stays in history but is excluded from performance comparisons. A changed rep range or setup is not automatically treated as regression.</div></section>`;
+ return `<section class="card pad"><strong>Progress Reports</strong><div class="sub">Choose the view that answers the question you have today.</div><div class="actions" style="margin-top:16px;display:grid;gap:12px"><button class="primary" style="text-align:left;padding:16px" onclick="openMonthlyReport()"><strong>📅 Monthly Progress</strong><span class="sub" style="display:block;color:#d0d5dd;margin-top:4px">See how you progressed through ${esc(month||'the current month')}.</span></button><button style="text-align:left;padding:16px" onclick="openAllTimeReport()"><strong>📈 All-Time Progress</strong><span class="sub" style="display:block;margin-top:4px">See patterns and progress across your complete workout history.</span></button><button style="text-align:left;padding:16px" onclick="openStarsReport()"><strong>Show Me ⭐⭐⭐</strong><span class="sub" style="display:block;margin-top:4px">Just the biggest wins: this month and all time.</span></button></div><div class="previous" style="margin-top:16px"><strong>How comparisons work</strong><br>Weight, reps, exercise variation, assistance/resistance, and difficulty are considered when the data supports it. Technique Focus stays in history but is excluded from performance comparisons. A changed rep range or setup is not automatically treated as regression.</div></section>`;
 }
 function renderMonthlyReport(){
  const month=currentProgramMonth(),all=monthlyWorkouts(),eligible=all.filter(reportComparisonEligible),rows=reportExerciseRows(all),total=all.reduce((n,w)=>n+totalVolume(w),0),tech=techniqueSetCount(all);
  const classified=rows.map(r=>({...r,classification:classifyReportRow(r)})),starKeys=topThreeImprovementKeys(rows);
  const progressed=classified.filter(r=>r.classification.status.includes('Progressed')||r.classification.status.includes('Progress across')).length,maintained=classified.filter(r=>r.classification.status.includes('Maintained')).length,changed=classified.filter(r=>r.classification.status.includes('Different')).length;
  return `<section class="card pad"><div class="actions" style="margin:0 0 12px"><button class="small-btn" onclick="backToReports()">← Progress Reports</button></div><strong>📅 ${esc(month||'Monthly')} Progress</strong><div class="sub">A live month-to-date report. It becomes your completed month-end view after the final workout is logged.</div><div class="journey-grid" style="margin-top:14px"><div class="journey-box"><strong>${all.length}</strong><span>workouts</span></div><div class="journey-box"><strong>${total.toLocaleString()}</strong><span>lb training volume</span></div></div><div class="journey-grid" style="margin-top:10px"><div class="journey-box"><strong>${progressed}</strong><span>progress signals</span></div><div class="journey-box"><strong>${tech}</strong><span>technique-focus sets</span></div></div><div class="previous" style="margin-top:14px"><strong>Monthly snapshot</strong><br>🟢/🔵 ${progressed} progressed · → ${maintained} maintained · ↔ ${changed} different stimulus/setup</div></section><section class="card pad"><strong>Exercise-by-Exercise</strong><div class="sub">First comparable performance → latest comparable performance, with the full month's trajectory used to identify the best comparable result.</div>${rows.length?renderReportCards(rows,999,starKeys):'<p class="sub">More repeated performances are needed for this month.</p>'}</section>`;
+}
+function renderStarsReport(){
+ const month=currentProgramMonth();
+ const monthlyRows=reportExerciseRows(monthlyWorkouts());
+ const allRows=reportExerciseRows(reportComparisonEligibleWorkouts());
+ const monthlyTop=topThreeImprovementRows(monthlyRows),allTop=topThreeImprovementRows(allRows);
+ const monthlyKeys=new Set(monthlyTop.map(r=>r.key)),allKeys=new Set(allTop.map(r=>r.key));
+ return `<section class="card pad"><div class="actions" style="margin:0 0 12px"><button class="small-btn" onclick="backToReports()">← Progress Reports</button></div><strong>Show Me ⭐⭐⭐</strong><div class="sub">Your biggest measurable improvements, pulled directly from the gold-star rankings in your Progress Reports.</div><div class="previous" style="margin-top:14px"><strong>How stars are chosen</strong><br>Stars go to the three exercises with the largest positive meaningful percentage improvement in each report. Monthly and All-Time are ranked separately, so an exercise can appear in both sections.</div></section><section class="card pad"><strong>This Month’s ⭐⭐⭐ — ${esc(month||'Current Month')}</strong><div class="sub">The three strongest improvement signals from the current program month.</div>${monthlyTop.length?renderReportCards(monthlyTop,3,monthlyKeys):'<p class="sub">Not enough comparable improvement data yet this month to award stars.</p>'}</section><section class="card pad"><strong>All-Time ⭐⭐⭐</strong><div class="sub">The three strongest measurable improvements across your complete eligible workout history.</div>${allTop.length?renderReportCards(allTop,3,allKeys):'<p class="sub">Not enough comparable all-time improvement data yet to award stars.</p>'}</section>`;
 }
 function renderAllTimeReport(){
  const all=[...db.history].sort((a,b)=>String(a.date).localeCompare(String(b.date))),eligible=all.filter(reportComparisonEligible),allRows=reportExerciseRows(all,1),repeatRows=allRows.filter(r=>r.records.length>=2),recent=eligible.slice(-8),recentAvg=recent.length?Math.round(recent.reduce((n,w)=>n+totalVolume(w),0)/recent.length):0,tech=techniqueSetCount(all),month=currentProgramMonth();
@@ -885,7 +895,7 @@ function renderHistory(){
 }
 function render(){
  migrateDatabaseToV14();migrateOldFriday();const app=document.getElementById('app'),footer=document.getElementById('footer'),back=document.getElementById('backBtn'),sub=document.getElementById('headerSub'),top=document.getElementById('topBtn');
- back.classList.toggle('hidden',view.screen==='home');back.onclick=goHome;top.classList.toggle('hidden',!['reports','monthlyReport','allTimeReport','history','exerciseIndex'].includes(view.screen));
+ back.classList.toggle('hidden',view.screen==='home');back.onclick=goHome;top.classList.toggle('hidden',!['reports','monthlyReport','allTimeReport','starsReport','history','exerciseIndex'].includes(view.screen));
  if(view.screen==='home'){sub.textContent='Know your history. Challenge yourself appropriately.';app.innerHTML=renderHome();footer.classList.add('hidden')}
  if(view.screen==='workout'){sub.textContent=`${view.editingId?'Editing · ':''}${view.day} · ${programs[view.day].title} · ${programs[view.day].month||'August 2026'}`;app.innerHTML=renderWorkout();footer.classList.remove('hidden');footer.innerHTML=view.editingId?`<button onclick="cancelEdit()">Cancel</button><button class="primary" onclick="finishWorkout()">Save Changes</button>`:`<button onclick="resetWorkout()">Reset</button><button class="primary" ${allStationsDone(view.workout)?'':'disabled'} onclick="finishWorkout()">Finish Workout</button>`}
  if(view.screen==='summary'){sub.textContent='Workout complete';app.innerHTML=renderSummary();footer.classList.add('hidden')}
@@ -894,6 +904,7 @@ function render(){
  if(view.screen==='reports'){sub.textContent='Your progress reports';app.innerHTML=renderReports();footer.classList.add('hidden')}
  if(view.screen==='monthlyReport'){sub.textContent=`${currentProgramMonth()} progress`;app.innerHTML=renderMonthlyReport();footer.classList.add('hidden')}
  if(view.screen==='allTimeReport'){sub.textContent='Your all-time progress';app.innerHTML=renderAllTimeReport();footer.classList.add('hidden')}
+ if(view.screen==='starsReport'){sub.textContent='Show Me ⭐⭐⭐';app.innerHTML=renderStarsReport();footer.classList.add('hidden')}
 }
 document.getElementById('importInput').addEventListener('change',e=>importWorkoutFiles(e.target.files));
 window.addEventListener('beforeunload',()=>{saveDraft();releaseWakeLock()});render();
