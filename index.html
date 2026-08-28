@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#172033">
-<title>Fearless Lift Log v16.9</title>
+<title>Fearless Lift Log v16.9.1</title>
 <style>
 :root{
   --bg:#f3f4f6;--card:#fff;--ink:#172033;--muted:#667085;--line:#d0d5dd;
@@ -861,7 +861,7 @@ function renderMonthlyReport(){
 function renderStarsReport(){
  const month=currentProgramMonth();
  const monthlyRows=reportExerciseRows(monthlyWorkouts());
- const allRows=reportExerciseRows(reportComparisonEligibleWorkouts());
+ const allRows=reportExerciseRows([...db.history].filter(reportComparisonEligible),1);
  const monthlyTop=topThreeImprovementRows(monthlyRows),allTop=topThreeImprovementRows(allRows);
  const monthlyKeys=new Set(monthlyTop.map(r=>r.key)),allKeys=new Set(allTop.map(r=>r.key));
  return `<section class="card pad"><div class="actions" style="margin:0 0 12px"><button class="small-btn" onclick="backToReports()">← Progress Reports</button></div><strong>Show Me ⭐⭐⭐</strong><div class="sub">Your biggest measurable improvements, pulled directly from the gold-star rankings in your Progress Reports.</div><div class="previous" style="margin-top:14px"><strong>How stars are chosen</strong><br>Stars go to the three exercises with the largest positive meaningful percentage improvement in each report. Monthly and All-Time are ranked separately, so an exercise can appear in both sections.</div></section><section class="card pad"><strong>This Month’s ⭐⭐⭐ — ${esc(month||'Current Month')}</strong><div class="sub">The three strongest improvement signals from the current program month.</div>${monthlyTop.length?renderReportCards(monthlyTop,3,monthlyKeys):'<p class="sub">Not enough comparable improvement data yet this month to award stars.</p>'}</section><section class="card pad"><strong>All-Time ⭐⭐⭐</strong><div class="sub">The three strongest measurable improvements across your complete eligible workout history.</div>${allTop.length?renderReportCards(allTop,3,allKeys):'<p class="sub">Not enough comparable all-time improvement data yet to award stars.</p>'}</section>`;
