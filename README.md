@@ -33,6 +33,9 @@ Fearless Lift Log is a lightweight workout tracker that runs directly on your iP
 - 📊 Open **Progress Reports** for two views: **Monthly Progress** and **All-Time Progress**
 - 📅 **Monthly Progress** follows the current program month and summarizes comparable exercise progress as the month develops
 - 📈 **All-Time Progress** uses your saved workout history to show longer-term strength and performance trends
+- 📌 Current-program exercises are featured first in All-Time Progress while remaining included in the complete exercise-family history below
+- 🧩 Browse complete exercise history by movement family, with exercises alphabetized within each family
+- 📊 View percentage change when the underlying performances support a meaningful comparison
 - 🧠 Progress comparisons account for more than load alone, including reps, difficulty, exercise variations, bands, assistance, and Technique Focus where applicable
 
 ---
@@ -135,7 +138,13 @@ Technique Focus sets remain part of workout history but are not treated as perfo
 
 **All-Time Progress** looks across your complete saved workout history rather than only the current program month. It is intended to show longer-term exercise performance, repeat performances, best comparable efforts, and broader strength trends.
 
-Related exercises can be understood as part of the same movement family while meaningful variations remain separate for direct performance comparisons. For example, barbell and dumbbell versions, incline and flat pressing, and paused or tempo variations are not treated as interchangeable loads.
+The report begins with a **Current Program** section so the exercises you are actively training this month are easy to find. These exercises appear in current-program order and are also repeated in the complete historical section below; the top section is a convenient current-training view, not a replacement for their full history.
+
+Below the Current Program section, **Complete Exercise History** groups exercises into movement families such as squat/knee-dominant, hinge/deadlift/hip thrust, horizontal press, vertical press, horizontal pull, vertical pull, arms, core, power/plyometrics, carries, mobility/prehab, and conditioning. Exercises are alphabetized within their family. Meaningful variations remain separate for direct performance comparisons—for example, barbell and dumbbell versions, incline and flat pressing, and paused or tempo variations are not treated as interchangeable loads.
+
+When the underlying performances support a valid numerical comparison, All-Time Progress also displays **percentage change**. For comparable performances at the same rep count, this may represent change in load. When rep ranges differ but the comparison is still meaningful, the report may use estimated performance capacity instead. Exercises involving assistance, bands, bodyweight variations, or other setups where a percentage would be misleading remain descriptive rather than forcing a percentage.
+
+All-Time Progress includes a search tool with previous/next match navigation, making it easier to jump through repeated terms or exercises in a long report.
 
 The reports are generated from the workout history stored on your device, so corrections made with **Edit Workout** are reflected in future report calculations.
 
@@ -216,6 +225,7 @@ This allows monthly training programs to be updated without replacing the core a
 | **v16.2** | Added **Progress Reports** with separate **Monthly Progress** and **All-Time Progress** views. Monthly Progress follows the current program month and evaluates comparable performances using exercise context such as load, reps, difficulty, variations, bands, assistance, and Technique Focus. All-Time Progress analyzes the complete saved workout history for longer-term performance trends and best comparable efforts. |
 | **v16.4** | Added a workout-level **Include this workout in Progress Reports** option. It is included by default and can be deselected for unusual sessions whose equipment or conditions would make direct performance comparisons misleading. |
 | **v16.5** | Improved All-Time Progress search with persistent previous/next match navigation while moving through long reports. |
+| **v16.6** | Reorganized **All-Time Progress** to feature current-program exercises first while also retaining them in the complete history; grouped the full exercise history into movement families with alphabetical ordering within each family; and added percentage-change reporting when a meaningful comparison can be calculated. |
 
 ---
 

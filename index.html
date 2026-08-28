@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#172033">
-<title>Fearless Lift Log v16.5</title>
+<title>Fearless Lift Log v16.6</title>
 <style>
 :root{
   --bg:#f3f4f6;--card:#fff;--ink:#172033;--muted:#667085;--line:#d0d5dd;
@@ -659,21 +659,21 @@ function reportExercisePerformance(w,id){
  if(candidates.length){const c=candidates.reduce((a,b)=>epley(b.weight,b.reps)>epley(a.weight,a.reps)?b:a,candidates[0]);return {metric:'weight',score:epley(c.weight,c.reps),weight:c.weight,reps:c.reps,label:`${c.weight} lb${c.reps?` × ${c.reps}`:''}${reportDifficultyLabel(c.s.difficulty)}`,difficulty:difficultyValue(c.s.difficulty)}}
  const s=usable.reduce((a,b)=>(Number(b.reps)||0)>(Number(a.reps)||0)?b:a,usable[0]),reps=Number(s.reps)||0;return reps?{metric:'reps',score:reps,label:`${reps} reps${reportDifficultyLabel(s.difficulty)}`,reps,difficulty:difficultyValue(s.difficulty)}:null;
 }
-function reportExerciseRows(workouts=[...db.history]){
+function reportExerciseRows(workouts=[...db.history],minRecords=2){
  const byKey=new Map();
  for(const w of [...workouts].sort((a,b)=>String(a.date).localeCompare(String(b.date)))){
   if(!reportComparisonEligible(w))continue;
   for(const id of Object.keys(w.data||{})){
    const perf=reportExercisePerformance(w,id);if(!perf)continue;
    const key=historicalExerciseKey(id),ex=exerciseDefinition(id);
-   if(!byKey.has(key))byKey.set(key,{name:ex.name,records:[]});
+   if(!byKey.has(key))byKey.set(key,{key,name:ex.name,records:[]});
    byKey.get(key).records.push({date:w.date,id,...perf});
   }
  }
- return [...byKey.values()].map(r=>{const a=r.records[0],z=r.records[r.records.length-1],best=r.records.reduce((x,y)=>y.score>x.score?y:x,a);return {...r,first:a,last:z,best}}).filter(r=>r.records.length>=2);
+ return [...byKey.values()].map(r=>{const a=r.records[0],z=r.records[r.records.length-1],best=r.records.reduce((x,y)=>y.score>x.score?y:x,a);return {...r,first:a,last:z,best}}).filter(r=>r.records.length>=minRecords);
 }
 function classifyReportRow(r){
- const a=r.first,z=r.last;if(!a||!z)return {status:'⚪ Insufficient comparable data',note:'More comparable performances are needed.'};
+ const a=r.first,z=r.last;if(!a||!z||!r.records||r.records.length<2)return {status:'⚪ Insufficient comparable data',note:'More comparable performances are needed.'};
  if(a.metric!==z.metric)return {status:'↔ Different stimulus/setup',note:'The way this exercise was logged changed, so a direct comparison would be misleading.'};
  if(a.metric==='pullup'){
   const sameBands=JSON.stringify([...(a.bands||[])].sort())===JSON.stringify([...(z.bands||[])].sort());
@@ -695,7 +695,55 @@ function classifyReportRow(r){
  return {status:'↔ Different stimulus/setup',note:'Latest result differs, but the report does not treat a single lower result as regression.'};
 }
 function techniqueSetCount(workouts){return workouts.reduce((n,w)=>n+Object.values(w.data||{}).reduce((m,d)=>m+(Array.isArray(d)?d.filter(reportSetTechniqueFocused).length:(d?.techniqueFocus?1:0)),0),0)}
-function renderReportCards(rows,limit=999){return rows.slice(0,limit).map((r,i)=>{const c=classifyReportRow(r);return `<div class="history-item report-exercise" id="report-exercise-${i}" data-report-name="${esc(r.name.toLowerCase())}"><div class="history-title">${esc(r.name)} · ${c.status}</div><div class="history-meta">${r.first.label} → ${r.last.label} · ${formatHistoryDate(r.first.date)} to ${formatHistoryDate(r.last.date)}</div><div class="sub" style="margin-top:5px">${esc(c.note)}</div><div class="sub" style="margin-top:5px">Best comparable performance: ${r.best.label} on ${formatHistoryDate(r.best.date)}</div></div>`}).join('')}
+function reportPercentChange(r){
+ if(!r?.records||r.records.length<2)return '';
+ const a=r.first,z=r.last;if(!a||!z||a.metric!==z.metric)return '';
+ let value=null,label='';
+ if(a.metric==='weight'){
+  if(a.weight>0&&z.weight>=0&&a.reps===z.reps){value=(z.weight-a.weight)/a.weight*100;label='load'}
+  else if(a.score>0&&z.score>=0){value=(z.score-a.score)/a.score*100;label='estimated capacity'}
+ }else if(['reps','time'].includes(a.metric)&&a.score>0){value=(z.score-a.score)/a.score*100;label=a.metric==='time'?'time':'reps'}
+ if(value===null||!Number.isFinite(value))return '';
+ const sign=value>0?'+':value<0?'−':'';return `${sign}${Math.abs(value).toFixed(1)}% ${label}`;
+}
+function currentProgramExerciseOrder(){
+ const seen=new Set(),out=[];
+ for(const day of Object.keys(programs||{})){
+  const stations=programs[day]?.stations||{};
+  for(const n of Object.keys(stations).map(Number).sort((a,b)=>a-b)){
+   for(const id of stations[n]?.exercises||[]){const key=historicalExerciseKey(id);if(!seen.has(key)){seen.add(key);out.push({key,id,day,station:n})}}
+  }
+ }
+ return out;
+}
+const REPORT_FAMILY_ORDER=['Squat & Knee-Dominant','Hinge / Deadlift / Hip Thrust','Horizontal Press','Vertical Press','Horizontal Pull','Vertical Pull','Arms','Core','Power / Plyometrics','Carry','Mobility / Prehab','Conditioning','Other'];
+function reportExerciseFamily(r){
+ const id=String(r?.records?.at(-1)?.id||''),name=normalizeExerciseName(r?.name||''),text=`${id} ${name}`;
+ if(/squat|lunge|step up|step-up|step down|step-down|split squat|cossack|calf raise|soleus|nordic/.test(text))return 'Squat & Knee-Dominant';
+ if(/deadlift|rdl|romanian|hip thrust|hamstring|hinge|good morning|swing/.test(text))return 'Hinge / Deadlift / Hip Thrust';
+ if(/bench press|chest press|push up|push-up|fly|floor press/.test(text))return 'Horizontal Press';
+ if(/overhead press|shoulder press|push press|landmine press|front raise|lateral raise/.test(text))return 'Vertical Press';
+ if(/row|reverse fly|pull apart|pull-apart/.test(text))return 'Horizontal Pull';
+ if(/pulldown|pull down|pull-up|pull up|chin up/.test(text))return 'Vertical Pull';
+ if(/curl|tricep|skull crusher|dip/.test(text))return 'Arms';
+ if(/plank|deadbug|dead bug|sit up|sit-up|v up|v-up|copenhagen|prayer|knee raise|core|pallof/.test(text))return 'Core';
+ if(/jump|slam|rope|snatch|clean|pogo|plyo|throw/.test(text))return 'Power / Plyometrics';
+ if(/carry|march/.test(text))return 'Carry';
+ if(/mobility|thoracic|airplane|clam|stretch|rotation|scap/.test(text))return 'Mobility / Prehab';
+ if(/treadmill|bike|rower|conditioning/.test(text))return 'Conditioning';
+ return 'Other';
+}
+function renderReportCard(r){
+ const c=classifyReportRow(r),pct=reportPercentChange(r),history=r.records?.length||0;
+ const comparison=history<2?`${r.first.label} · ${formatHistoryDate(r.first.date)}`:`${r.first.label} → ${r.last.label} · ${formatHistoryDate(r.first.date)} to ${formatHistoryDate(r.last.date)}`;
+ return `<div class="history-item report-exercise" data-report-name="${esc(r.name.toLowerCase())}"><div class="history-title">${esc(r.name)} · ${c.status}</div><div class="history-meta">${comparison}</div>${pct?`<div class="sub" style="margin-top:5px;font-weight:800">Change: ${pct}</div>`:''}<div class="sub" style="margin-top:5px">${esc(c.note)}</div><div class="sub" style="margin-top:5px">Best comparable performance: ${r.best.label} on ${formatHistoryDate(r.best.date)}</div></div>`;
+}
+function renderReportCards(rows,limit=999){return rows.slice(0,limit).map(renderReportCard).join('')}
+function renderFamilySections(rows){
+ const groups=new Map(REPORT_FAMILY_ORDER.map(f=>[f,[]]));
+ for(const r of rows){const family=reportExerciseFamily(r);(groups.get(family)||groups.get('Other')).push(r)}
+ return REPORT_FAMILY_ORDER.map(f=>{const items=groups.get(f).sort((a,b)=>a.name.localeCompare(b.name));return items.length?`<section class="card pad"><strong>${esc(f)}</strong><div class="sub">${items.length} exercise${items.length===1?'':'s'} in this family.</div>${renderReportCards(items)}</section>`:''}).join('');
+}
 let reportSearchMatches=[],reportSearchIndex=-1;
 function syncReportFindFloat(){const box=document.getElementById('reportFindFloat'),label=document.getElementById('reportFindFloatLabel');if(!box||!label)return;if(!reportSearchMatches.length){box.classList.add('hidden');label.textContent='';return}box.classList.remove('hidden');label.textContent=`${reportSearchIndex+1} of ${reportSearchMatches.length}`;}
 function updateReportSearch(){const input=document.getElementById('reportSearch'),count=document.getElementById('reportMatchCount');if(!input||!count)return;const q=input.value.trim().toLowerCase();document.querySelectorAll('.report-exercise').forEach(el=>el.classList.remove('report-match-active'));if(!q){reportSearchMatches=[];reportSearchIndex=-1;count.textContent='';syncReportFindFloat();return}reportSearchMatches=[...document.querySelectorAll('.report-exercise')].filter(el=>(el.dataset.reportName||'').includes(q));reportSearchIndex=reportSearchMatches.length?0:-1;count.textContent=reportSearchMatches.length?`1 of ${reportSearchMatches.length} matches`:'0 matches';syncReportFindFloat();if(reportSearchMatches.length)focusReportMatch()}
@@ -713,9 +761,9 @@ function renderMonthlyReport(){
  return `<section class="card pad"><div class="actions" style="margin:0 0 12px"><button class="small-btn" onclick="backToReports()">← Progress Reports</button></div><strong>📅 ${esc(month||'Monthly')} Progress</strong><div class="sub">A live month-to-date report. It becomes your completed month-end view after the final workout is logged.</div><div class="journey-grid" style="margin-top:14px"><div class="journey-box"><strong>${all.length}</strong><span>workouts</span></div><div class="journey-box"><strong>${total.toLocaleString()}</strong><span>lb training volume</span></div></div><div class="journey-grid" style="margin-top:10px"><div class="journey-box"><strong>${progressed}</strong><span>progress signals</span></div><div class="journey-box"><strong>${tech}</strong><span>technique-focus sets</span></div></div><div class="previous" style="margin-top:14px"><strong>Monthly snapshot</strong><br>🟢/🔵 ${progressed} progressed · → ${maintained} maintained · ↔ ${changed} different stimulus/setup</div></section><section class="card pad"><strong>Exercise-by-Exercise</strong><div class="sub">First comparable performance → latest comparable performance, with the full month's trajectory used to identify the best comparable result.</div>${rows.length?renderReportCards(rows):'<p class="sub">More repeated performances are needed for this month.</p>'}</section>`;
 }
 function renderAllTimeReport(){
- const all=[...db.history].sort((a,b)=>String(a.date).localeCompare(String(b.date))),eligible=all.filter(reportComparisonEligible),rows=reportExerciseRows(all),recent=eligible.slice(-8),recentAvg=recent.length?Math.round(recent.reduce((n,w)=>n+totalVolume(w),0)/recent.length):0,tech=techniqueSetCount(all);
- const ranked=[...rows].sort((a,b)=>{const ca=classifyReportRow(a).status,cb=classifyReportRow(b).status;return (cb.includes('Progress')?1:0)-(ca.includes('Progress')?1:0)||b.records.length-a.records.length});
- return `<section class="card pad"><div class="actions" style="margin:0 0 12px"><button class="small-btn" onclick="backToReports()">← Progress Reports</button></div><strong>📈 All-Time Progress</strong><div class="sub">Your complete training history, using comparable exercise performances rather than simply ranking the heaviest number.</div><div class="report-search"><input id="reportSearch" type="search" placeholder="Find an exercise…" oninput="updateReportSearch()"><button class="small-btn" onclick="stepReportSearch(-1)" aria-label="Previous match">‹</button><button class="small-btn" onclick="stepReportSearch(1)" aria-label="Next match">›</button></div><div id="reportMatchCount" class="match-count"></div><div id="reportFindFloat" class="report-find-float hidden"><button onclick="stepReportSearch(-1)" aria-label="Previous match">‹</button><span id="reportFindFloatLabel"></span><button onclick="stepReportSearch(1)" aria-label="Next match">›</button></div><div class="journey-grid" style="margin-top:14px"><div class="journey-box"><strong>${all.length}</strong><span>workouts logged</span></div><div class="journey-box"><strong>${rows.length}</strong><span>repeat exercises compared</span></div></div><div class="journey-grid" style="margin-top:10px"><div class="journey-box"><strong>${recentAvg.toLocaleString()}</strong><span>avg volume · last ${recent.length}</span></div><div class="journey-box"><strong>${tech}</strong><span>technique-focus sets</span></div></div><div class="previous" style="margin-top:14px"><strong>Comparison rules</strong><br>🎯 Technique Focus sets remain in history but are excluded from performance comparisons.<br>↔ Meaningful variations such as paused/tempo work remain separate rather than being forced into direct load comparisons.</div></section><section class="card pad"><strong>Long-Term Exercise Progress</strong><div class="sub">First comparable performance → latest, plus the best comparable result found in your history.</div>${ranked.length?renderReportCards(ranked):'<p class="sub">More repeated performances are needed before long-term trends appear.</p>'}</section>`;
+ const all=[...db.history].sort((a,b)=>String(a.date).localeCompare(String(b.date))),eligible=all.filter(reportComparisonEligible),allRows=reportExerciseRows(all,1),repeatRows=allRows.filter(r=>r.records.length>=2),recent=eligible.slice(-8),recentAvg=recent.length?Math.round(recent.reduce((n,w)=>n+totalVolume(w),0)/recent.length):0,tech=techniqueSetCount(all),month=currentProgramMonth();
+ const rowByKey=new Map(allRows.map(r=>[r.key,r])),currentRows=currentProgramExerciseOrder().map(x=>rowByKey.get(x.key)).filter(Boolean);
+ return `<section class="card pad"><div class="actions" style="margin:0 0 12px"><button class="small-btn" onclick="backToReports()">← Progress Reports</button></div><strong>📈 All-Time Progress</strong><div class="sub">Your complete training history, with the exercises you are training now featured first and your full history organized by movement family below.</div><div class="report-search"><input id="reportSearch" type="search" placeholder="Find an exercise…" oninput="updateReportSearch()"><button class="small-btn" onclick="stepReportSearch(-1)" aria-label="Previous match">‹</button><button class="small-btn" onclick="stepReportSearch(1)" aria-label="Next match">›</button></div><div id="reportMatchCount" class="match-count"></div><div id="reportFindFloat" class="report-find-float hidden"><button onclick="stepReportSearch(-1)" aria-label="Previous match">‹</button><span id="reportFindFloatLabel"></span><button onclick="stepReportSearch(1)" aria-label="Next match">›</button></div><div class="journey-grid" style="margin-top:14px"><div class="journey-box"><strong>${all.length}</strong><span>workouts logged</span></div><div class="journey-box"><strong>${repeatRows.length}</strong><span>repeat exercises compared</span></div></div><div class="journey-grid" style="margin-top:10px"><div class="journey-box"><strong>${recentAvg.toLocaleString()}</strong><span>avg volume · last ${recent.length}</span></div><div class="journey-box"><strong>${tech}</strong><span>technique-focus sets</span></div></div><div class="previous" style="margin-top:14px"><strong>Comparison rules</strong><br>🎯 Technique Focus sets remain in history but are excluded from performance comparisons.<br>↔ Meaningful variations such as paused/tempo work remain separate rather than being forced into direct load comparisons.<br>% Change is shown only where a percentage is meaningful; different rep ranges may use estimated capacity rather than load alone.</div></section><section class="card pad"><strong>⭐ Current Program — ${esc(month||'Current Month')}</strong><div class="sub">Exercises from this month's program are featured here in workout/program order. They also appear again in their movement families below.</div>${currentRows.length?renderReportCards(currentRows):'<p class="sub">Complete workouts this month to populate your current-program history.</p>'}</section><section class="card pad"><strong>Complete Exercise History</strong><div class="sub">Every exercise with saved performance data, organized by movement family. Current-month exercises are intentionally included again here.</div></section>${renderFamilySections(allRows)}`;
 }
 
 function renderHome(){
