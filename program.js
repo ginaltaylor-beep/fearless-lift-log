@@ -14,7 +14,7 @@ window.FEARLESS_PROGRAM = {
     walking_lunges:{name:'Walking Lunges',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Lower Body Push',equipment:'Dumbbells',target:'8 each side'},
     incline_dumbbell_bench_press:{name:'Incline Dumbbell Bench Press',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells / incline bench',target:'8–10',cue:'Incline bench set to 30°.'},
     skull_crushers:{name:'Skull Crushers',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Arms',equipment:'Dumbbells',target:'10–12'},
-    side_plank_hip_abduction:{name:'Side Plank with Hip Abduction',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Core',equipment:'Bodyweight',target:'10 each side',cue:'Modified option: from knee, top leg slightly kicked backward so shoulder to ankle makes a straight line. Progression: full side plank with leg lift.'},
+    side_plank_hip_abduction:{name:'Side Plank with Hip Abduction',kind:'pushupVariation',label:'Reps',variationLabel:'Side plank variation',variationOptions:['Knee Down','Hybrid','Full'],increment:null,multiplier:0,category:'Core',equipment:'Bodyweight',target:'10 each side',cue:'Modified option: from knee, top leg slightly kicked backward so shoulder to ankle makes a straight line. Progression: full side plank with leg lift.'},
 
     // Tuesday — Hinge
     barbell_romanian_deadlift:{name:'BB RDL',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Hinge',equipment:'Barbell',target:'8–10',cue:'Safety arms at 5. Handles out, cables at chest height.'},
