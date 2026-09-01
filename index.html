@@ -66,8 +66,10 @@ input,select,textarea{width:100%;border:1px solid #c7cbd1;border-radius:10px;pad
 const STORAGE_KEY='fearlessLiftLog_v02';
 const OLD_KEY='fearlessLiftLogFriday_v01';
 const INCREMENTS=[1.25,2.5,5,10,20,25];
-const BANDS=['Red','Orange','Yellow','Green','Blue','Purple','Black'];
-const MONSTER_WALK_BANDS=['Green','Blue','Yellow','Red','Black'];
+const LONG_BANDS=['Green','Blue','Orange','Red','Purple'];
+const SMALL_BANDS=['Green','Blue','Yellow','Red','Black'];
+const BANDS=LONG_BANDS;
+const MONSTER_WALK_BANDS=SMALL_BANDS;
 const DIFFICULTIES=[['','Effort'],['E','Easy'],['M','Medium'],['H','Hard']];
 
 const EXERCISE_ALIASES={
@@ -601,15 +603,18 @@ function renderExerciseIndex(){
  return `<section class="card pad"><strong>Exercise Index</strong><div class="sub">Built automatically from your workout history.</div>${rows.length?rows.map(r=>`<div class="history-item"><div class="history-title">${esc(r.name)}</div><div class="history-meta">${esc(r.category)} · ${r.workouts} workout${r.workouts===1?'':'s'} · ${r.first} to ${r.last}</div>${r.best?`<div class="sub" style="margin-top:5px">Best recorded weight: ${r.best} lb${r.repsAtBest?` × ${r.repsAtBest}`:''}</div>`:''}</div>`).join(''):'<p class="sub">The index will populate as workouts are imported or completed.</p>'}</section>`;
 }
 
-const LONG_BAND_STRENGTH={Purple:1,Green:2,Blue:3,Orange:4,Red:5};
+const LONG_BAND_STRENGTH={Green:1,Blue:2,Orange:3,Red:4,Purple:5};
 const SMALL_BAND_STRENGTH={Green:1,Blue:2,Yellow:3,Red:4,Black:5};
 const REPORT_BAND_RULES={
  monster_walks:{family:'small',role:'resistance'},
+ banded_open_the_gate:{family:'small',role:'resistance'},
+ banded_side_steps:{family:'small',role:'resistance'},
  standing_banded_cable_hip_flexion:{family:'long',role:'resistance'},
  standing_banded_hip_flexion:{family:'long',role:'resistance'},
  horizontal_pull_apart:{family:'long',role:'resistance'},
  reverse_nordic:{family:'long',role:'assistance'},
- reverse_nordic_curl:{family:'long',role:'assistance'}
+ reverse_nordic_curl:{family:'long',role:'assistance'},
+ power_push_up_assisted:{family:'long',role:'assistance'}
 };
 function reportComparisonEligible(w){return !!w&&w.includeInProgressReports!==false}
 function reportSetTechniqueFocused(s){return !!s?.techniqueFocus}
@@ -765,9 +770,13 @@ function classifyReportRow(r){
  const a=r.first,z=r.last;if(!a||!z||!r.records||r.records.length<2)return {status:'⚪ Insufficient comparable data',note:'More comparable performances are needed.'};
  if(a.metric!==z.metric)return {status:'↔ Different stimulus/setup',note:'The way this exercise was logged changed, so a direct comparison would be misleading.'};
  if(a.metric==='pullup'){
-  const sameBands=JSON.stringify([...(a.bands||[])].sort())===JSON.stringify([...(z.bands||[])].sort());
+  const normBands=bands=>[...(bands||[])].filter(Boolean).sort();
+  const sameBands=JSON.stringify(normBands(a.bands))===JSON.stringify(normBands(z.bands));
+  const assistance=bands=>normBands(bands).reduce((sum,b)=>sum+(LONG_BAND_STRENGTH[b]||0),0);
+  const aAssist=assistance(a.bands),zAssist=assistance(z.bands);
   if(sameBands&&a.hook&&z.hook&&a.reps===z.reps){if(z.hook<a.hook)return {status:'🟢 Progressed',note:'Same bands and reps with a lower (harder) hook position.'};if(z.hook>a.hook)return {status:'↔ Different assistance setup',note:'Same bands and reps with a higher (easier) hook position.'}}
   if(sameBands&&z.reps>a.reps&&z.hook===a.hook)return {status:'🟢 Progressed',note:'More reps with the same assistance setup.'};
+  if(a.reps===z.reps&&a.hook===z.hook&&aAssist&&zAssist){if(zAssist<aAssist)return {status:'🟢 Progressed',note:'Same reps and hook position with less band assistance.'};if(zAssist>aAssist)return {status:'↔ Different assistance setup',note:'Same reps and hook position with more band assistance.'}}
   return {status:'↔ Different assistance setup',note:'Bands, hook position, or reps changed together; shown without pretending the setups are mathematically equivalent.'};
  }
  if(a.metric==='weight'){

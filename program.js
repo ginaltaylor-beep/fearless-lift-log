@@ -42,7 +42,7 @@ window.FEARLESS_PROGRAM = {
 
     // Friday — Accessory
     overhead_tricep_extension:{name:'Overhead Tricep Extensions',kind:'weight',label:'One dumbbell total',increment:2.5,multiplier:1,category:'Arms',equipment:'Dumbbell',target:'12–15',cue:'Rope attachment, cables set at top.'},
-    power_push_up_assisted:{name:'Power Push-Up',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Power',equipment:'Long resistance band',bandOptions:['Red','Orange','Blue','Green','Purple'],target:'5–8',cue:'Assisted with long resistance band. Safety arms set to 2; long bands out. Knee pads (black) out.'},
+    power_push_up_assisted:{name:'Power Push-Up',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Power',equipment:'Long resistance band',bandOptions:['Green','Blue','Orange','Red','Purple'],target:'5–8',cue:'Assisted with long resistance band. Safety arms set to 2; long bands out. Knee pads (black) out.'},
     wall_sit:{name:'Wall Sit',kind:'time',label:'Seconds',increment:null,multiplier:0,category:'Lower Body Push',equipment:'Bodyweight',target:'Work to 45 sec'},
     seated_shoulder_press:{name:'Seated Shoulder Press',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells / incline bench',target:'8–10',cue:'Incline benches set upright.'},
     lateral_raise:{name:'Lateral Raise',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells',target:'8–10'},
