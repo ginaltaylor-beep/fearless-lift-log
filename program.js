@@ -5,7 +5,7 @@
 // The app engine remains in index.html.
 
 window.FEARLESS_PROGRAM = {
-  version: 'September 2026',
+  version: 'September 2026 v16.9.4',
   month: 'September 2026',
   exercises: {
     // Monday — Push LB
@@ -42,11 +42,11 @@ window.FEARLESS_PROGRAM = {
 
     // Friday — Accessory
     overhead_tricep_extension:{name:'Overhead Tricep Extensions',kind:'weight',label:'One dumbbell total',increment:2.5,multiplier:1,category:'Arms',equipment:'Dumbbell',target:'12–15',cue:'Rope attachment, cables set at top.'},
-    power_push_up_assisted:{name:'Power Push-Up',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Power',equipment:'Long resistance band',bandOptions:['Green','Blue','Orange','Red','Purple'],target:'5–8',cue:'Assisted with long resistance band. Safety arms set to 2; long bands out. Knee pads (black) out.'},
-    wall_sit:{name:'Wall Sit',kind:'time',label:'Seconds',increment:null,multiplier:0,category:'Lower Body Push',equipment:'Bodyweight',target:'Work to 45 sec'},
+    power_push_up_assisted:{name:'Power Push-Up',kind:'assistedPushup',label:'Assistance',variationLabel:'Push-up variation',variationOptions:['Knee — hands release','Full — hands release'],increment:null,multiplier:0,category:'Power',equipment:'Long resistance band / bodyweight',bandOptions:['Green','Blue','Orange','Red','Purple'],target:'5–8',cue:'Use one or more long bands for assistance as needed. Safety arms set to 2; long bands out. Knee pads (black) out.'},
+    wall_sit:{name:'Wall Sit',kind:'timedWeight',label:'Weight on lap',increment:2.5,multiplier:0,category:'Lower Body Push',equipment:'Bodyweight / optional external load',target:'30 sec',cue:'Hold for 30 seconds. Add weight on your lap if appropriate.'},
     seated_shoulder_press:{name:'Seated Shoulder Press',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells / incline bench',target:'8–10',cue:'Incline benches set upright.'},
     lateral_raise:{name:'Lateral Raise',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells',target:'8–10'},
-    single_leg_sit_to_stand:{name:'Single-Leg Sit to Stand',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Lower Body Push',equipment:'Bench / bodyweight',target:'6–8 each side'},
+    single_leg_sit_to_stand:{name:'Single-Leg Sit to Stand',kind:'sitToStand',label:'Reps',variationLabel:'Variation',variationOptions:['Kickstand','Hybrid','Single Leg'],boxOptions:[24,20,16],increment:null,multiplier:0,category:'Lower Body Push',equipment:'Box / bodyweight',target:'6–8 each side',cue:'Choose 16, 20, or 24 in box. Lower box = harder. Variations: Kickstand, Hybrid, or Single Leg.'},
     bicep_21s:{name:'Bicep 21s',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Arms',equipment:'Dumbbells',target:'21s'},
 
     // Saturday — Pull UB
