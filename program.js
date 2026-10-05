@@ -1,100 +1,101 @@
 // Fearless Lift Log monthly program data
-// September 2026 training block
+// October 2026 training block
+// Source of truth: October 2026 workbook, Programming sheet.
 // Station convention: Station 1 = rack/barbell for free-weight movements;
 // Stations 3 and 4 may use dumbbells unless the program explicitly specifies otherwise.
 // The app engine remains in index.html.
 
 window.FEARLESS_PROGRAM = {
-  version: 'September 2026 v16.9.4',
-  month: 'September 2026',
+  version: 'October 2026',
+  month: 'October 2026',
   exercises: {
-    // Monday — Push LB
-    barbell_back_squat:{name:'Back Squat',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Lower Body Push',equipment:'Barbell',target:'6–8'},
-    banded_open_the_gate:{name:'Banded Open the Gate',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Mobility / Prehab',equipment:'Mini band',bandOptions:['Green','Blue','Yellow','Red','Black'],target:'5 each side',cue:'Keep pelvis pointing forward and knee horizontally abducting. May be used as active recovery.'},
-    walking_lunges:{name:'Walking Lunges',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Lower Body Push',equipment:'Dumbbells',target:'8 each side'},
-    incline_dumbbell_bench_press:{name:'Incline Dumbbell Bench Press',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells / incline bench',target:'8–10',cue:'Incline bench set to 30°.'},
-    skull_crushers:{name:'Skull Crushers',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Arms',equipment:'Dumbbells',target:'10–12'},
-    side_plank_hip_abduction:{name:'Side Plank with Hip Abduction',kind:'pushupVariation',label:'Reps',variationLabel:'Side plank variation',variationOptions:['Knee Down','Hybrid','Full'],increment:null,multiplier:0,category:'Core',equipment:'Bodyweight',target:'10 each side',cue:'Modified option: from knee, top leg slightly kicked backward so shoulder to ankle makes a straight line. Progression: full side plank with leg lift.'},
+    // Monday - Hinge
+    single_leg_landmine_rdl:{name:'Single-Leg Landmine RDL',kind:'weight',label:'Landmine weight',increment:5,multiplier:1,category:'Hinge',equipment:'Landmine',target:'6 each side'},
+    cable_prayer:{name:'Cable Prayer',kind:'weight',label:'Cable weight',increment:5,multiplier:1,category:'Core',equipment:'Cable',target:'10-12'},
+    dumbbell_hip_thrust:{name:'Dumbbell Hip Thrust',kind:'weight',label:'One dumbbell total',increment:2.5,multiplier:1,category:'Hinge',equipment:'Dumbbell / bench',target:'12',cue:'Trainer note: may use a KAS glute bridge variation.'},
+    heels_elevated_goblet_squat:{name:'Heels-Elevated Goblet Squat',kind:'weight',label:'Goblet weight',increment:2.5,multiplier:1,category:'Lower Body Push',equipment:'Dumbbell / squat wedge',target:'8'},
+    half_kneeling_windmill:{name:'1/2 Kneeling Windmill',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Mobility / Prehab',equipment:'Dumbbell / kettlebell',target:'6 each side'},
+    hammer_curl:{name:'Hammer Curl',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Arms',equipment:'Dumbbells',target:'10-12'},
 
-    // Tuesday — Hinge
-    barbell_romanian_deadlift:{name:'BB RDL',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Hinge',equipment:'Barbell',target:'8–10',cue:'Safety arms at 5. Handles out, cables at chest height.'},
-    pallof_press_rotation:{name:'Pallof Press with Rotation',kind:'weight',label:'Cable weight',increment:5,multiplier:1,category:'Core',equipment:'Cable',target:'6 each direction',cue:'Rotate toward the rack.'},
-    dumbbell_pullover:{name:'Dumbbell Pullover',kind:'weight',label:'One dumbbell total',increment:2.5,multiplier:1,category:'Upper Body Pull',equipment:'Dumbbell / bench',target:'10–12'},
-    rope_slams:{name:'Rope Slams',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Power',equipment:'Battle rope',target:'12'},
-    dumbbell_bent_over_row:{name:'Bent Over Row',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Upper Body Pull',equipment:'Dumbbells',target:'6–8',cue:'Top-down row.'},
-    dumbbell_sumo_squat:{name:'Dumbbell Sumo Squat',kind:'weight',label:'Dumbbell weight',increment:2.5,multiplier:1,category:'Lower Body Push',equipment:'Dumbbell',target:'8–10'},
+    // Tuesday - Push UB
+    incline_barbell_bench_press:{name:'Incline Barbell Bench Press',kind:'weight',label:'Total weight',increment:2.5,multiplier:1,category:'Upper Body Push',equipment:'Barbell / incline bench',target:'4-6'},
+    horizontal_pull_apart:{name:'Horizontal Pull Apart',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Upper Body Pull',equipment:'Resistance band',bandOptions:['Green','Blue','Orange','Red','Purple'],target:'8',cue:'Choose an appropriate resistance band and return it after the station.'},
+    alternating_seated_shoulder_press:{name:'Alternating Seated Shoulder Press',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells',target:'6-8 each side'},
+    reverse_fly:{name:'Reverse Fly',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Pull',equipment:'Dumbbells',target:'8-10'},
+    slide_lateral_lunge:{name:'Slider Lateral Lunge',kind:'weight',label:'Weight / load',increment:2.5,multiplier:1,category:'Lower Body Push',equipment:'Dumbbell / slider',target:'8 each side',cue:'Complete one side at a time.'},
+    single_arm_overhead_march:{name:'Overhead March',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Carry',equipment:'Dumbbell',target:'10 total'},
 
-    // Wednesday — Push UB
-    barbell_bench_press:{name:'Bench Press',kind:'weight',label:'Total weight',increment:2.5,multiplier:1,category:'Upper Body Push',equipment:'Barbell',target:'6–8',cue:'Bench press setup: hooks at 12, flat benches.'},
-    single_leg_calf_raise:{name:'Single-Leg Calf Raise',kind:'weight',label:'External weight',increment:2.5,multiplier:1,category:'Lower Body',equipment:'Dumbbell / bodyweight',target:'8–10 each side',cue:'Calf raises can be the rest for the bench press. Cue to use dumbbell.'},
-    incline_dumbbell_fly:{name:'Incline Dumbbell Fly',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells / incline bench',target:'8–10',cue:'Incline bench set to 45°.'},
-    strict_bicep_curl:{name:'Strict Bicep Curl',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Arms',equipment:'Dumbbells',target:'12–15'},
-    dumbbell_squat_push_press:{name:'Squat Push Press',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Power',equipment:'Dumbbells',target:'6',cue:'Full squat. Power.'},
-    slider_crunches:{name:'Slider Crunches',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Core',equipment:'Sliders',target:'10–15'},
+    // Wednesday - Pull LB
+    hex_bar_deadlift:{name:'Hex Bar Deadlift',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Hinge',equipment:'Hex bar',target:'4-6'},
+    seated_broad_jump:{name:'Seated Broad Jump',kind:'weight',label:'External weight',increment:2.5,multiplier:1,category:'Power',equipment:'Bodyweight / optional external load',target:'3'},
+    bird_dog_row:{name:'Bird Dog Row',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Upper Body Pull',equipment:'Dumbbell / bench',target:'8-10 each side'},
+    dumbbell_rdl:{name:'Dumbbell RDL',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Hinge',equipment:'Dumbbells',target:'6-8'},
+    push_up:{name:'Push Up',kind:'pushupVariation',label:'Reps',variationLabel:'Push-up variation',variationOptions:['Knee Push-Up','Hybrid (toes down / knees up)','Toe Push-Up'],increment:null,multiplier:0,category:'Upper Body Push',equipment:'Bodyweight',target:'5-8'},
+    dumbbell_upright_row:{name:'Dumbbell Upright Row',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Pull',equipment:'Dumbbells',target:'10'},
+    overhead_tricep_extension:{name:'Overhead Tricep Extension',kind:'weight',label:'One dumbbell total',increment:2.5,multiplier:1,category:'Arms',equipment:'Dumbbell',target:'10'},
 
-    // Thursday — Pull LB
-    deadlift:{name:'Deadlift',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Hinge',equipment:'Barbell',target:'6–8',cue:'Deadlift setup: safety arms at 5. Rope attachment, cables set at shoulder height.'},
-    seated_high_to_low_row:{name:'Seated High to Low Row',kind:'weight',label:'Cable weight',increment:5,multiplier:1,category:'Upper Body Pull',equipment:'Cable',target:'12–15'},
-    bulgarian_split_squat:{name:'Bulgarian Split Squat',kind:'weight',label:'One dumbbell',increment:2.5,multiplier:1,category:'Lower Body Push',equipment:'Dumbbell / bench',target:'8–10 each side',cue:'Staggered benches. Hold 1 dumbbell in the hand opposite the working leg.'},
-    banded_side_steps:{name:'Banded Side Steps',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Lower Body Push',equipment:'Mini band',bandOptions:['Green','Blue','Yellow','Red','Black'],target:'2 × 10 steps each direction',cue:'Band around feet. Toes point forward.'},
-    dead_bug_slam_ball:{name:'Dead Bug with Slam Ball',kind:'weight',label:'Ball weight',increment:2.5,multiplier:1,category:'Core',equipment:'Slam ball',target:'8–10 each side',cue:'Same-side arm and leg hold the ball; complete all reps on one side, then the other.'},
-    kettlebell_swing:{name:'KB Swing',kind:'weight',label:'Kettlebell weight',increment:5,multiplier:1,category:'Hinge',equipment:'Kettlebell',target:'10'},
+    // Thursday - Accessory
+    hanging_hollow_hold:{name:'Hanging Hollow Hold',kind:'time',label:'Seconds',increment:null,multiplier:0,category:'Core',equipment:'Bodyweight / optional long-band assistance',target:'30 sec',cue:'Long power bands may be used for assistance. Record band setup in Technique / setup if used.'},
+    single_arm_landmine_push_press:{name:'Single-Arm Landmine Push Press',kind:'weight',label:'Landmine weight',increment:5,multiplier:1,category:'Upper Body Push',equipment:'Landmine',target:'6 each side'},
+    single_arm_front_rack_squat:{name:'Single-Arm Front Rack Squat',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Lower Body Push',equipment:'Dumbbell / kettlebell',target:'5 each side'},
+    lateral_raise:{name:'Lateral Raise',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells',target:'10-12'},
+    slider_hamstring_curl:{name:'Slider Hamstring Curl',kind:'hamstringCurl',label:'External weight (optional)',increment:2.5,multiplier:1,category:'Hinge',equipment:'Sliders / box',target:'10',cue:'Use the Full / Hip Drop / Hybrid selector. If box height matters for the setup, record it in Technique / setup.'},
+    split_stance_kettlebell_swing:{name:'Split-Stance KB Swing',kind:'weight',label:'Kettlebell weight',increment:5,multiplier:1,category:'Hinge',equipment:'Kettlebell',target:'5 each side',cue:'Regress to a standard KB swing if the swing pattern is new.'},
 
-    // Friday — Accessory
-    overhead_tricep_extension:{name:'Overhead Tricep Extensions',kind:'weight',label:'One dumbbell total',increment:2.5,multiplier:1,category:'Arms',equipment:'Dumbbell',target:'12–15',cue:'Rope attachment, cables set at top.'},
-    power_push_up_assisted:{name:'Power Push-Up',kind:'assistedPushup',label:'Assistance',variationLabel:'Push-up variation',variationOptions:['Knee — hands release','Full — hands release'],increment:null,multiplier:0,category:'Power',equipment:'Long resistance band / bodyweight',bandOptions:['Green','Blue','Orange','Red','Purple'],target:'5–8',cue:'Use one or more long bands for assistance as needed. Safety arms set to 2; long bands out. Knee pads (black) out.'},
-    wall_sit:{name:'Wall Sit',kind:'timedWeight',label:'Weight on lap',increment:2.5,multiplier:0,category:'Lower Body Push',equipment:'Bodyweight / optional external load',target:'30 sec',cue:'Hold for 30 seconds. Add weight on your lap if appropriate.'},
-    seated_shoulder_press:{name:'Seated Shoulder Press',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells / incline bench',target:'8–10',cue:'Incline benches set upright.'},
-    lateral_raise:{name:'Lateral Raise',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells',target:'8–10'},
-    single_leg_sit_to_stand:{name:'Single-Leg Sit to Stand',kind:'sitToStand',label:'Goblet weight',variationLabel:'Variation',variationOptions:['Kickstand','Hybrid','Single Leg'],boxOptions:[24,20,16],increment:2.5,multiplier:1,category:'Lower Body Push',equipment:'Single dumbbell / box / bodyweight',target:'6–8 each side',cue:'Choose 16, 20, or 24 in box. Lower box = harder. Variations: Kickstand, Hybrid, or Single Leg. If using weight, hold one dumbbell goblet-style and enter that dumbbell weight.'},
-    bicep_21s:{name:'Bicep 21s',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Arms',equipment:'Dumbbells',target:'21s'},
+    // Friday - Pull UB
+    barbell_bent_over_row_underhand:{name:'Barbell Bent Over Row - Underhand Grip',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Upper Body Pull',equipment:'Barbell',target:'8, 6, 4, 4',cue:'Use an underhand grip.'},
+    cable_angel:{name:'Cable Angel',kind:'weight',label:'Cable weight',increment:5,multiplier:1,category:'Upper Body Pull',equipment:'Cable',target:'5 each side'},
+    dumbbell_reverse_lunge:{name:'Dumbbell Reverse Lunge',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Lower Body Push',equipment:'Dumbbells',target:'6 each side',cue:'Optional heel float for an added calf challenge.'},
+    incline_bench_bicep_curl:{name:'Incline Bench Bicep Curl',kind:'weight',label:'Weight (each hand)',increment:1.25,multiplier:2,category:'Arms',equipment:'Dumbbells / incline bench',target:'8-10'},
+    staggered_stance_three_point_row:{name:'Staggered-Stance 3-Point Row',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Upper Body Pull',equipment:'Dumbbell / bench',target:'6 each side'},
+    side_plank_shoulder_external_rotation:{name:'Side Plank with Shoulder External Rotation',kind:'weight',label:'Weight',increment:1.25,multiplier:1,category:'Core',equipment:'Dumbbell / bodyweight',target:'8-10 each side'},
 
-    // Saturday — Pull UB
-    half_kneeling_single_arm_lat_pulldown:{name:'Half-Kneeling SA Lat Pulldown',kind:'weight',label:'Cable weight',increment:5,multiplier:1,category:'Upper Body Pull',equipment:'Cable',target:'10–12 each side',cue:'Handle attachment, cable set to top.'},
-    trx_y:{name:'TRX Y',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Upper Body Pull',equipment:'TRX',target:'6–8',cue:'TRX straps out. Option: TRX T if Y is too upper-trap dominant.'},
-    three_point_row:{name:'3-Point Row',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:1,category:'Upper Body Pull',equipment:'Dumbbell / bench',target:'4–6 each side',cue:'Feet parallel, core engaged.'},
-    single_arm_overhead_march:{name:'Overhead March',kind:'weight',label:'Weight',increment:2.5,multiplier:1,category:'Carry',equipment:'Dumbbell',target:'10 marches total each side'},
-    kickstand_rdl:{name:'Kickstand RDL',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Hinge',equipment:'Dumbbells',target:'8–10 each side'},
-    dumbbell_sit_up:{name:'DB Sit-Up',kind:'weight',label:'One dumbbell total',increment:2.5,multiplier:1,category:'Core',equipment:'Dumbbell',target:'8–12'},
+    // Saturday - Push LB
+    front_squat:{name:'Front Squat',kind:'weight',label:'Total weight',increment:5,multiplier:1,category:'Lower Body Push',equipment:'Barbell',target:'6-8'},
+    standing_banded_cable_hip_flexion:{name:'Standing Banded Hip Flexion',kind:'band',label:'Band color',increment:null,multiplier:0,category:'Hinge',equipment:'Small resistance band',bandOptions:['Green','Blue','Yellow','Red','Black'],target:'5 each side'},
+    dumbbell_bench_press:{name:'Dumbbell Bench Press',kind:'weight',label:'Weight (each hand)',increment:2.5,multiplier:2,category:'Upper Body Push',equipment:'Dumbbells / bench',target:'8-10'},
+    tricep_dips:{name:'Tricep Dips',kind:'reps',label:'Reps',increment:null,multiplier:0,category:'Arms',equipment:'Bodyweight / bench',target:'8-10'},
+    curtsey_step_up:{name:'Curtsey Step-Up',kind:'weight',label:'Weight / load',increment:2.5,multiplier:1,category:'Lower Body Push',equipment:'Dumbbell / box',target:'6-8 each side',cue:'Complete both movements on one side before switching sides.'},
+    half_kneeling_rainbow_slam:{name:'Rainbow Slams',kind:'weight',label:'Ball weight',increment:2.5,multiplier:1,category:'Power',equipment:'Medicine / slam ball',target:'3 each side - 6 total',cue:'Complete both movements on one side before switching sides.'},
 
     treadmill:{name:'Treadmill',kind:'cardio',label:'Speed',increment:null,multiplier:0,category:'Conditioning',equipment:'Treadmill'}
   },
   programs: {
-    Monday:{title:'Push LB',month:'September 2026',stations:{
-      1:{name:'Rack',duration:'9.5 min',exercises:['barbell_back_squat','banded_open_the_gate']},
+    Monday:{title:'Hinge',month:'October 2026',stations:{
+      1:{name:'Rack',duration:'9.5 min',exercises:['single_leg_landmine_rdl','cable_prayer']},
       2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},
-      3:{name:'Bench',duration:'9.5 min · 4 sets',exercises:['walking_lunges','incline_dumbbell_bench_press']},
-      4:{name:'Floor',duration:'9.5 min',exercises:['skull_crushers','side_plank_hip_abduction']}
+      3:{name:'Bench',duration:'9.5 min',exercises:['dumbbell_hip_thrust','heels_elevated_goblet_squat']},
+      4:{name:'Floor',duration:'9.5 min',exercises:['half_kneeling_windmill','hammer_curl']}
     }},
-    Tuesday:{title:'Hinge',month:'September 2026',stations:{
-      1:{name:'Rack',duration:'9.5 min',exercises:['barbell_romanian_deadlift','pallof_press_rotation']},
+    Tuesday:{title:'Push UB',month:'October 2026',stations:{
+      1:{name:'Rack',duration:'9.5 min',exercises:['incline_barbell_bench_press','horizontal_pull_apart']},
       2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},
-      3:{name:'Bench',duration:'9.5 min',exercises:['dumbbell_pullover','rope_slams']},
-      4:{name:'Floor',duration:'9.5 min',exercises:['dumbbell_bent_over_row','dumbbell_sumo_squat']}
+      3:{name:'Bench',duration:'9.5 min',exercises:['alternating_seated_shoulder_press','reverse_fly']},
+      4:{name:'Floor',duration:'9.5 min',exercises:['slide_lateral_lunge','single_arm_overhead_march']}
     }},
-    Wednesday:{title:'Push UB',month:'September 2026',stations:{
-      1:{name:'Rack',duration:'9.5 min',exercises:['barbell_bench_press','single_leg_calf_raise']},
+    Wednesday:{title:'Pull LB',month:'October 2026',stations:{
+      1:{name:'Rack',duration:'9.5 min',exercises:['hex_bar_deadlift','seated_broad_jump']},
       2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},
-      3:{name:'Bench',duration:'9.5 min',exercises:['incline_dumbbell_fly','strict_bicep_curl']},
-      4:{name:'Floor',duration:'9.5 min',exercises:['dumbbell_squat_push_press','slider_crunches']}
+      3:{name:'Bench',duration:'9.5 min',exercises:['bird_dog_row','dumbbell_rdl']},
+      4:{name:'Floor',duration:'9.5 min',exercises:['push_up','dumbbell_upright_row','overhead_tricep_extension']}
     }},
-    Thursday:{title:'Pull LB',month:'September 2026',stations:{
-      1:{name:'Rack',duration:'9.5 min',exercises:['deadlift','seated_high_to_low_row']},
+    Thursday:{title:'Accessory',month:'October 2026',stations:{
+      1:{name:'Rack',duration:'9.5 min',exercises:['hanging_hollow_hold','single_arm_landmine_push_press']},
       2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},
-      3:{name:'Bench',duration:'9.5 min',exercises:['bulgarian_split_squat','banded_side_steps']},
-      4:{name:'Floor',duration:'9.5 min',exercises:['dead_bug_slam_ball','kettlebell_swing']}
+      3:{name:'Bench',duration:'9.5 min',exercises:['single_arm_front_rack_squat','lateral_raise']},
+      4:{name:'Floor',duration:'9.5 min',exercises:['slider_hamstring_curl','split_stance_kettlebell_swing']}
     }},
-    Friday:{title:'Accessory',month:'September 2026',stations:{
-      1:{name:'Rack',duration:'9.5 min',exercises:['overhead_tricep_extension','power_push_up_assisted','wall_sit']},
+    Friday:{title:'Pull UB',month:'October 2026',stations:{
+      1:{name:'Rack',duration:'9.5 min',exercises:['barbell_bent_over_row_underhand','cable_angel']},
       2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},
-      3:{name:'Bench',duration:'9.5 min',exercises:['seated_shoulder_press','lateral_raise']},
-      4:{name:'Floor',duration:'9.5 min',exercises:['single_leg_sit_to_stand','bicep_21s']}
+      3:{name:'Bench',duration:'9.5 min',exercises:['dumbbell_reverse_lunge','incline_bench_bicep_curl']},
+      4:{name:'Floor',duration:'9.5 min',exercises:['staggered_stance_three_point_row','side_plank_shoulder_external_rotation']}
     }},
-    Saturday:{title:'Pull UB',month:'September 2026',stations:{
-      1:{name:'Rack',duration:'9.5 min',exercises:['half_kneeling_single_arm_lat_pulldown','trx_y']},
+    Saturday:{title:'Push LB',month:'October 2026',stations:{
+      1:{name:'Rack',duration:'9.5 min',exercises:['front_squat','standing_banded_cable_hip_flexion']},
       2:{name:'Treadmill',duration:'9.5 min',exercises:['treadmill']},
-      3:{name:'Bench',duration:'9.5 min',exercises:['three_point_row','single_arm_overhead_march']},
-      4:{name:'Floor',duration:'9.5 min',exercises:['kickstand_rdl','dumbbell_sit_up']}
+      3:{name:'Bench',duration:'9.5 min',exercises:['dumbbell_bench_press','tricep_dips']},
+      4:{name:'Floor',duration:'9.5 min',exercises:['curtsey_step_up','half_kneeling_rainbow_slam']}
     }}
   }
 };
