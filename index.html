@@ -61,7 +61,19 @@ input,select,textarea{width:100%;border:1px solid #c7cbd1;border-radius:10px;pad
 <main id="app"></main>
 <div id="footer" class="footer hidden"></div>
 <input id="importInput" class="hidden" type="file" accept="application/json,.json" multiple>
-<script src="program.js"></script>
+<!-- Load a fresh monthly program on each online launch. If offline, retry the browser-cached copy. -->
+<script>
+(function(){
+  var fresh = 'program.js?fresh=' + Date.now();
+  document.write('<script src="' + fresh + '" onerror="window.fearlessProgramFreshFailed=true"><\/script>');
+})();
+</script>
+<script>
+if (!window.FEARLESS_PROGRAM || !window.FEARLESS_PROGRAM.programs) {
+  // On an offline launch, Safari may still have the unversioned program in cache.
+  document.write('<script src="program.js"><\/script>');
+}
+</script>
 <script>
 const STORAGE_KEY='fearlessLiftLog_v02';
 const OLD_KEY='fearlessLiftLogFriday_v01';
