@@ -247,7 +247,7 @@ function newWorkout(day,date=today()){
 }
 function defaultData(ex){
  if(ex.kind==='cardio') return {speed:'',distance:'',difficulty:'',notes:'',setup:'',techniqueFocus:false};
- if(ex.kind==='pullup') return [{bands:[],hookHeight:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='pullup') return [{hookHeight:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
  if(ex.kind==='plankSplit') return [{fullReps:'',kneeReps:'',difficulty:'',setup:'',techniqueFocus:false}];
  if(ex.kind==='pushupVariation') return [{variation:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
  if(ex.kind==='assistedPushup') return [{bands:[],variation:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
@@ -256,6 +256,9 @@ function defaultData(ex){
  if(ex.kind==='weightHold') return [{weight:'',reps:'',holdSeconds:'',difficulty:'',setup:'',techniqueFocus:false}];
  if(ex.kind==='hamstringCurl') return [{weight:'',reps:'',variation:'',difficulty:'',setup:'',techniqueFocus:false}];
  if(ex.kind==='singleLegPlyo') return [{weight:'',boxHeight:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='timeVariation') return [{variation:'',seconds:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='calfVariation') return [{variation:'',weight:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
+ if(ex.kind==='weightBox') return [{weight:'',boxHeight:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
  if(ex.kind==='time') return [{seconds:'',difficulty:'',setup:'',techniqueFocus:false}];
  if(ex.kind==='reps') return [{reps:'',difficulty:'',setup:'',techniqueFocus:false}];
  if(ex.kind==='drop') return [{weight1:'',weight2:'',reps:'',difficulty:'',setup:'',techniqueFocus:false}];
@@ -335,7 +338,7 @@ function lastExerciseSummary(id){
  if(!Array.isArray(d)) return `Last performed ${date}: prior data available.`;
  const parts=[...d].reverse().map(s=>{
   let main='';
-  if(ex.kind==='pullup') main=`${Array.isArray(s.bands)&&s.bands.length?s.bands.join(' + '):'No band listed'} · hook ${s.hookHeight||'—'} · ${s.reps||'—'} reps`;
+  if(ex.kind==='pullup') main=`Hook ${s.hookHeight||'—'} · ${s.reps||'—'} reps`;
   else if(ex.kind==='plankSplit') main=`${s.fullReps||0} full + ${s.kneeReps||0} knee`;
   else if(ex.kind==='pushupVariation') main=`${s.variation||'Variation not listed'} · ${s.reps||'—'} reps`;
   else if(ex.kind==='assistedPushup') main=`${s.variation||'Variation not listed'} · ${Array.isArray(s.bands)&&s.bands.length?s.bands.join(' + '):'No band'} · ${s.reps||'—'} reps`;
@@ -345,6 +348,9 @@ function lastExerciseSummary(id){
   else if(ex.kind==='hamstringCurl') main=`${s.reps||'—'} reps · ${s.variation||'Variation not listed'}${s.weight?` · ${s.weight} lb`:''}`;
   else if(ex.kind==='singleLegPlyo') main=`${s.weight||'—'} lb each × ${s.reps||'—'} each side${s.boxHeight?` · box ${s.boxHeight}`:''}`;
   else if(ex.kind==='band') main=`${s.weight||s.band||'—'} band · ${s.reps||'—'} reps`;
+  else if(ex.kind==='timeVariation') main=`${s.variation||'Modification not listed'} · ${s.seconds||'—'} sec`;
+  else if(ex.kind==='calfVariation') main=`${s.variation||'Modification not listed'} · ${s.reps||'—'} reps${s.weight?` · ${s.weight} lb`:''}`;
+  else if(ex.kind==='weightBox') main=`${s.weight||'—'} lb × ${s.reps||'—'} · box ${s.boxHeight||'—'} in`;
   else if(ex.kind==='time') main=`${s.seconds||'—'} sec`;
   else if(ex.kind==='reps') main=`${s.reps||'—'} reps`;
   else if(ex.kind==='drop') main=`${s.weight1||'—'}→${s.weight2||'—'} × ${s.reps||'—'}`;
@@ -575,11 +581,16 @@ function exerciseHtml(id,exerciseIndex=0,stationNumber=1){
  if(ex.kind==='cardio') body=`<div class="field-grid three"><div class="field"><label>Speed</label><input inputmode="decimal" value="${esc(d.speed)}" onchange="updateValue('${id}',0,'speed',this.value)"></div><div class="field"><label>Distance</label><input inputmode="decimal" value="${esc(d.distance)}" onchange="updateValue('${id}',0,'distance',this.value)"></div><div class="field"><label>Difficulty</label><select onchange="updateValue('${id}',0,'difficulty',this.value)">${DIFFICULTIES.map(([v,l])=>`<option value="${v}" ${d.difficulty===v?'selected':''}>${l}</option>`).join('')}</select></div></div><label class="technique-focus"><input type="checkbox" ${d.techniqueFocus?'checked':''} onchange="updateValue('${id}',0,'techniqueFocus',this.checked)"><span>🎯 Technique Focus</span><span class="tf-note">intentional form / technique work</span></label><div class="field" style="margin-top:8px"><label>Notes</label><input value="${esc(d.notes)}" placeholder="Incline, intervals, most/all…" onchange="updateValue('${id}',0,'notes',this.value)"></div>`;
  else body=d.map((s,i)=>setHtml(id,ex,s,i)).join('')+`<div class="actions"><button onclick="addSet('${id}',true)">Repeat Previous Performance</button><button onclick="addSet('${id}',false)">Add Empty Set</button></div>`;
  const inc=ex.increment!=null?`<div class="increment-row">Weight +/− changes by <select onchange="setIncrement('${id}',this.value)">${INCREMENTS.map(v=>`<option value="${v}" ${currentIncrement(id)===v?'selected':''}>${v} lb</option>`).join('')}</select></div>`:'';
- return `<div class="exercise" style="--exercise-bg:${exerciseColor(exerciseIndex,stationNumber)}"><h3>${ex.name}</h3><div class="hint">${ex.target?`Target: ${ex.target}`:ex.label}${ex.note?` · ${ex.note}`:''}</div>${ex.cue?`<div class="cue"><strong>Coach cue:</strong> ${esc(ex.cue)}</div>`:''}<div class="previous">${lastExerciseSummary(id)}</div>${body}${inc}</div>`;
+ return `<div class="exercise" style="--exercise-bg:${exerciseColor(exerciseIndex,stationNumber)}"><h3>${ex.name}</h3><div class="hint">${ex.target?`Target: ${ex.target}`:ex.label}${ex.note?` · ${ex.note}`:''}</div>${ex.cue?`<div class="cue"><strong>Coach cue:</strong> ${coachCueHtml(ex.cue)}</div>`:''}<div class="previous">${lastExerciseSummary(id)}</div>${body}${inc}</div>`;
+}
+function coachCueHtml(cue){
+ const raw=String(cue||'').trim();
+ if(/^https:\/\/[^\s<>"']+$/i.test(raw))return `<a href="${esc(raw)}" target="_blank" rel="noopener noreferrer">Open coaching demonstration ↗</a>`;
+ return esc(raw);
 }
 function setHtml(id,ex,s,i){
  let fields='';
- if(ex.kind==='pullup') fields=`<div class="field" style="grid-column:1/-1"><label>Assistance bands (choose all used)</label><div class="band-grid">${BANDS.map(b=>`<label class="band-choice"><input type="checkbox" ${Array.isArray(s.bands)&&s.bands.includes(b)?'checked':''} onchange="toggleBand('${id}',${i},'${b}',this.checked)"><span>${b}</span></label>`).join('')}</div></div><div class="field"><label>Hook height (1–25)</label><input type="number" inputmode="numeric" min="1" max="25" value="${esc(s.hookHeight)}" onchange="updateValue('${id}',${i},'hookHeight',this.value)"></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ if(ex.kind==='pullup') fields=`<div class="field"><label>Hook height (1–25)</label><input type="number" inputmode="numeric" min="1" max="25" value="${esc(s.hookHeight||'')}" onchange="updateValue('${id}',${i},'hookHeight',this.value)"></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='plankSplit') fields=`<div class="field"><label>Full-plank reps</label>${stepper(id,i,'fullReps',s.fullReps,'0')}</div><div class="field"><label>Knee-plank reps</label>${stepper(id,i,'kneeReps',s.kneeReps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='pushupVariation'){const opts=ex.variationOptions||['Knee Push-Up','Hybrid (toes down / knees up)','Toe Push-Up'];fields=`<div class="field"><label>${esc(ex.variationLabel||'Variation')}</label><select onchange="updateValue('${id}',${i},'variation',this.value)"><option value="">Choose</option>${opts.map(v=>`<option value="${esc(v)}" ${s.variation===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;}
  else if(ex.kind==='assistedPushup'){const opts=ex.variationOptions||['Knee — hands release','Full — hands release'];const bandOpts=ex.bandOptions||LONG_BANDS;fields=`<div class="field" style="grid-column:1/-1"><label>Assistance bands (choose all used)</label><div class="band-grid">${bandOpts.map(b=>`<label class="band-choice"><input type="checkbox" ${Array.isArray(s.bands)&&s.bands.includes(b)?'checked':''} onchange="toggleBand('${id}',${i},'${b}',this.checked)"><span>${b}</span></label>`).join('')}</div></div><div class="field"><label>${esc(ex.variationLabel||'Push-up variation')}</label><select onchange="updateValue('${id}',${i},'variation',this.value)"><option value="">Choose</option>${opts.map(v=>`<option value="${esc(v)}" ${s.variation===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;}
@@ -589,6 +600,9 @@ function setHtml(id,ex,s,i){
  else if(ex.kind==='hamstringCurl') fields=`<div class="field" style="grid-column:1/-1"><label>Hamstring curl variation</label><select onchange="updateValue('${id}',${i},'variation',this.value)"><option value="">Choose</option>${['Full — hips stay up entire time','Hip Drop — hips up going out / butt down pulling in','Hybrid'].map(v=>`<option value="${v}" ${s.variation===v?'selected':''}>${v}</option>`).join('')}</select></div><div class="field"><label>${ex.label}</label>${stepper(id,i,'weight',s.weight,'lb')}</div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='singleLegPlyo') fields=`<div class="field"><label>Weight (each hand)</label>${stepper(id,i,'weight',s.weight,'lb')}</div><div class="field"><label>Box height (inches)</label>${stepper(id,i,'boxHeight',s.boxHeight,'in')}</div><div class="field"><label>Reps each side</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='band') fields=`<div class="field"><label>Band color</label><select onchange="updateValue('${id}',${i},'weight',this.value)"><option value="">Choose</option>${(ex.bandOptions||BANDS).map(b=>`<option ${String(s.weight||'').toLowerCase()===b.toLowerCase()?'selected':''}>${b}</option>`).join('')}</select></div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
+ else if(ex.kind==='timeVariation'){const opts=ex.variationOptions||[];fields=`<div class="field" style="grid-column:1/-1"><label>${esc(ex.variationLabel||'Modification')}</label><select onchange="updateValue('${id}',${i},'variation',this.value)"><option value="">Choose</option>${opts.map(v=>`<option value="${esc(v)}" ${s.variation===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div><div class="field"><label>Seconds</label>${stepper(id,i,'seconds',s.seconds,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;}
+ else if(ex.kind==='calfVariation'){const opts=ex.variationOptions||[];fields=`<div class="field" style="grid-column:1/-1"><label>Modification (easiest to hardest)</label><select onchange="updateValue('${id}',${i},'variation',this.value)"><option value="">Choose</option>${opts.map(v=>`<option value="${esc(v)}" ${s.variation===v?'selected':''}>${esc(v)}</option>`).join('')}</select></div><div class="field"><label>${esc(ex.label)}</label>${stepper(id,i,'weight',s.weight,'lb')}</div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;}
+ else if(ex.kind==='weightBox') fields=`<div class="field"><label>${esc(ex.label)}</label>${stepper(id,i,'weight',s.weight,'lb')}</div><div class="field"><label>Box height (inches)</label>${stepper(id,i,'boxHeight',s.boxHeight,'in')}</div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='time') fields=`<div class="field"><label>Seconds</label>${stepper(id,i,'seconds',s.seconds,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='reps') fields=`<div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
  else if(ex.kind==='drop') fields=`<div class="field"><label>Weight 1</label>${stepper(id,i,'weight1',s.weight1,'lb')}</div><div class="field"><label>Weight 2</label>${stepper(id,i,'weight2',s.weight2,'lb')}</div><div class="field"><label>Reps performed</label>${stepper(id,i,'reps',s.reps,'0')}</div><div class="field"><label>Difficulty</label>${difficulty(s.difficulty,id,i)}</div>`;
@@ -652,8 +666,8 @@ function reportExercisePerformance(w,id){
  const usable=d.filter(s=>hasLoggedValue(s)&&!reportSetTechniqueFocused(s));if(!usable.length)return null;
  if(ex.kind==='pullup'){
   const s=usable.reduce((a,b)=>(Number(b.reps)||0)>(Number(a.reps)||0)?b:a,usable[0]);
-  const bands=Array.isArray(s.bands)?s.bands.filter(Boolean):[];const hook=Number(s.hookHeight)||null,reps=Number(s.reps)||0;
-  return reps?{metric:'pullup',score:reps,label:`${bands.length?bands.join(' + '):'No band listed'} · hook ${hook||'—'} · ${reps} reps${reportDifficultyLabel(s.difficulty)}`,bands,hook,reps,difficulty:difficultyValue(s.difficulty)}:null;
+  const hook=Number(s.hookHeight)||null,reps=Number(s.reps)||0;
+  return reps?{metric:'pullup',score:reps,label:`Hook ${hook||'—'} · ${reps} reps${reportDifficultyLabel(s.difficulty)}`,hook,reps,difficulty:difficultyValue(s.difficulty)}:null;
  }
  if(ex.kind==='pushupVariation'){
   const opts=ex.variationOptions||['Knee Push-Up','Hybrid (toes down / knees up)','Toe Push-Up'];
@@ -689,6 +703,23 @@ function reportExercisePerformance(w,id){
   if(!candidates.length)return null;
   const c=candidates.reduce((a,b)=>((rule?.role==='assistance'?-b.rank:b.rank)*100+b.reps)>((rule?.role==='assistance'?-a.rank:a.rank)*100+a.reps)?b:a,candidates[0]);
   const difficulty=difficultyValue(c.s.difficulty);return {metric:'band',score:(rule?.role==='assistance'?-c.rank:c.rank)*100+c.reps,label:`${c.band} band · ${c.reps||'—'} reps${reportDifficultyLabel(c.s.difficulty)}`,band:c.band,rank:c.rank,reps:c.reps,role:rule?.role||'unknown',difficulty};
+ }
+ if(ex.kind==='timeVariation'){
+  const opts=ex.variationOptions||[],ranks=Object.fromEntries(opts.map((v,i)=>[v,i+1]));
+  const candidates=usable.map(s=>({s,rank:ranks[s.variation]||0,seconds:Number(s.seconds)||0})).filter(c=>c.seconds);
+  if(!candidates.length)return null;const c=candidates.reduce((a,b)=>(b.rank*10000+b.seconds)>(a.rank*10000+a.seconds)?b:a,candidates[0]);
+  return {metric:'time',score:c.seconds,label:`${c.s.variation||'Modification not listed'} · ${c.seconds} sec${reportDifficultyLabel(c.s.difficulty)}`,seconds:c.seconds,difficulty:difficultyValue(c.s.difficulty)};
+ }
+ if(ex.kind==='calfVariation'){
+  const opts=ex.variationOptions||[],ranks=Object.fromEntries(opts.map((v,i)=>[v,i+1]));
+  const candidates=usable.map(s=>({s,rank:ranks[s.variation]||0,reps:Number(s.reps)||0,weight:Number(s.weight)||0})).filter(c=>c.reps);
+  if(!candidates.length)return null;const c=candidates.reduce((a,b)=>(b.rank*100000+b.weight*100+b.reps)>(a.rank*100000+a.weight*100+a.reps)?b:a,candidates[0]);
+  return {metric:'reps',score:c.reps,label:`${c.s.variation||'Modification not listed'} · ${c.reps} reps${c.weight?` · ${c.weight} lb`:''}${reportDifficultyLabel(c.s.difficulty)}`,reps:c.reps,difficulty:difficultyValue(c.s.difficulty)};
+ }
+ if(ex.kind==='weightBox'){
+  const candidates=usable.map(s=>({s,weight:Number(s.weight)||0,reps:Number(s.reps)||0,boxHeight:Number(s.boxHeight)||0})).filter(c=>c.reps);
+  if(!candidates.length)return null;const c=candidates.reduce((a,b)=>epley(b.weight,b.reps)>epley(a.weight,a.reps)?b:a,candidates[0]);
+  return {metric:'weight',score:epley(c.weight,c.reps),weight:c.weight,reps:c.reps,label:`${c.weight} lb × ${c.reps} · box ${c.boxHeight||'—'} in${reportDifficultyLabel(c.s.difficulty)}`,difficulty:difficultyValue(c.s.difficulty)};
  }
  if(ex.kind==='time'){
   const s=usable.reduce((a,b)=>(Number(b.seconds)||0)>(Number(a.seconds)||0)?b:a,usable[0]),seconds=Number(s.seconds)||0;return seconds?{metric:'time',score:seconds,label:`${seconds} sec${reportDifficultyLabel(s.difficulty)}`,seconds,difficulty:difficultyValue(s.difficulty)}:null;
